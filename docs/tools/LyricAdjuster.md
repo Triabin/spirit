@@ -36,7 +36,6 @@ LRC的时间标签的格式为`[mm:ss.xx]`其中`mm`为分钟数、`ss`为秒数
 ...
 [mm:ss.xx] 最后一行歌词
 ```
-[Resource.rc](../../../MyCppTools/Bp4THCOTW/Resource.rc)
 ID标签在歌词前可能出现，不过一些播放器可能会忽略它们。
 
 ```
