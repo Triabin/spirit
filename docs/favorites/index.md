@@ -2,6 +2,11 @@
 layout: page
 title: 收藏网页
 items:
+  - title: 本项目框架
+    icon: https://vitepress.dev/vitepress-logo-mini.svg
+    url: https://vitepress.dev/zh/
+    description: 由 Vite 和 Vue 驱动的静态站点生成器。将 Markdown 变成优雅的文档，只需几分钟。
+
   - title: LaTeX入门
     icon: /icons/file-icons--latex.png
     url: /favorites/LaTeX入门/
