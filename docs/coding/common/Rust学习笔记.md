@@ -78,7 +78,7 @@ Rust语言的库（crate）的官方网站：[https://crates.io/](https://crates
 
 #### 国内源
 
-推按使用[rsproxy.cn](rsproxy.cn)
+推按使用[rsproxy.cn](https://rsproxy.cn)
 
 - 文件`~/.cargo/config`
 
