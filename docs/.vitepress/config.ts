@@ -3,13 +3,12 @@ import sidebar from './config/sidebar';
 import nav from './config/nav';
 
 export default defineConfig({
-  base: '/spirit/',
   title: "灵犀Spirit",
   description: "一个人的心有灵犀",
   lastUpdated: true,
   head: [
     ['meta', { name: 'referrer', content: 'no-referrer' }],
-    ['link', { rel: 'icon', href: '/spirit/icons/favicon.png' }],
+    ['link', { rel: 'icon', href: '/icons/favicon.png' }],
   ],
   themeConfig: {
     nav,

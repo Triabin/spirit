@@ -8,7 +8,7 @@ items:
     description: 由 Vite 和 Vue 驱动的静态站点生成器。将 Markdown 变成优雅的文档，只需几分钟。
 
   - title: LaTeX入门
-    icon: /spirit/icons/file-icons--latex.png
+    icon: /icons/file-icons--latex.png
     url: /favorites/LaTeX入门/
     description: LaTeX（读作/ˈlɑːtɛx/或/ˈleɪtɛx/）是一个让你的文档看起来更专业的排版系统，它尤其适合处理篇幅较长、结构严谨的文档，并且十分擅长处理公式表达。
 
@@ -42,7 +42,7 @@ items:
     description: 先放这儿，免得忘了，有空看看。
     
   - title: Z-Library
-    icon: /spirit/icons/z-lib.svg
+    icon: /icons/z-lib.svg
     url: https://www.tboxn.com/sites/320.html
     description: 啥书都有，尤其是课本、技术相关书籍、完结小说等……但是域名不固定，只能通过导航站进入了。
 ---
