@@ -1,15 +1,6 @@
 export default {
   '/coding/common': [
-    {
-      text: '编程散记与通用技术',
-      link: '/coding/common/important/',
-      items: [
-        { text: 'Redis', link: '/coding/common/important/Redis' },
-        { text: 'SQL与数据库', link: '/coding/common/important/SQL与数据库' },
-        { text: '数据结构与算法', link: '/coding/common/important/数据结构与算法' },
-        { text: '23种设计模式', link: '/coding/common/important/23种设计模式' }
-      ]
-    },
+    { text: 'Rust学习笔记', link: '/coding/common/Rust学习笔记' },
     { text: '正则表达式（Java）', link: '/coding/common/正则表达式（Java）' },
     { text: 'Cookie、Session、Token区别', link: '/coding/common/Cookie、Session、Token区别' },
     { text: '十大经典排序算法', link: '/coding/common/十大经典排序算法' },
@@ -25,6 +16,16 @@ export default {
     { text: '平方根倒数算法', link: '/coding/common/平方根倒数算法' },
     { text: '开源协议', link: '/coding/common/开源协议' },
     { text: '常用命令', link: '/coding/common/常用命令' },
+    {
+      text: '编程散记与通用技术',
+      link: '/coding/common/important/',
+      items: [
+        { text: 'Redis', link: '/coding/common/important/Redis' },
+        { text: 'SQL与数据库', link: '/coding/common/important/SQL与数据库' },
+        { text: '数据结构与算法', link: '/coding/common/important/数据结构与算法' },
+        { text: '23种设计模式', link: '/coding/common/important/23种设计模式' }
+      ]
+    },
   ],
   '/coding/java/': [
     {
