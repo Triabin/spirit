@@ -14,7 +14,7 @@ tags:
 import LyricAdjuster from '../.vitepress/components/LyricAdjuster.vue';
 </script>
 
-<LyricAdjuster hideTitle="true"></LyricAdjuster>
+<LyricAdjuster/>
 
 ## 关于`.lrc`文件
 
