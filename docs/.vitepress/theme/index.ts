@@ -4,6 +4,7 @@ import type { Theme } from 'vitepress';
 import DefaultTheme from 'vitepress/theme';
 import './style.css';
 import FavoirtesPage from '../components/FavoritesPage.vue';
+import CardClock from '../components/CardClock/index.vue';
 
 export default {
   extends: DefaultTheme,
@@ -14,5 +15,6 @@ export default {
   },
   enhanceApp({ app, router, siteData }) {
     app.component('FavoritesPage', FavoirtesPage);
+    app.component('CardClock', CardClock);
   }
 } satisfies Theme
