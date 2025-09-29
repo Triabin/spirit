@@ -75,6 +75,9 @@ watch(() => [props.currValue], () => {
   backface-visibility: hidden;
   transition: 0.5s;
   border-radius: 3px;
+  display: flex;
+  align-items: start;
+  justify-content: center;
 }
 
 .card-1 {
