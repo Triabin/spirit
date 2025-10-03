@@ -1,6 +1,7 @@
 import { DefaultTheme } from "vitepress";
 
 const nav:  DefaultTheme.NavItem[] = [
+  { component: 'CardClock' },
   { text: '首页', link: '/' },
   {
     text: '编程',
@@ -16,7 +17,6 @@ const nav:  DefaultTheme.NavItem[] = [
   { text: '文章笔记', link: '/articles/', activeMatch: '/articles/*' },
   { text: '工具集', link: '/tools/', activeMatch: '/tools/*' },
   { text: '收藏网页', link: '/favorites/' },
-  { component: 'CardClock' },
 ];
 
 export default nav;

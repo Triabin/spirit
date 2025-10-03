@@ -31,6 +31,7 @@ onUnmounted(() => timer && cancelAnimationFrame(timer));
 </script>
 <style lang="css" scoped>
 .card-clock {
+  margin-right: 20px;
   width: 100%;
   height: 60px;
   display: flex;
