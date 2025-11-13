@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress';
 import sidebar from './config/sidebar';
 import nav from './config/nav';
 import { resolve } from 'path';
+import mathjax3 from 'markdown-it-mathjax3';
 
 // 当前执行node命令时文件夹的地址（工作目录）
 const root: string = process.cwd();
@@ -24,6 +25,11 @@ export default defineConfig({
       ],
       extensions: ['.vue', '.css', '.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
     },
+  },
+  markdown: {
+    config: (md) => {
+      md.use(mathjax3)
+    }
   },
   themeConfig: {
     nav,
