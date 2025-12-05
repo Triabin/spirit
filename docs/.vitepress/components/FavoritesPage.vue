@@ -22,6 +22,8 @@
 </template>
 
 <script lang="ts" setup>
+import { openUrl } from '@/common/utils';
+
 const props = defineProps<{
   items: {
     icon?: string,
@@ -30,13 +32,6 @@ const props = defineProps<{
     description?: string
   } []
 }>();
-
-const openUrl = (url: string, target: string = '_blank') => {
-  if (url.startsWith('/')) {
-    target = '_self';
-  }
-  window.open(url, target);
-}
 </script>
 
 <style lang="css" scoped>
