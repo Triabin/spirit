@@ -117,8 +117,9 @@ export default defineConfig({
   markdown: {
     math: true,
     lineNumbers: true,
+    languageAlias: { 'postgresql': 'sql' },
     config: (md) => {
-      md.use(mathjax3)
+      md.use(mathjax3);
     }
   },
   vue: {
