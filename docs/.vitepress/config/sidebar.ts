@@ -49,6 +49,9 @@ const sidebar: DefaultTheme.Sidebar = {
     {text: 'SpringBoot', link: '/coding/java/SpringBoot'},
     {text: 'SpringAI', link: '/coding/java/SpringAI'},
   ],
+  '/coding/python/': [
+    {text: 'Python基础语法', link: '/coding/python/Python基础语法'},
+  ],
   '/coding/frontend/': [
     {text: 'HTML', link: '/coding/frontend/HTML'},
     {text: 'CSS', link: '/coding/frontend/CSS'},
