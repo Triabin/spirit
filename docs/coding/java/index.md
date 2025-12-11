@@ -26,7 +26,12 @@ description: Java学习笔记与文档
 
 #### 安装包下载
 
-[官网地址，点击跳转](https://www.oracle.com/java/technologies/downloads/archive/)，或者到[Java版本变更表](#java版本变更表)中点击对应版本直接跳转（jdk1的找不到）。也可直接下载我的版本jdk，版本为`jdk-8u201`，如无特殊需求，之后我所有教程中所使用的jdk版本均为此版本（商用前最后一个小版本号为奇数的版本）：
+~~[官网地址，点击跳转](https://www.oracle.com/java/technologies/downloads/archive/)，或者到[Java版本变更表](#java版本变更表)中点击对应版本直接跳转（jdk1的找不到）~~（于2025年11月发现已经不可用，详情见Oracle账号问题，当然，入如果是OracleJDK17及以后的版本，则还是可以到官网直接下载）。可以使用国内的jdk镜像下载：
+
+* 华为OracleJDK镜像：[https://repo.huaweicloud.com/java/jdk/](https://repo.huaweicloud.com/java/jdk/)
+* injdk：[https://d10.injdk.cn/openjdk/oraclejdk/](https://d10.injdk.cn/openjdk/oraclejdk/)
+
+也可直接下载我的版本jdk，版本为`jdk-8u201`，如无特殊需求，之后我所有教程中所使用的jdk版本均为此版本（商用前最后一个小版本号为奇数的版本）：
 
 * 百度网盘
 
@@ -44,13 +49,15 @@ description: Java学习笔记与文档
 
 ::: warning Oracle账号问题
 
-在Oracle官网下载时会要求登录官网，如果自己注册，又需要填写个人及公司各种信息，这时候就需要万能的网友了。
+~~在Oracle官网下载时会要求登录官网，如果自己注册，又需要填写个人及公司各种信息，这时候就需要万能的网友了。~~
 
-用前声明，此方法仅限于个人使用，公司中请直接找公司内部要相应版本，下载内容仅限个人学习使用，请于24小时后删除（狗头保命🙃
+~~用前声明，此方法仅限于个人使用，公司中请直接找公司内部要相应版本，下载内容仅限个人学习使用，请于24小时后删除（狗头保命🙃~~
 
-直接上网搜索“Oracle账号”，然后依次点击搜索框下的`工具 | 时间 | 过去1年内`（百度类似），逐个查看搜索结果，一般都有网友分享的公益账号，礼貌使用，用后及时注销。
+~~直接上网搜索“Oracle账号”，然后依次点击搜索框下的`工具 | 时间 | 过去1年内`（百度类似），逐个查看搜索结果，一般都有网友分享的公益账号，礼貌使用，用后及时注销。~~
 
 **![image-20250103184500905](https://gitee.com/triabin/img_bed/raw/master/2025/01/03/8aa92cf1a5dbb13b2c58a552b61e7641-image-20250103184500905.png)**
+
+于2025年11月才发现，Oracle账号登录需验证码，上述方法已失效。如果需要jdk17以前的版本可以使用国内镜像下载，，
 
 :::
 
@@ -326,6 +333,48 @@ javac @xxx.txt # 编译xxx.txt文件中列出的.java文件所有，每行一个
   ④ `-h`：显示命令帮助
 
   ⑤ `-J`：直接传递给JVM参数
+
+### JetBrains IDEA中使用jdb远程调试
+
+（底层应是使用`jdb`命令来进行功能封装的）
+
+**1、调试模式启动Springboot项目：**
+
+| 方法类别    | 关键命令/配置                                                | 核心参数说明                                                 |
+| ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| JVM参数启动 | `java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar app.jar` | `-agentlib:jdwp`: 启用JDWP（Java Debug Wire Protocol）。这是推荐用于JDK 5及以上版本的现代方式 |
+| Maven插件   | `mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"` | 在通过Maven直接运行项目时，通过系统属性传递JVM参数。         |
+
+> 以上为两种启动Springboot调试端口的方式，公司测试环境中一般那都会配置启动调试环境，可以找测试人员直接要远程调试端口。
+
+**2、在IDEA中配置远程调试**
+
+① 打开要远程调试的项目，然后在IDEA右上角点击项目运行配置，然后添加`Remote JVM Debug`配置：
+
+<img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/11/953928610b9fedc8875c14f0fce9e4eb-image-20251211124813152.png" alt="image-20251211124813152" align="left"/>
+
+<div style="clear: both;"></div>
+
+② 然后分别配置从测试人员那边要来的IP地址和调试端口，再选择要调试的项目本地代码所属模块完成配置。
+
+<img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/11/b1bf5743c4e9f4b80f7667781156d391-image-20251211125045702.png" align="left"/>
+
+<div style="clear: both;"></div>
+
+③ 最后启动远程调试，然后再和正常本地项目一样调试即可。远程调试连接成功控制台样例：
+
+<img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/11/3f3f612a194ba315081ecad010d1a13b-image-20251211125707995.png" alt="3f3f612a194ba315081ecad010d1a13b-image" align="left"/>
+
+<div style="clear: both;"></div>
+
+:::warning 注意
+
+① 远程调试版本是按照行号来与本地代码匹配，如果本地代码与远程调试代码版本不同，它将会按照行号显示Debug结果；
+
+② 停止调试之前，**一定一定一定**要将所有断点取消掉并确保已经放掉了调试断点（也就是确保项目已经和连接调试前一样正常运行），不然一旦测试环境进入断点卡住，测试人员只能重启系统（那时你很有可能面临整个测试组的关爱😅）。
+
+:::
+
 
 ## 附录
 
