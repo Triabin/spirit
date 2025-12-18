@@ -18,6 +18,7 @@ const sidebar: DefaultTheme.Sidebar = {
     {text: '平方根倒数算法', link: '/coding/common/平方根倒数算法'},
     {text: '开源协议', link: '/coding/common/开源协议'},
     {text: '常用命令', link: '/coding/common/常用命令'},
+    {text: '计算机中的数据存储', link: '/coding/common/计算机中的数据存储'},
     {
       text: '编程散记与通用技术',
       link: '/coding/common/important/',
@@ -55,6 +56,7 @@ const sidebar: DefaultTheme.Sidebar = {
   '/coding/frontend/': [
     {text: 'HTML', link: '/coding/frontend/HTML'},
     {text: 'CSS', link: '/coding/frontend/CSS'},
+    {text: 'JavaScript', link: '/coding/frontend/JavaScript'},
     {text: 'TypeScript', link: '/coding/frontend/TypeScript'},
   ],
   '/articles/': [
@@ -64,6 +66,9 @@ const sidebar: DefaultTheme.Sidebar = {
     {text: '贝赛尔曲线', link: '/articles/贝赛尔曲线'},
     {text: '配色设计', link: '/articles/配色设计'},
     {text: '用于数学、科学和工程学的希腊字母', link: '/articles/用于数学、科学和工程学的希腊字母'},
+  ],
+  '/essays/': [
+    {text: '识文僻义', link: '/essays/识文僻义'},
   ]
 };
 
