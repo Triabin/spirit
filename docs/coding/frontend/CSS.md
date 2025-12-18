@@ -154,3 +154,84 @@ display: grid;
 `grid-template-columns / grid-template-rows`<br/>设置网格每一行/列的宽/高度。
 
 repeat()函数：用于简化多行或多列的尺寸定义。
+
+## 过渡和动画
+
+参考：[无废话！12分钟彻底搞懂 CSS 动画与过渡 让你的网页不再“呆板”](https://www.bilibili.com/video/BV1SRUYBeEUj/)
+
+CSS过渡（Transitions）：将属性值的瞬时变动转变成一个持续一段时间的平滑过程，适用于那些有**明确触发条件并且只在两个状态之间进行切换的效果**（例如鼠标悬停之类）。
+
+CSS动画（Animations）：通过定义关键帧（keyframes）来实现对动画效果更细节的控制，它甚至允许逐帧创建复杂动画，它适用于包含多个状态或者无需交互就能自动播放的效果。
+
+### CSS过渡
+
+```css
+button {
+  transition-property: transform; /* 用于配置过渡效果对哪些属性生效，也可以配置all */
+  transition-duration: 0.3s; /* 用于指定过渡持续时间 */
+  transition-timing-function: ease; /*
+  配置过渡动画播放速度类型
+      ease（默认）：开始很慢，但很快加速到一个比较大的速度，时间过半就开始缓慢减速，直到最后减速为0；
+      ease-in：慢速开始，一直变快直到结束；
+      ease-out：快速开始，一直变慢直到结束；
+      ease-in-out：开始慢，匀加速到一个速度大概时间到1/3时就保持，直到最后1/3时间再均匀减速（注意和ease区别）；
+      linear：速度保持不变。
+  */
+  transition-delay: 0.5s; /* 用于配置在过渡发生前会延迟多久（包括恢复） */
+  
+  /* 可以使用transition简写完成以上所有属性，多个属性的变换之间用逗号分隔 */
+  transition: transform 0.3s ease 0.5s;
+  /* Tips：transition-delay单独写，这样在transition中只包含一个时间值，方便可读 */
+}
+
+button:hover {
+  transform: translateY(-10px); /* 鼠标悬停时向上移动10个像素 */
+}
+```
+
+### CSS动画
+
+```css
+.element {
+  animation-name: a-name; /* 要使用的动画名称 */
+  animation-duration: 3s; /* 动画持续时间 */
+  animation-timing-function: ease; /* 与过渡动画中的timing-function一样 */
+  animation-delay: 0s; /* 动画延迟时间 */
+  animation-iteration-count: 1; /* 动画播放次数，默认为1，可以配置infinite，则无限循环播放动画 */
+  animation-direction: normal; /* 
+  动画播放次序
+    默认为normal，正常播放；
+    reverse：反向播放；
+    alternate：每次播放后反转方向；
+    alternate-reverse：每播放一次后都反转方向，但是第一次播放为反向
+  */
+  animation-fill-mode: none; /*
+  动画播放后状态
+    默认为none，即播放后恢复最初状态；
+    forwards：播放后保持状态，使动画停留在最后一帧；
+    backwards：使动画在delay期间保持在最初状态；
+    both：结合forwards和backwards。
+  */
+  animation-play-state: running; /* 控制动画启停，running/stop */
+}
+
+/* 定义动画 */
+@keyframes a-name {
+/*
+  定义动画序列，其中每一步都是一个百分比值，0%为动画开始，100%为动画结束，
+  任何介于二者之间的值都代表动画过程中的某一个时间点，案例为让element这个
+  元素旋转并且变成一个圆形，所以在动画100%时动画应该已经是旋转过并且是圆的。
+*/
+  0% {}
+  50% {
+    scale: 2; /* 变换到一半时让元素增大 */
+    transform: rotate(0); /* 明确定义在元素放大前不旋转 */
+    border-radius: 0; /* 明确定义在元素放大前部变为圆形 */
+  }
+  100% {
+    transform: rotate(360deg); /* 元素旋转360° */
+    border-radius: 50%; /* 元素编程圆形 */
+    scale: 2; /* 让元素变大效果保持到动画结束 */
+  }
+}
+```

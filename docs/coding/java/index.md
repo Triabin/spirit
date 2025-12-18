@@ -61,6 +61,18 @@ description: Java学习笔记与文档
 
 :::
 
+> 说明：JDK和JRE的区别。
+>
+> JDK（Java Development Kit）：JDK是Java开发工具包，包含了Java运行环境、Java编译器、Java工具和Java类库。
+>
+> <img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/16/b5691fe174876b368e8fa7d336a75f64-image-20251216235058273.png" alt="image-20251216235058273" align="left"/>
+>
+> JRE（Java Runtime Environment）：JRE是Java运行环境，包含了Java虚拟机、Java类库和其他运行Java程序所需的软件。
+>
+> <img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/16/17334f99c463bdc11b47e8eda30c4626-image-20251216235148566.png" alt="image-20251216235148566" align="left"/>
+>
+> 一般来说，JDK包含JRE，所以如果是开发Java程序的话安装JDK即可，如果是作为运行编译完成的Java程序的服务器，则可以只安装JRE。
+
 ### Linux系统安装（以Ubuntu为例）
 
 1、解压压缩包
@@ -232,6 +244,10 @@ java HelloWorld # .class可以省略
 
 **![image-20250105131503648](https://gitee.com/triabin/img_bed/raw/master/2025/01/05/bb9d5d56fbccfcd7cd4cdd4eade6fc61-image-20250105131503648.png)**
 
+## 跨平台原理
+
+<img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/16/89722d31a1bf2125316ca2c7e3ca27ac-image-20251216234656216.png" alt="image-20251216234656216" align="left" />
+
 ## Java几个基础命令使用与讲解（重要）
 
 说明：命令行示例中，使用`[]`括起来的部分意为非必填，没有括起来则意为必填。
@@ -375,8 +391,11 @@ javac @xxx.txt # 编译xxx.txt文件中列出的.java文件所有，每行一个
 
 :::
 
+### jhat内存分析工具
 
 ## 附录
+
+![image-20251216233614885](https://gitee.com/triabin/img_bed/raw/master/2025/12/16/1d8851555a136f0f39970f847b955eac-image-20251216233614885.png)
 
 ### Java版本变更表
 
