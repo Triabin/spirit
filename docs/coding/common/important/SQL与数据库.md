@@ -488,7 +488,7 @@ REVOKE 权限列表 ON 数据库名.表名 FROM '用户名'@'主机名';
 
 ### 2、数据类型
 
-<table  style="text-align: center; vertical-align: middle;">
+<table style="text-align: center; vertical-align: middle;">
   <thead>
     <tr>
       <th colspan="6">MySQL数据类型</th>
