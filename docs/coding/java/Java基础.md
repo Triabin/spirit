@@ -2435,7 +2435,7 @@ public class CollectionDemo {
 | `E`               | `set(int index, E element)`  用指定的元素替换此列表中指定位置的元素。 |
 | `int`             | `size()`  返回此列表中的元素数。                             |
 | `void`            | `sort(Comparator<? super E> c)`  使用提供的 `Comparator`对此列表进行排序以比较元素。 |
-| `Spliterator<E>`  | `spliterator()`  在此列表中的元素上创建*[late-binding](Spliterator.html#binding)*和*故障快速* [`Spliterator`](../../java/util/Spliterator.html) 。 |
+| `Spliterator<E>`  | `spliterator()`  在此列表中的元素上创建late-binding和故障快速Spliterator。 |
 | `List<E>`         | `subList(int fromIndex,  int toIndex)`  返回此列表中指定的 `fromIndex` （包括）和  `toIndex`之间的独占视图。 |
 | `Object[]`        | `toArray()`  以正确的顺序（从第一个到最后一个元素）返回一个包含此列表中所有元素的数组。 |
 | `<T> T[]`         | `toArray(T[] a)`  以正确的顺序返回一个包含此列表中所有元素的数组（从第一个到最后一个元素）;  返回的数组的运行时类型是指定数组的运行时类型。 |
