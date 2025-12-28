@@ -1497,7 +1497,7 @@ public class StructorDemo {
  * 类描述：面向对象Demo：人类设计
  *
  * @author Triabin
- * @date 2025-12-24 14:28:20
+ * @date 2020-12-24 14:28:20
  */
 public class Person {
     /**
@@ -1660,7 +1660,330 @@ this本质：所在方法调用者的地址值。
 
 ### 6.8 static
 
+`static`：表示静态，是Java中的一个修饰符，可以修饰成员方法也可以修饰成员变量。被`static`修饰的成员变量叫做静态变量，同理，被修饰的方法叫做静态方法。
+
+#### 静态变量
+
+特点：
+
+* 变量被该类所有对象共享
+* 随着类的加载而加载，是优先于对象出现的（类字节码文件加载到方法区的时候它就出现了，此时还没创建对象）
+
+调用方式：
+
+* 类名调用（推荐）：`类名.变量名`
+* 对象调用：`对象变量名.变量名`
+
+静态变量内存图：
+
+<img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/28/85f4434fd3de2366602551d2b42ad5cd-image-20251228134033472.png" alt="image-20251228134033472"/>
+<div style="clear: both;"></div>
+
+运行过程简述：
+
+* `main`方法第一行，将`Student.class`加载到方法区，发现该类有静态成员变量，于是将静态成员加载到堆内存的**静态区**，并且将其赋一个对应数据类型的默认值；
+
+  静态区：静态存储位置，在JDK8以前，这个分区存放在方法区，JDK8开始将其挪到了堆内存中。
+
+* 将“阿玮老师”赋给静态变量`teacherName`；
+
+* 内存中开辟一块空间存放`Student`对象，给成员变量赋默认初始值；
+
+* 分别给成员变量赋值；
+
+* 调用`show()`方法，方法入栈，然后通过对象访问到静态成员变量和类成员变量打印到控制台，方法运行结束，出栈；
+
+* `Student = s2`类似。
+
+#### 静态方法和工具类
+
+特点：
+
+* 多用在测试类和工具类中
+* JavaBean中很少使用（就算用到，也多涉及到一些设计模式，例如单例）
+
+调用方式：
+
+* 类名调用（推荐）：`类名.方法名`（类外部，内部可以直接调用，不用类名）
+* 对象调用：`对象变量名.方法名`
+
+工具类：帮助我们做一些事情（最好是能归为一类的那种），但是不描述任何事物（对象）的类。
+
+工具类与其他类对比：
+
+* JavaBean类：用来描述一类事物的类，比如，`Teacher`、`Student`、`Dog`，`Cat`等。
+* 测试类：用来检验其他类是否书写正确，带有程序入口的类。
+* 工具类：不是用来描述一类事物的，而是帮我们做一些事（里面多是一些静态方法，用于实现具体的功能）。
+
+工具类要遵守的规则：
+
+* 类名见名知意，例如数组工具类叫`ArrayUtil`（这里只是举例，实际上JDK提供的数组工具类叫做`Arrays`），数学工具就叫`MathUtil`；
+* 私有化构造方法，防止外界创建这个类的对象，因为工具类不是用来描述事物的，创建它的对象没有意义，只需要类名来调用工具方法就行了；
+* 方法都定义为静态的，方便调用（否则私有化了构造方法的类无法调用成员方法）。
+
+#### `static`的注意事项
+
+* 静态方法只能访问静态变量和静态方法（否则加载到静态区的时候其他内容都还没加载出来，无法访问）；
+* 非静态方法可以访问静态变量或者静态方法，也可以访问非静态的成员变量和非静态的成员方法（也是和加载顺序相关）；
+* 静态方法中没有`this`关键字。
+
+总结：静态方法中只能访问静态；非静态方法可以访问所有。静态方法中没有`this`关键字。
+
+静态成员变量随着类的加载而加载到静态区，此时的普通成员变量和成员方法因为不一定有调用者（创建的类对象），所以无法调用，但是静态成员变量已经加载到静态区，静态方法因为不需要`this`作为调用者，所以也可以直接调用。
+
+重新认识`main`方法：
+
+* public：被JVM调用，权限够大
+* static：被JVM调用，不用创建对象，直接访问类名（因为main方法是静态的，如果以main方法作为入口的测试类，那么测试类中其他方法也需要是静态的）
+* void：被JVM调用，不需要给JVM返回值
+* main：一个通用的名称，虽然不是关键字，但是能被JVM识别，是Java规定的主入口名称
+* `String[] args`：用于接收键盘录入的数据，现在几乎不用（编译后的结果在命令行调用的时候后面跟的参数列表）
+
 ### 6.9 继承
+
+继承是面向对象的三大特征之一，之前已经学过了封装，在将事物零散的属性和行为封装到一起成为一个对象的过程中，出现了许多属性高度重合的类。
+
+例如`Student`（学生）和`Teacher`（老师）两个类都有诸如姓名、年龄、性别、住址等相同的属性以及吃饭睡觉等相同的方法，为了解决这个问题，于是将这些重合的属性和方法写到了第三个类中，给这个类取名为`Person`。学生和老师两个类只需要去**继承**这个类即可获取到这些共有的属性和方法，再根据自身特添加一些独属于自己的属性和方法（或者重写父类方法）即可。
+
+* Java中提供一个关键字`extends`，用这个关键字就可以让一个类和另一个类建立起继承关系。
+
+  `public class Student extends Person {}`
+
+* 上述案例中，`Student`称为子类（派生类），`Person`称为父类（基类或超类）。
+
+#### 继承继承的好处
+
+* 可以把多个子类中重复的代码抽取到父类中，提高了代码的复用性。
+* 子类可以在父类的基础上，增加其他功能，使子类更强大。
+
+继承要学习的点：自己设计父类，使用别人设计好的类。
+
+**自己设计继承**：当类与类之间存在相同的内容，并满足子类时父类中的一种，就可以考虑使用继承来优化代码。
+
+#### 继承的特点
+
+Java只支持单继承，不支持多继承，但支持多层继承：
+
+* 单继承：一个子类只能继承一个父类
+
+* 不支持多继承：子类不能同时继承多个父类
+
+* 多层继承：子类A继承父类B，父类B可以继承父类C，其中，C是A的间接父类，B是A的直接父类，C是B的直接父类
+
+  > 在Java中，每一个类都直接或间接的继承于`java.lang.Object`类（万物皆对象，所以给最大基类命名为Object）。如果在定义类的时候，没有明确使用`extends`关键字指定父类，那么JVM会自动默认给类加上一个父类`Object`。
+
+#### 子类能继承父类中的哪些内容
+
+| 父类中的内容 |  非私有  | 私有`private` |
+| :----------: | :------: | :-----------: |
+|   构造方法   | 不能继承 |   不能继承    |
+|   成员变量   |  能继承  |    能继承     |
+|   成员方法   |  能继承  |   不能继承    |
+
+① 构造方法如果可以被继承会将会导致构造方法的命名规则，即构造方法名与类名相同。
+
+```java
+public class ExtendsDemo {
+    public static void main(String[] args) {
+        Son son1 = new Son();
+        Son son2 = new Son("张三", 18); // 报错
+    }
+}
+    
+class Parent {
+    private String name;
+    private int age;
+
+    public Parent() {}
+    public Parent(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+}
+
+class Son extends Parent {}
+```
+
+② 私有的成员变量虽然可以被继承下来，但是不能直接使用，只能通过`public`的`getter/setter`方法访问属性。继承的内存图：
+
+![image-20251228151814410](https://gitee.com/triabin/img_bed/raw/master/2025/12/28/1aabdd22e90e31619b6eadb04da62456-image-20251228151814410.png)
+<div style="clear: both;"></div>
+
+运行时内存分析：
+
+* 首先加载`TestStudent.class`到方法区，然后`main`方法进栈，开始运行；
+* 第一行发现要使用`Zi`类，于是将`Zi.class`加载到方法区，加载过程发现它集成了`Fu`类，于是将`Fu.class`也加载到方法区；
+* 第一行等号左边，在栈中定义了一个类型为`Zi`的`main`方法局部变量`z`；
+* 第一行等号右边，在堆空间中开辟一块内存区域，地址为`001`（假设），内存氛围两块（逻辑上），一块存放`Fu`类的成员变量，一块存放`Zi`类的成员，然后分别进行默认初始化，然后将内存地址赋值给左边的局部变量`z`，然后继续执行下一行；
+* 打印出内存地址`001`，继续执行下一行；
+* 三行都是赋值语句，不同的是每次赋值，都会现在`Zi`类的那块内存中找成员变量，找不到才会去父类中找，三行依次赋值后继续执行下一行；
+* 打印完成，`main`方法运行完毕，方法出栈。
+
+在该过程中，如果`Fu`类中，将成员变量都用`private`修饰，那么在子类中赋值时，将无法直接访问，除非父类提供可被子类继承的`public`的`getter/setter`供子类访问相应成员变量。
+
+③ **虚方法表**：对于方法的继承，如果每次调用父类方法都需要逐级往父类中去查找的话，那么那些继承关系比较复杂的类将会大大降低Java代码的执行效率，于是Java在底层做了一些优化，它会从最顶级的父类开始，设置一个虚方法表，将这个类中可能会经常用到的方法（非`private`、非`static`、非`final`）单独抽离出来，每次继承，父类都会将虚方法表交给子类，然后子类会再将自己的常用方法加入到这个虚方法表中，如此就避免了每次调用父类方法时的逐级查找（同时也方便方法重写）。**只有父类中的虚方法才能被子类继承。**内存图演示：
+
+![image-20251228154537300](https://gitee.com/triabin/img_bed/raw/master/2025/12/28/52194bc6dbea119ec26220084bcf36d1-image-20251228154537300.png)
+<div style="clear: both;"></div>
+
+运行过程内存分析：
+
+* 首先加载字节码文件`TestStudent.class`，然后`main`方法入栈开始执行；
+* 第一行，需要加载`Zi.class`，由于`Zi`类继承了`Fu`类，于是加载`Fu.class`，由于`Fu`类继承了`java.lang.Object`类（以前的内存分析由于不涉及到它的内容，为了简化分析，于是略过了这一步），于是加载`Object.class`到方法区。加载完成，首先在栈中定义变量`z`，然后开始在堆空间开辟内存区间，内存区域间在逻辑上分为两块，但是由于父类和子类都没有成员变量，所以只开辟，不需要默认初始化赋值，然后将开辟出来的内存地址返回给`z`；
+* 第二行，打印出内存地址`001`；
+* 第三行，调用`ziShow()`方法，先去`Zi`类的虚方法表中查找该方法，没找到再去查找自己的成员方法，还找不到就逐级向上查找，找到了直接运行；
+* 第四行，调用`fuShow1()`方法，先去`Zi`类的虚方法表中查找该方法，找到了直接运行；
+* 第五行，调用`fuShwo2()`方法，先去`Zi`类的虚方法表中查找该方法，没找到，再去查找自己的成员方法，也没找到，于是去`Fu`类中查找成员方法，找到了发现是`private`的方法，于是报错，栈帧弹出。
+
+#### 继承中成员变量的访问特点
+
+就近原则：谁离我近，我就用谁。当前方法作用域内找，找不到就去成员变量里面找，成员变量找不到再去父类找。
+
+```java
+public class ExtendsDemo {
+    public static void main(String[] args) {
+        Son son = new Son();
+        son.show(); // Show Son Parents
+    }
+}
+
+class Parent {
+    String name = "Parents";
+}
+
+class Son {
+    String name = "Son";
+    public void show() {
+        String name = "Show"
+        System.out.println(name); // 访问离我近的
+        System.out.println(this.name); // 访问本类
+        System.out.println(super.name); // 访问父类
+    }
+}
+```
+
+#### 继承中成员方法的访问特点
+
+直接调用满足就近原则，谁离我近我就用谁，`super`调用，访问父类。
+
+调用方法过程：现在本类中查看，有无此方法，没有则去父类中查找。但是如果子类重写了父类方法，那么在子类的虚方法表中的该方法名对应的方法为子类重写后的方法。
+
+```java
+public class ExtendsDemo {
+    public static void main(String[] args) {
+        Student s1 = new Student();
+        s1.lunch();
+        
+        InternationalStudent s2 = new InternationalStudent();
+        s2.lunch();
+    }
+}
+
+class Person {
+    public void eat() {
+        System.out.println("吃米饭");
+    }
+    public void drink() {
+        System.out.println("喝开水");
+    }
+}
+
+class Student extends Person {
+    public void lunch() {
+        this.eat();
+        this.drink();
+        
+        super.eat();
+        super.drink();
+    }
+}
+
+class InternationalStudent {
+    public void lunch() {
+        this.eat();
+        this.drink();
+        
+        super.eat();
+        super.drink();
+    }
+    
+    @Override
+    public void eat() {
+        System.out.println("吃面包");
+    }
+    
+    @Override
+    public void drink() {
+        System.out.println("喝凉水");
+    }
+}
+```
+
+方法的重写：当父类（做同一件事情的）的方法不能满足子类需求时，需要进行方法重写。
+
+* 书写格式：在继承体系中，子类出现了和父类中一模一样的方法声明，我们就称子类这个方法是重写的方法。
+* `@Override`重写注解：用于放在重写后的方法上，校验子类重写时语法是否正确。（关于注解的知识以后再详述）
+* 在添加虚方法表过程中，如果发生了方法重写，那么子类的方法会覆盖父类的方法。
+
+方法重写注意事项和要求：
+
+* 重写的方法名称、参数列表必须与父类保持一致；
+* 子类在重写父类方法时，访问权限子类必须大于等于父类（暂时了解：`private < default（空着不写） < protected < public`；
+* 子类重写父类方法是，返回值类型必须小于等于父类；
+* 建议：重写方法时，方法尽量与父类保持一致（访问权限、参数列表、返回值类型等，绝大部分场景都是一致的）；
+* 私有方法不能被重写；
+* 子类不能重写父类的静态方法，重写将会报错。**只有被添加到虚方法表中的方法才能被重写。** 方法重写本质就是覆盖虚方法表中的方法，因此那些不能被添加到虚方法表中的方法都无法被重写。
+
+#### 继承中构造方法的特点
+
+* 父类中的构造方法不会被子类继承；
+
+* 子类中所有构造方法默认先访问父类中的无参构造，再执行自己。
+
+  ```java
+  public class ExtendsDemo {
+      public static void main(String[] args) {
+          Child child = new Child("Triabin");
+          System.out.println(child); // Child{name='Triabin', age=18}，toString()方法为java.lang.Object中的方法，因此每个类其实都有该方法，打印到控制台时，引用对象打印的其实都是该方法的返回值
+      }
+  }
+  
+  class Parent {
+      String name;
+      int age;
+  
+      public Parent() {
+          this.age = 18;
+      }
+  }
+  
+  class Child extends Parent {
+      public Child(String name) {
+          this.name = name;
+      }
+  
+      @Override
+      public String toString() {
+          return String.format("Child{name='%s', age=%d}", name, age);
+      }
+  }
+  ```
+
+  原因：子类在初始化的时候，有可能会使用到父类中的数据，如果父类没有完成初始化，子类将无法使用父类的数据，因此子类初始化之前，一定要调用父类构造方法先完成父类数据空间的初始化。
+
+  调用方式：子类构造方法的第一行语句默认都是`super();`，即使不写也存在，并且必须在第一行。（如果调用父类的有参构造则必须手动调用`super(参数列表);`）
+
+#### this、super使用总结
+
+* `this`：可以理解为一个变量，表示当前方法调用者的地址值；从虚拟机打印的对象中方法的内存信息来看，它就是一个存在每个对象方法中的局部变量，当方法被调用的时候它才有值。
+* `super`：代表父类存储空间。
+
+| 关键字  |              访问成员变量              |                访问成员方法                 |                         访问构造方法                         |
+| :-----: | :------------------------------------: | :-----------------------------------------: | :----------------------------------------------------------: |
+| `this`  | `this.成员变量`<br />访问本类成员变量  | `this.成员方法(...)`<br />访问本类成员方法  | `this(...)`<br />访问本类构造方法，如果是在构造方法中，这个语句必须写在第一行 |
+| `super` | `super.成员变量`<br />访问父类成员变量 | `super.成员方法(...)`<br />访问父类成员方法 |              `super(...)`<br />访问父类构造方法              |
+
+
 
 ### 6.10 包、final、权限修饰符、代码块
 
@@ -1979,6 +2302,7 @@ public class StringDemo {
   ```
 
   <img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/26/00f4bf18c82d44586e2dd1e189d5ebf8-image-20251226154057595.png" alt="image-20251226154057595" align="left"/>
+  
   <div style="clear: both;"></div>
   在JDK8以前，会自动使用`StringBuilder`进行拼接，因此在运行类似`String s2 = s1 + "b";`这样一行代码的时候，会创建一个`StringBuilder`对象，然后运行`append`方法将`"b"`拼接到字符串后面，再将`StringBuilder`对象转为`String`对象（通过`new String()`的方式），因此每运行一次这样的拼接以后，都会产生至少一个`String`对象以及在字符串常量池中产生一个拼接目标的字符串常量。这就是直接使用字符串拼接性能低下的原因。
   
@@ -2046,10 +2370,135 @@ public class StringDemo {
 ## 9、集合
 
 数组的弊端：
+* 长度一旦确定，不管索引位置上是否需要存放数据都需要占用内存空间，并且长度一旦固定就不可变；
+* 只能使用连续的内存区域，对于那些离散的、分布在物理内存各个位置的空间无法很充分的使用；
+* 一个数组只能存放一种数据类型（当然，这应该算优点）。
+
+集合与数组区别：
+* 数组可以存基本数据类型和引用数据类型，集合只能存储引用数据类型；
+* 数组长度固定，集合长度可变
 
 ### 9.1 集合的基本使用
 
+<img src="https://yanglukuan.github.io/images/arrayList/Collections.png" alt="Java集合框架" align="left" />
+<div style="clear: both;"></div>
 
+在Java中，所有集合均实现自接口`java.util.Collection`，并且默认实现了很多种集合，每种集合都有其各自功能和特点，在节中，首先学习使用以后应用最广泛集合之一的`java.util.ArrayList`。
+
+结合JDK API文档中关于这个类的构造方法和类方法列表，可以初步了解该类的使用：
+
+| 构造方法和方法描述                                           |
+| ------------------------------------------------------------ |
+| `ArrayList()`  构造一个初始容量为十的空列表。                |
+| `ArrayList(Collection<? extends E> c)`  构造一个包含指定集合的元素的列表，按照它们由集合的迭代器返回的顺序。 |
+| `ArrayList(int initialCapacity)`  构造具有指定初始容量的空列表。 |
+
+> 泛型：可以限定集合中要存储的数据类型，格式为在类名后面使用`<E>`，尖括号中的`E`就是要存储的数据类型，并且这个泛型只能是引用数据类型，基本数据类型只能用它们的包装类型。
+
+```java
+public class CollectionDemo {
+    public static void main(String[] args) {
+        // ArrayList<String> list = new ArrayList<String>(); // JDK7以前
+        ArrayList<String> list = new ArrayList<>(); // JDK7以后
+        
+        System.out.println(list); // []
+        // 由于这个类底层已经做了一些处理（实现了toString()方法），打印对象不是地址值，而是集合中存储的数据内容，并且在展示时会使用中括号包裹。
+    }
+}
+```
+
+成员方法：
+
+| 返回值类型        | 方法名和方法描述                                             |
+| ----------------- | ------------------------------------------------------------ |
+| `boolean`         | `add(E e)`  将指定的元素追加到此列表的末尾。                 |
+| `void`            | `add(int index, E element)`  在此列表中的指定位置插入指定的元素。 |
+| `boolean`         | `addAll(Collection<? extends E> c)`  按指定集合的Iterator返回的顺序将指定集合中的所有元素追加到此列表的末尾。 |
+| `boolean`         | `addAll(int index,  Collection<? extends E> c)`  将指定集合中的所有元素插入到此列表中，从指定的位置开始。 |
+| `void`            | `clear()`  从列表中删除所有元素。                            |
+| `Object`          | `clone()`  返回此 `ArrayList`实例的浅拷贝。                  |
+| `boolean`         | `contains(Object o)`  如果此列表包含指定的元素，则返回 `true` 。 |
+| `void`            | `ensureCapacity(int minCapacity)`  如果需要，增加此 `ArrayList`实例的容量，以确保它可以至少保存最小容量参数指定的元素数。 |
+| `void`            | `forEach(Consumer<? super E> action)`  对 `Iterable`的每个元素执行给定的操作，直到所有元素都被处理或动作引发异常。 |
+| `E`               | `get(int index)`  返回此列表中指定位置的元素。               |
+| `int`             | `indexOf(Object o)`  返回此列表中指定元素的第一次出现的索引，如果此列表不包含元素，则返回-1。 |
+| `boolean`         | `isEmpty()`  如果此列表不包含元素，则返回 `true` 。          |
+| `Iterator<E>`     | `iterator()`  以正确的顺序返回该列表中的元素的迭代器。       |
+| `int`             | `lastIndexOf(Object o)`  返回此列表中指定元素的最后一次出现的索引，如果此列表不包含元素，则返回-1。 |
+| `ListIterator<E>` | `listIterator()`  返回列表中的列表迭代器（按适当的顺序）。   |
+| `ListIterator<E>` | `listIterator(int index)`  从列表中的指定位置开始，返回列表中的元素（按正确顺序）的列表迭代器。 |
+| `E`               | `remove(int index)`  删除该列表中指定位置的元素。            |
+| `boolean`         | `remove(Object o)`  从列表中删除指定元素的第一个出现（如果存在）。 |
+| `boolean`         | `removeAll(Collection<?> c)`  从此列表中删除指定集合中包含的所有元素。 |
+| `boolean`         | `removeIf(Predicate<? super E> filter)`  删除满足给定谓词的此集合的所有元素。 |
+| `protected void`  | `removeRange(int fromIndex,  int toIndex)`  从这个列表中删除所有索引在 `fromIndex` （含）和  `toIndex`之间的元素。 |
+| `void`            | `replaceAll(UnaryOperator<E> operator)`  将该列表的每个元素替换为将该运算符应用于该元素的结果。 |
+| `boolean`         | `retainAll(Collection<?> c)`  仅保留此列表中包含在指定集合中的元素。 |
+| `E`               | `set(int index, E element)`  用指定的元素替换此列表中指定位置的元素。 |
+| `int`             | `size()`  返回此列表中的元素数。                             |
+| `void`            | `sort(Comparator<? super E> c)`  使用提供的 `Comparator`对此列表进行排序以比较元素。 |
+| `Spliterator<E>`  | `spliterator()`  在此列表中的元素上创建*[late-binding](Spliterator.html#binding)*和*故障快速* [`Spliterator`](../../java/util/Spliterator.html) 。 |
+| `List<E>`         | `subList(int fromIndex,  int toIndex)`  返回此列表中指定的 `fromIndex` （包括）和  `toIndex`之间的独占视图。 |
+| `Object[]`        | `toArray()`  以正确的顺序（从第一个到最后一个元素）返回一个包含此列表中所有元素的数组。 |
+| `<T> T[]`         | `toArray(T[] a)`  以正确的顺序返回一个包含此列表中所有元素的数组（从第一个到最后一个元素）;  返回的数组的运行时类型是指定数组的运行时类型。 |
+| `void`            | `trimToSize()`  修改这个 `ArrayList`实例的容量是列表的当前大小。 |
+
+可以看到，`ArrayList`的成员方法非常多，但是总的来说，（对于这些用于存储多条数据的数据结构）其成员方法可以归咎与四类，分别是增、删、改、查，将这四类方法学会使用后，其余方法可以在使用到的时候再去查看方法注释即可（并且，这类方法连名字都大同小异）。
+
+演示说明代码：
+
+```java
+/*
+     boolean add(E e)       增
+     
+     boolean remove(E e)    删
+     E remove(int index)
+     
+     E set(int index, E e)  改
+     
+     E get(int index)       查
+     int size()             获取长度
+ */
+public class CollectionDemo {
+    public static void main(String[] args) {
+        // 1、创建一个集合
+        ArrayList<String> list = new ArrayList<>();
+        
+        // 2、添加元素
+        boolean addRes = list.add("aaa");
+        System.out.println(addRes); // true，这个返回值一般不使用
+        System.out.println(list);
+        list.add("ccc");
+        list.add("aaa");
+        list.add("bbb");
+        
+        // 3、删除元素
+        boolean delRes = list.remove("aaa");
+        System.out.println(delRes);
+        System.out.println(list); // 第一个“"aaa"”元素被删除
+        System.out.println(list.remove("ddd")); // false，元素不存在，删除失败
+        // ArrayList是有索引的，与数组一样，索引也是从0开始
+        String delEle = list.remove(0);
+        System.out.println(delEle); // ccc
+        System.out.println(list);
+        
+        // 4、修改元素
+        String setRes = list.set(1, "BBB");
+        System.out.println(setRes); // bbb，它会将被覆盖的值返回
+        System.out.println(list);
+        
+        // 5、查询
+        String getRes = list.get(0);
+        System.out.println(getRes); // aaa
+        // 遍历
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i));
+        }
+    }
+}
+```
+
+> 一旦访问到`ArrayList`中不存在的索引，也会报索引越界异常`java.lang.IndexOutOfBoundsException`
 
 ## 10、常用API
 
