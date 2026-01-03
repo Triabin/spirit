@@ -1985,15 +1985,1038 @@ class InternationalStudent {
 
 ### 6.10 多态
 
+多态是面向对象的三大特征之一，前面已经依次介绍了封装和继承。在继承的使用过程中，出现了一种使用情况，假如在设计一个学生管理系统时，将所有用户重复的属性放在`User`类中，然后分别继承出`Administrator`类，`Teacher`类和`Student`类，然后再设计一个注册接口的方法，为了设计这个方法，就需要重写出`register(Administrator admin)`、`register(Teacher teacher)`和`register(Student student)`三个方法，这样的场景又造成了代码逻辑的重复，调用起来也很不方便，于是设计了多态来解决这样的问题。
+
+在创建对象时，可以将子类对象赋值给父类，例如`User user = new Student()`，这样**同类型的对象，表现出的不同形态，即为多态**。可以看出，继承是多态的前提条件，没有继承，就没有多态。根据多态的特性，上述问题中的注册方法可以写成`register(User user)`，这样就可以接收所有继承自`User`类的对象了，并且根据各个子类中方法实现的逻辑不同，调用同一个方法时，其运行逻辑也可以不同。
+
+#### 多态的基本使用
+
+多态的表现形式：`父类类型 变量名 = 子类对象;`
+
+多态的前提：
+* 有继承/实现关系（实现关系到后面的接口章节再介绍）
+* 有父类引用指向子类对象
+* 有方法重写
+
+多态的好处：使用父类作为参数，可以接收所有子类对象，体现多态的扩展性与便利。
+
+代码演示：
+
+```java
+public class PolymorphismDemo {
+    public static void main(String[] args) {
+        User student = new Administrator();
+        User teacher = new Teacher();
+        User admin = new Student();
+
+        register(admin); // Administrator
+        register(teacher); // Teacher
+        register(student); // Student
+    }
+
+    public static void register(User user) {
+        user.show();
+    }
+}
+
+class User {
+    public void show() {
+        System.out.println("User");
+    }
+}
+
+class Administrator extends User {
+    @Override
+    public void show() {
+        System.out.println("Administrator");
+    }
+}
+
+class Teacher extends User {
+    @Override
+    public void show() {
+        System.out.println("Teacher");
+    }
+}
+
+class Student extends User {
+    @Override
+    public void show() {
+        System.out.println("Student");
+    }
+}
+```
+
+#### 多态调用成员的特点
+
+* 变量调用：编译看左边，运行也看左边
+
+* 方法调用：编译看左边，运行看右边
+
+代码演示：
+
+```java
+public class PolymorphismDemo {
+    public static void main(String[] args) {
+        Animal animal = new Cat();
+        Cat cat = new Cat();
+
+        // 编译代码的时候，会看左边的父类中有没有这个变量，如果有就编译成功，没有就编译失败，运行的时候也看左边，实际获取的就是左边父类中的成员变量的值
+        System.out.println(animal.name); // 动物
+        System.out.println(cat.name); // 猫
+
+        // 编译的时候，会看左边的父类中有没有这个方法，如果有就编译成功，没有就编译失败，运行的时候实际运行的是子类中的方法
+        animal.show(); // Animal --- show方法
+        cat.show(); // Cat --- show方法
+    }
+}
+
+class Animal {
+    String name = "动物";
+
+    public void show() {
+        System.out.println("Animal --- show方法");
+    }
+}
+
+class Dog extends Animal {
+    String name = "狗";
+
+    @Override
+    public void show() {
+        System.out.println("Dog --- show方法");
+    }
+}
+
+class Cat extends Animal {
+    String name = "猫";
+
+    @Override
+    public void show() {
+        System.out.println("Cat --- show方法");
+    }
+}
+```
+
+多态调用成员内存图解：
+
+![image-20251230160445552](https://gitee.com/triabin/img_bed/raw/master/2025/12/30/f2fdfad65a6cf856297f7c46bcaf6fce-image-20251230160445552.png)
+<div style="clear: both;"></div>
+
+执行步骤解析：
+
+* 首先加载`Test.class`到方法区，然后`main`方法入栈开始执行；
+* 第一行，先加载字节码文件，涉及到继承关系，都是先加载父类再加载子类，所以这一行加载顺序为`Object.class -> Animal.class -> Dog.class`，加载完毕后在栈内存中定义一个类型为`Animal`的变量`a`，然后在堆内存中开辟一块内存区间来存储`Dog`对象，这块内存区间分为两个区间（逻辑上），一个存储父类成员变量，一个存储子类成员变量，给所有成员变量初始化完成后继续执行下一部；
+* 第二行，调用成员变量，先去父类中找成员变量`name`，找到了后打印到控制台，然后继续执行下一步（当然，如果父类中没有这个成员变量，直接编译都无法通过，这就是编译看左边，运行也看左边）；
+* 第三行，调用成员方法，直接在需方发表中找到了`show()`方法，直接入栈运行即可（因为此时子类中的`show()`方法已经在加载字节码文件的时候就被子类`Dog`中的`show()`方法覆盖了，所以运行的是子类中的`show()`方法，这就是运行看右边）；
+* 运行完毕，`main`方法出栈。
+
+看着整个运行逻辑有点复杂，其实总结下来就是为了确保多态使用过程中，不会调用到不存在的成员变量（所以要求成员变脸必须是父类中存在的）以及能够调用到真正要运行（子类中）的方法。只要明确了这个目的，整个加载调用过程的设计也就能够理解了。
+
+#### 多态的优势和弊端
+
+优势：
+* 在多态形式下，右边对象可以实现解耦合，便于扩展和维护。例如，`Person p = new Student(); p.work(); ...`，在代码中，如果后续不想学生工作了，想要换老师工作，只需要将第一行改成`Person p = new Teacher();`即可，后续的代码不用变更。
+* 定义方法的时候，使用父类作为参数，可以接收所有子类对象。
+
+弊端：在执行子类特有方法时，无法调用子类的特有功能。解决方案：这种问题在设计方法的时候就需要考虑到，如果确实有需求，可以使用`instanceof`来判断类型从属关系然后进行强转再调用，`instanceof`关键字的使用格式`变量名 instanceof 类名`，返回结果为布尔类型，代码演示：
+
+```java
+public class PolymorphismDemo {
+    public static void main(String[] args) {
+        Animal a1 = new Dog();
+        Animal a2 = new Cat();
+
+        test(a1);
+        test(a2);
+    }
+
+    public static void test(Animal animal) {
+        animal.eat();
+
+        if (animal instanceof Dog) {
+            Dog dog = (Dog) animal;
+            dog.watchDog();
+        }
+        if (animal instanceof Cat cat) { // JDK14加入的新特性，将判断和强转合到一起
+            cat.mouseKiller();
+        }
+    }
+}
+
+class Animal {
+    public void eat() {
+        System.out.println("吃东西");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("狗啃骨头");
+    }
+
+    public void watchDog() {
+        System.out.println("看家狗");
+    }
+}
+
+class Cat extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("猫吃鱼");
+    }
+
+    public void mouseKiller() {
+        System.out.println("猫抓老鼠");
+    }
+}
+```
+
+如果不先判断类型就直接强转（例如将狗转成猫），可能会出现类型转换异常`ClassCastException`。
+
 ### 6.11 包、final、权限修饰符、代码块
 
-### 6.12 抽象类
+#### 包
+
+包就是文件夹，用来管理各种不同功能的Java类，方便后期代码维护。包名使用`package`关键字声明在一个Java文件的第一行。
+
+包的命名规则：公司域名反写+包的作用，需要全部英文小写，见名知意。例如`com.microsoft.office.word`、`com.microsoft.office.powerpoint`、`com.microsoft.office.excel`。
+
+在使用一个类的时候，真正的使用方式，其实是将其包名加类名才对，这种`包名.类名`的形式叫做类的**全类名**（也叫做全限定名，只不过一般不用，至少口语上不用）。平时在编写代码时，因为使用了导入语句将类导入，所以避免了在每一个使用类的地方都写上全类名，当类名冲突的时候，就可以通过给其中一个类使用的地方加上全类名来区分。
+
+使用其他类的规则：
+
+* 使用同一包中的类时，不需要导包（默认到本包中找）
+* 使用`java.lang`包中的类时，不需要导包
+* 其他情况都需要导包
+* 如果同事使用两个包中的同名类，需要用全类名（很少碰到）
+
+:::info Tips
+
+在编写Java程序的时候，如果使用JetBrains IDEA，默认情况下，导入同一个包中的类如果超过5个，它就会自动改成`import com.identifier.*`，这个星号就表示导入这个包下的所有类。这种导入方式虽然省事儿，但是在项目中是及其不推荐的，首先代码编写需要的是确保使用明确声明的东西，其次这回很容易造成命名空间污染以及出现不必要的导入，因此需要避免使用`*`号导入。IDEA设置自动导包自动使用`*`同包数量：`File -> New Projects Setup -> Settings for New Projects... -> Editor -> Code Style -> Java -> Imports`，进入界面后将`Class count to use import whith '*'`和`Names count to use static import whith '*'`改为一个几乎不可能达到的数字（一般直接改为9999😅），然后保存即可。
+
+**注意：一定要在`Settings for New Projects...`中设置，不然你重新打开一个项目又恢复默认你了，所有需要全部项目生效的设置都在这里设置一遍。**
+
+:::
+
+#### `final`关键字
+
+final，翻译成中文就是`最终的`，即不可变，在Java中，`final`关键字可以修饰方法、类和变量：
+
+* 方法：表名该方法是最终方法，不能被重写
+* 类：表名该类是最终类，不能被继承
+* 变量：声明常量，只能被赋值一次（注意是赋值指向值的指向不可变，对于引用数据类型，赋值的地址不可变，但是地址对应的引用数据类型自身是可变的，例如指向一个对象，那么这个指向确实不可变，但是可以调用这个对象本身的成员变量/成员方法修改自身属性）
+
+常量：实际开发中，一般作为系统的配置信息，方便维护，提高可读性，并且常量有自己的命名规范：单词全部大写，单词之间用下划线`_`隔开。
+
+细节：
+
+* `final`修饰的变量是基本类型，那么变量存储的数据值不能发生改变；
+* `final`修饰的变量是引用类型，那么变量存储的地址值不能发生改变，对象内部的可以改变。 
+
+:::info 说明
+**① 字符串不可变的原因：`java.lang.String`类使用了字节数组存储字符串内容，该字节数组使用了`final`关键字进行修饰：`private final byte[] value;`；**
+
+**② 在项目中，一般会用`Constants.java`这个类定义全局常量，定义格式：`public static final 数据类型 常量名 = 常量值;`，使用：`Constants.常量名`；**
+
+**③ 项目中的每个类中获取日志对象时，也常用`final`关键字：`private static final Logger logger = LogManager.getLogger(当前类名.class);`。**
+:::
+
+#### 权限修饰符
+
+权限修饰符就是用来控制一个成员能够被访问的范围的，可以用来修饰成员变量、方法（包括构造方法）、内部类。
+
+权限修饰符有四种，作用范围从小到大依次是：`private < default（空着不写，缺省/默认） < protected < public`。
+
+|   修饰符    | 同一个类中 | 同一个包中其他类 | 不同包下的子类 | 不同包下无关类 |
+| :---------: | :--------: | :--------------: | :------------: | :------------: |
+|  `private`  |     ✓      |                  |                |                |
+|  空着不写   |     ✓      |        ✓         |                |                |
+| `protected` |     ✓      |        ✓         |       ✓        |                |
+|  `public`   |     ✓      |        ✓         |       ✓        |       ✓        |
+
+* `private`：只能自己用
+* `default`：只能本包中使用
+* `protected`：其他包中的子类也能用
+* `public`：公共的
+
+使用规则：实际开发中，一般只用`private`和`public`。
+* 成员变量私有
+
+* 方法公开
+
+* <span id="6-11-权限修饰符-共性代码">特例</span>：如果方法中的代码是抽取其他方法中共性代码，这个方法一般也私有
+  
+  例如在类的方法中，如果有多个需要暴露到外界使用的方法都有相同的代码逻辑，那么这部分代码就称之为共性代码。共性代码一般会被抽取出来，封装成一个私有方法，供类中的其他方法调用。（因为这相当于类中方法的一部分，不希望暴露到外界被其他地方调用）
+
+:::info Tips
+在实际开发中，其实并没有那么统一的标准，大多根据项目功能开发需求和语言特性，自由发挥使用，尽量避免屎山代码的形成即可。
+:::
+
+#### 代码块
+
+代码块：在类中，使用`{}`括起来的代码，称为代码块。
+
+根据代码块出现的位置不同，可以将代码块分为三类，分别是出现在方法中的局部代码块、方法外类里面的构造代码块以及使用`static`关键字修饰的静态代码块。
+
+局部代码块：写在方法中的`{}`，用于限制变量的生命周期，定义的变量只在该代码块中有效，出了代码块就释放内存。其最为本质的作用就是节约内存，秉承用完内存立马回收的思想，但是随着计算机硬件的发展，内存的成本逐步降低，现在基本不用这个技术了。
+
+```java
+public class LocalCodeBlockDemo {
+    public static void main(String[] args) {
+        {
+            int a = 10;
+            System.out.println(a);
+        }
+        System.out.println(a); // Cannot resolve symbol 'a'
+    }
+}
+```
+
+构造代码块：写在类中的`{}`下的代码片段，一般用于存放构造方法中重复的代码，执行时机为每次创建对象时，在构造方法执行之前。这个特性由于其灵活性等原因，现在已经基本不常用了。
+
+```java
+public class ConstructorCodeBlockDemo {
+    private String name;
+    private int age;
+
+    // 构造代码块
+    {
+        System.out.println("这是构造代码块");
+    }
+    public ConstructorCodeBlockDemo() {
+        System.out.println("这是无参构造方法");
+    }
+    public ConstructorCodeBlockDemo(String name, int age) {
+        this.name = name;
+        this.age = age;
+        System.out.println("这是有参构造方法");
+    }
+}
+```
+
+静态代码块：使用`static`关键字修饰的代码块（格式：`static { ... }`），一般用于初始化静态变量，随着类的加载而加载，并且自动触发，**只执行一次**。这个特性在项目中的应用十分广泛，例如在项目中，我们可以使用静态代码块来初始化数据库连接池、加载配置文件等。
+
+```java
+public class StaticCodeBlockDemo {
+    public static void main(String[] args) {
+        System.out.println(StaticCodeBlock.count);
+    }
+}
+
+class StaticCodeBlock {
+    // 静态变量
+    private static int count = 0;
+
+    // 静态代码块
+    static {
+        System.out.println("这是静态代码块");
+        count = 100;
+    }
+}
+```
+
+“只执行一次”是静态代码块的重要特性，也是某些数据的的初始化不能写在`main`方法中的原因（因为只要是方法，就有被重复调用的可能，包括`main`方法）。
+
+### 6.12 抽象类和抽象方法
+
+在之前的面相对象三大特征中，我们首先提出了继承来解决代码重复的问题，继承算是解决了属性复用的问题，但是方法复用过程中又出现了新的问题，即父类中的方法不能满足所有子类需求，于是又设计了方法重写的概念，但是方法重写只是一种软性的规定，即在使用过程中即使不重写方法也不会报错，加之前面说的父类方法不能穷尽子类方法需求的问题，于是引入了抽象的概念。
+
+> 说明：抽象也算是面向对象的特性
+
+可以说，类是对事物的抽象，抽象类则是对类的抽象，对类行为（方法）的规定。
+
+抽象方法：将**共性的**行为（方法）抽取到父类之后，由于每一个子类执行的内容是不一样的（该行为在每个子类中必须要有），父类中不能确定具体的方法体，该方法就可以定义为抽象方法。
+* 定义格式：`public abstract 返回值类型 方法名(参数列表);`，没有方法体，方法权限修饰符要确保在子类中能继承到该方法（不能是`private`）
+
+抽象类：如果一个类中存在抽象方法，那么该类就必须声明为抽象类。
+* 定义格式：`public abstract class 类名 { ... }`，抽象类中可以包含抽象方法和非抽象方法。
+
+抽象里和抽象方法的注意事项：
+* 抽象类不能实例化（不能创建对象），只能被继承。
+* 抽象类中不一定有抽象方法，但是有抽象方法的类一定是抽象类。
+* 可以有构造方法（给子类调用）。
+* 抽象类的子类要么重写抽象类中的所有抽象方法，要么声明为抽象类。
+
+抽象类和抽象方法的意义：在多人协作的项目中，对类的行为（包括方法名）进行统一强制规定，避免了多人协作过程中忘记实现某种行为的情况以及对同一行为的方法命名迥异的情况。
 
 ### 6.13 接口
 
+在有了面向对象的三大特征以及抽象的概念后，实际使用过程中出现了一种情况，就是在规定的诸多类中，有许多**不同的**类（不是同一个父类）之间却存在着相同的一些列的行为（方法），并且这些行为是每一个类都必须要拥有的，但是由于项目是多人协作，在开发过程中每个人每次分配到的需求不一，这一些列的方法不一定都能记得去一一实现，并且即使是同一个方法，每个人每次的命名也不一定能够统一，这给方法的调用带来一定负担。由于只能继承一个类的特性，这些方法又不能定义在另一个抽象类之中，于是就引入了接口的概念来解决这一个问题。
+
+与抽象类不同，抽象类是对类的抽象，接口是对行为的抽象，抽象类中定义了同一种（同一个继承体系）类必须要有的行为，而接口中则是定义不同类中必须要有的行为。
+
+#### 接口的基本使用
+
+接口的定义和使用：
+
+* 接口用关键字`interface`来定义：`public interface 接口名 {}`
+* 接口不能实例化
+* 接口和类之间是实现关系，通过`implements`关键字表示：`权限修饰符 class 类名 implements 接口1, 接口2... {}`
+* 接口的实现类要么重写接口中所有的抽象方法，要么是抽象类
+* 实现和继承可以同时存在
+
+#### 接口中成员的特点
+
+* 成员变量：只能是常量，默认修饰符`public static final`（默认，就算你没写，Java也会自动给你加上），因为接口是一种规则，规则是不能改变的，所以只能是常量。
+
+  ```java
+  public class InterfaceDemo {
+      public static void main(String[] args) {
+          System.out.println(InterF.a); // 10
+          InterF.a = 20; // Cannot assign a value to final variable 'a'
+      }
+  }
+  
+  public interface InterF {
+      int a = 10;
+  }
+  ```
+
+* 构造方法：没有构造方法，因为接口是行为的规则，不能创建对象也不需要给实现类初始化成员变量，所以没有给接口设计构造方法。
+
+* 成员方法：只能是抽象方法，默认修饰符为`public abstract`（默认，就算你没写，Java也会自动给你加上）。
+
+  ① JDK7及以前，接口中只能定义抽象方法；
+
+  ② JDK8新特性：接口中可以定义有方法体的方法`default`和`static`，可以定义方法的默认实现以及静态方法；
+
+  ③ JDK9新特性：接口中可以定义私有方法。
+
+> ① 接口中，所有方法前面的`public abstract`都可以省略，项目开发过程中都是不会去写这部分内容的，所以其格式可以归结为`返回值类型 方法名(参数列表);`。
+>
+> ② 在IDEA中，编写实现类时，在写完要实现的接口时会出现编译报错，此时按下`Ctrl+I`（macOS为`Command+I`）即可快速呼出方法重写弹窗，窗口中会列出所有还需要重写的方法，选中即可快速生成空实现方法。
+
+#### 接口和类之间的关系
+
+* 类和类的关系：继承关系，只能单继承，不能多继承，但是可以多层继承。
+* 类和接口的关系：实现关系，可以单实现，也可以多实现，还可以在继承一个类的同时实现多个接口，如果多个接口中有同名方法，则只需要重写一次即可。
+* 接口和接口的关系：继承关系，可以单继承，**也可以多继承**。
+
+#### 接口扩展
+
+接口新增特性：
+
+* JDK8新增的有默认实现的接口方法：有默认实现的方法，使用关键字`default`修饰，一般用于解决接口升级又不需要在所有实现类中去实现或者调用的情况，又或者所有实现类对于该的方法体都完全一致的情况，格式为`default 返回值类型 方法名(参数列表) { 方法体 }`。
+
+  注意事项：① 默认方法不是抽象方法，所以不强制重写，但是如果重写，重写的时候不需要`default`关键字。
+
+  ② 如果实现的多个接口中，有同名的`default`方法，那么实现类就必须重写该方法。
+
+* JDK8新增的接口中可以定义静态方法：接口中定义静态方法与类中的静态方法一样，需要用`static`关键字修饰，格式为`public static 返回值类型 方法名(参数列表) { 方法体 }`。
+
+  注意事项：① 静态方法只能通过接口名去调用，不能通过实现类名或者实现类的对象名去调用。
+
+  ② `public`关键字可以省略，`static`关键字不可以省略。
+
+* JDK9开始，接口中可以定义私有方法：其实在接口中定义私有方法的目的与前文[权限修饰符](#权限修饰符)中所述的**[共性代码](#6-11-权限修饰符-共性代码 "共性代码")**的目的一致，因为静态方法的存在，所有也和普通类一样，包含静态私有方法。
+
+接口的应用：
+
+* 接口代表规则，是行为的抽象，想要让哪个类拥有一个行为，就让这个类事项对应的接口就可以了。
+* 当一个方法的参数是接口时，可以传递接口所有实现类的对象，这种方式称之为接口多态，接口多态的引用于继承多态的应用一致。
+
+#### 适配器模式
+
+设计模式（Design pattern）：是一套反复使用、多数人知晓的、经过分类编目的、代码设计经验总结。使用设计模式是为了可重用代码、让代码更容易被他人理解、保证代码可靠性、程序的重用性。
+
+适配器设计模式：解决接口于接口实现类之间的矛盾问题。[见23种设计模式-适配器模式](../common/important/23种设计模式.md#13、适配器模式)
+
+问题：一个接口中抽象方法太多，而实际使用只需要其中一部分方法，但是由于接口必须全部实现的限制，需要在实现类中对一些方法做空实现，造成代码可读性下降，代码结构复杂等问题。
+
+解决：
+
+1. 编写中间类`XxxAdapter`实现对应接口；
+2. 对接口中的抽象方法进行空实现；
+3. 让真正的实现类继承中间类，重写实际需要使用到的方法；
+4. 为了避免其他类去创建适配器类对象，中间的适配器类使用`abstract`关键字修饰。
+
 ### 6.14 内部类
 
+内部类：类的五大成员之一（五大成员：属性、方法、构造方法、代码块、内部类），在一个类中再定义另一个类即为内部类。内部类表示的是外部类的一部分，内部类单独出现没有任何意义。（Tips：我的开发印象中，内部类在定义一些前端接收的JSON数据时，为了保持结构一致并且方便类的管理时使用过）
+
+内部类的访问特点：
+
+* 内部类可以直接访问外部类的成员，包括私有（类内部）；
+* 外部类要访问内部类的成员，必须创建对象。
+
+以下为一个内部类使用样例：
+
+```java
+public class InnerClassDemo {
+    public static void main(String[] args) {
+        Car car = new Car("BMW", 2010, "red", "V8", 20); // 要想在外面使用内部类，需要给内部类加static关键字修饰
+        car.show(); // Car{carName='BMW', age=2010, color='red', engine=Engine{name='V8', age=20}}
+    }
+}
+
+/**
+ * 类描述：内部类演示对象
+ *
+ * @author Triabin
+ * @date 2020-10-03 16:08:38
+ */
+public class Car {
+    /**
+     * 车名
+     */
+    private String carName;
+    /**
+     * 使用年限
+     */
+    private int age;
+    /**
+     * 车辆颜色
+     */
+    private String color;
+    /**
+     * 引擎
+     */
+    private Engine engine;
+
+    /**
+     * 类描述：发动机引擎
+     */
+    static class Engine {
+        /**
+         * 引擎名称
+         */
+        private String name;
+        /**
+         * 引擎使用年限
+         */
+        private int age;
+
+        public Engine() {
+        }
+
+        public Engine(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        @Override
+        public String toString() {
+            return "Engine{" +
+                    "name='" + name + '\'' +
+                    ", age=" + age +
+                    '}';
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Engine setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public Engine setAge(int age) {
+            this.age = age;
+            return this;
+        }
+
+        public void show() {
+            System.out.println(this);
+        }
+    }
+
+    public Car() {
+    }
+
+    public Car(String carName, int age, String color) {
+        this.carName = carName;
+        this.age = age;
+        this.color = color;
+    }
+
+    public Car(String carName, int age, String color, String engineName, int engineAge) {
+        this(carName, age, color);
+        this.engine = new Engine(engineName, engineAge);
+    }
+
+    @Override
+    public String toString() {
+        return "Car{" +
+                "carName='" + carName + '\'' +
+                ", age=" + age +
+                ", color='" + color + '\'' +
+                ", engine=" + engine +
+                '}';
+    }
+
+    public String getCarName() {
+        return carName;
+    }
+
+    public Car setCarName(String carName) {
+        this.carName = carName;
+        return this;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public Car setAge(int age) {
+        this.age = age;
+        return this;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public Car setColor(String color) {
+        this.color = color;
+        return this;
+    }
+
+    public Engine getEngine() {
+        return engine;
+    }
+
+    public Car setEngine(Engine engine) {
+        this.engine = engine;
+        return this;
+    }
+
+    public void show() {
+        System.out.println(this);
+    }
+}
+
+```
+
+内部类的分类：根据类位置的不同以及功能作用的差异内部类可以分为成员内部类、静态内部类、局部内部类和匿名内部类，在实际的使用过程中，前三种几乎不用我们自己手动写，匿名内部类则在开发过程中会经常用到。
+
+#### 成员内部类
+
+成员内部类写在成员位置，属于外部类的成员，例如前面案例中`Car`类的内部类`Engine`。
+
+成员内部类可以被一些修饰符修饰，比如`private`、`默认`、`protected`、`public`、`static`等，只要可以用来修饰成员变量的，都可以用来修饰成员内部类。当然，一旦使用`static`进行修饰以后，就不叫成员内部类了，而是叫做静态内部类。
+
+在成员内部类中，JDK16之前是不能定义静态变量的，JDK16开始才可以定义静态变量。
+
+获取成员内部类对象：
+
+* 在外部类编写方法，对外提供内部类的对象：在外部类创建对外暴露的成员方法，方法返回该内部类对象实例即可。
+* 直接创建格式：`外部类名.内部类名 对象名 = 外部类对象.内部类对象;`，示例：`Outer.Inner inner = new Outer().new Inner();`
+
+:::info Tips
+
+① Java打印地址值的时候，如果是内部类，地址值为以下格式：`外部类名$内部类名@地址值`，这也是之前命名规范中不建议使用美元符号命名的原因之一。
+
+② 使用`private`关键字修饰的内部类外部无法直接访问，需要跟私有属性一样，提供对外暴露的方法使用内部类。
+
+:::
+
+成员内部类访问外部类：
+
+```java
+public class FieldInnerClassDemo {
+    public static void main(String[] args) {
+        Outer.Inner inner = new Outer().new Inner();
+        inner.show();
+    }
+}
+
+class Outer {
+    private int a = 10;
+    
+    class Inner {
+        private int a = 20;
+        
+        public void show() {
+            int a = 30;
+            System.out.println(a); // 30
+            System.out.println(this.a); // 20
+            System.out.println(Outer.this.a); // 10
+        }
+    }
+}
+```
+
+内存分析：
+
+![image-20260103173029787](https://gitee.com/triabin/img_bed/raw/master/2026/01/03/83747366ff930cd5e29ab98a566c5cd7-image-20260103173029787.png)
+<div style="clear: both;"></div>
+
+* JVM将`Test.class`字节码文件加载到方法区，开始执行该文件夹，将`main`方法加载到栈内存，开始执行；
+* `main`方法第一行，需要用到`Outer.class`和`Outer$Inner.class`等字节码文件，将它们分别加载到方法区，然后在栈空间中定义一个类型为`Inner`，名为`oi`的变量；然后在堆空间中开辟一块空间用于存储`Outer`类对象，假设地址为`001`，成员变量为`a`，默认初始化为0，然后再进行字面量初始化为10；再在堆空间中开辟一块内存区域用于存储`Inner`对象，假设地址为`002`，成员变量为`a`，默认值为0，字面量初始化后值为20；然后再在该对象内初始化一个类型为`Outer`的`this`指向前面开辟的`Outer`对象所在内存地址`001`；最后将`Inner`对象所在地址`002`返回并赋值给栈内存中的`oi`；
+* `main`方法第二行，调用`oi`对象的`show()`方法，方法入栈，开始执行；
+* `show`方法第一行，在栈内存中定义局部变量`a`并给它赋值为30；
+* `show`方法第二行，打印变量`a`的值，由于就近原则，直接取局部变量`a`的值30；
+* `show`方法第三行，打印`this.a`，由于`show`方法的调用者为`Inner`类对象`oi`，所以`this`指向`002`，所以此处`a`的值为`oi`的成员变量，值为20；
+* `show`方法第四行，打印`Outer.this.a`，由于在堆空间中开辟`Inner`对象内存空间时，在该对象中初始化了一个`Outer`的`this`指向外部类，所以这里的`a`为外部类中的成员变量，值为10；
+* `show`方法`mian`方法相继执行完毕，方法出栈，程序运行结束。
+
+#### 静态内部类
+
+静态内部类中的一种，算是一种特殊情况，当成员内部类前面使用`static`关键字修饰，该成员内部类就称为静态内部类。静态内部类只能访问外部类中的静态变量和静态方法，如果想要访问非静态的需要创建对象。
+
+创建静态内部类对象的格式：`外部类名.内部类名 变量名 = new 外部类名.内部类名();`；
+
+调用非静态方法的格式：先创建对象，对象调用；
+
+调用静态方法的格式：`外部类名.内部类名.方法名(参数列表);`
+
+#### 局部内部类
+
+将内部类定义在方法里面就叫做局部内部类，类似于方法里面的局部变量；
+
+外接无法直接使用，需要在方法内部创建对象并使用；
+
+该类可以直接访问外部类的成员，也可以访问方法内的局部变量。
+
+#### 匿名内部类
+
+匿名内部类本质就是隐藏了名字的内部类，格式为：`new 类名或者接口名 { 重写方法; }`，这当中包含了三个部分，继承/实现、方法重写、创建对象。
+
+举例：有一个接口`Inter`，它有一个抽象方法名为`show()`，那么使用匿名内部类可以直接写成`new Inter() { 直接写重写方法 }`，对于一些接口/父类的直接使用（只用一次）的场景，不需要额外再去新建一个实现类，可以在使用的地方利用匿名内部类直接实现。
+
+代码演示：
+
+```java
+public class AnonymousInnerClassDemo {
+    public static void main(String[] args) {
+        Swim swim = new Swim() {
+            @Override
+            public void swim() {
+                System.out.println("在匿名内部类中重写了swim方法");
+            }
+        };
+        swim.swim();
+    }
+}
+
+public interface Swim {
+    void swim();
+}
+```
+
+`new 接口名()`后面的花括号中的内容就是那个“没有名字的类”的内容，这些匿名内部类在编译后都会被虚拟机赋予一个名字，字节码文件为`外部类名$数字序号.class`，其内容为常规的实现类编译后的样子。
+
+使用场景：当方法的参数是接口或者类时，以几口为例，可以传递这个接口的实现类对象，如果实现类只要使用一次，就可以使用匿名内部类简化代码。
+
 ## 7、Lambda表达式和方法引用
+
+### 7.1 Lambda表达式
+
+上一章节匿名内部类中的使用，可以使用Lambda表达式进一步简化代码：
+
+```java
+public class AnonymousInnerClassDemo {
+    public static void main(String[] args) {
+        // Swim swim = () -> {
+        //     System.out.println("在匿名内部类中重写了swim方法");
+        // };
+        // 或
+        Swim swim = () -> System.out.println("在匿名内部类中重写了swim方法");
+        swim.swim();
+    }
+}
+
+public interface Swim {
+    void swim();
+}
+```
+
+这就是Lambda表达式的应用。
+
+#### 函数式编程
+
+函数式编程（Functional programming）是一种思想特点。在面向对象中，要做一件事情，首先是先找到对应的对象，然后再让对象去做事情。而函数式编程的思想，则是忽略面向对象复杂的语法，只强调做什么，而不是谁去做。可以简单的理解为我在乎的只有接口里面的方法逻辑，而不是谁去实现了这个接口。
+
+Lambda表达式就是在Java中函数式编程思想的具体实现。
+
+#### Lambda表达式的标准格式
+
+Lambda是JDK8新加入的特性，它由`()`、`->`和`{}`三部分组成：
+
+* `()`：对应方法的形参
+* `->`：固定格式
+* `{}`：对应方法体，当方法体只有一行代码时，可省略
+
+注意点：
+
+* Lambda表达式可以用来简化匿名内部类的书写
+* Lambda表达式只能简化**函数式接口**的匿名内部类的写法
+* 函数式接口：有且仅有一个抽象方法的接口叫做函数式接口，接口上方可以加`@FunctionalInterface`注解验证，如果报错就不是函数式接口
+
+#### Lambda表达式的省略写法
+
+神略核心：可推导，可省略。（凡是可以推导出来的东西，都可以省略）
+
+Lambda的省略规则：
+
+* 参数类型可以省略不写；
+* 如果只有一个参数，参数类型可以省略，`()`也可以省略；
+* 如果Lambda表达式的方法体只有一行，大括号、分号，`return`可以省略不写，需要同时省略。
+
+```java
+import java.util.Arrays;
+import java.util.Comparator;
+
+public class LambdaDemo {
+    public static void main(String[] args) {
+        // Lambda省略规则演示，以Arrays自带的排序方法为例
+        Integer[] arr = { 3, 5, 4, 1, 6, 2 };
+
+        // 原生写法
+        Arrays.sort(arr, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1 - o2;
+            }
+        });
+
+        // Lambda表达式
+        Arrays.sort(arr, (Integer o1, Integer o2) -> {
+            return o1 - o2;
+        });
+        
+        // 省略参数类型
+        Arrays.sort(arr, (o1, o2) -> {
+            return o1 - o2;
+        });
+        
+        // 省略括号略
+        
+        // 只有一行，省略大括号、分号、return关键字
+        Arrays.sort(arr, (o1, o2) -> o1 - o2);
+    }
+}
+```
+
+:::info Tips
+
+函数式编程思想是JDK8才引入的的，为此，JDK8还提供了一些函数式接口来供方便我们更好地在Java开发中使用函数式编程，详见[Java四大函数式编程接口](./random-notes/Java四大函数式编程接口)。在实际开发中，熟悉了函数式编程后，就会觉得Lambda表达式非常好用，但是在刚开始接触开发的时候，往往意识不到哪些地方该使用函数式编程。以我的经验来看，**只要觉得某个地方传递的参数实际上是函数**，就立马考虑是否使用函数式编程，一使用函数式编程，就先看看在Java提供的四大函数式编程接口中，是否有现成可用的接口，避免自己重复创建函数式接口。四大函数式编程接口基本涵盖了80%以上的使用场景了，极少需要自己手动创建这样的接口。
+
+:::
+
+### 7.2 方法引用
+
+方法引用：把已有的方法拿过来用，当做函数式接口中抽象方法的方法体。
+
+#### 方法引用的基本使用
+
+方法引用的要求：
+* 引用处必须是函数式接口
+* 被引用的方法必须已经存在
+* 被引用方法的形参和返回值需要跟抽象方法保持一致
+* 被引用方法的功能要满足当前需求
+
+下面通过一个方法引用的实际使用案例来说明如何使用方法引用：
+
+```java
+import java.util.Arrays;
+import java.util.Comparator;
+
+public class MethodRefDemo {
+    public static void main(String[] args) {
+        // 创建一个数组，进行倒序排序
+        Integer[] arr = { 3, 5, 4, 1, 6, 2 };
+        System.out.println("原数组：" + Arrays.toString(arr));
+
+        // 原生写法
+        Arrays.sort(arr, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2 - o1;
+            }
+        });
+
+        // Lambda表达式
+        Arrays.sort(arr, (Integer o1, Integer o2) -> {
+            return o2 - o1;
+        });
+        
+        // Lambda表达式简化格式
+        Arrays.sort(arr, (o1, o2) -> o2 - o1);
+
+        // 方法引用
+        Arrays.sort(arr, MethodRefDemo::subtact);
+
+        System.out.println("倒序后：" + Arrays.toString(arr));
+    }
+
+    // 可以是Java自带的，也可以是第三方的
+    public static int subtact(int num1, int num2) {
+        return num2 - num1;
+    }
+}
+```
+
+在上述排序的案例中，`MethodRefDemo::subtact`表示引用`MethodRefDemo`类中的`subtact`方法来作为`Arrays.sort`方法第二个参数的接口中抽象方法的方法体。（`::`是方法引用符）
+
+方法引用的分类：方法引用可以分为引用静态方法、引用成员方法和引用构造方法，其中，引用成员方法还可以细分为应用其他类的成员方法、引用本类的成员方法和引用父类的成员方法。
+
+#### 引用静态方法
+
+格式：`类名::静态方法名`，例`Integer::parseInt`。
+
+#### 引用成员方法
+
+格式：`对象::成员方法名`，例`System.out::println`。
+* 其他类：`其他类对象::方法名`
+* 本类：`this::方法名`
+* 父类：`super::方法名`
+
+注意：本类和父类的方法引用使用过程中，方法引用处不能是静态方法内，因为静态方法中没有`this`，如果非要在静态方法中使用，那么只能新建一个对象来完成方法引用。
+
+#### 引用构造方法
+
+格式：`类名::new`，例`Random::new`。
+
+练习：集合里面存储姓名和年龄，比如：张无忌，15，要求：将数据封装成`Student`对象并收集到`List`集合中。
+
+题解：
+
+```java
+// 学生类设计
+package com.triabin.ideasy_server;
+
+/**
+ * 类描述：学生类
+ *
+ * @author Triabin
+ * @date 2020-10-04 00:36:40
+ */
+public class Student {
+    /**
+     * 学生姓名
+     */
+    private String name;
+
+    /**
+     * 学生年龄
+     */
+    private int age;
+
+    public Student() {}
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public Student(String strItem) {
+        String[] items = strItem.split("，");
+        this.name = items[0];
+        this.age = Integer.parseInt(items[1]);
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Student setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public Student setAge(int age) {
+        this.age = age;
+        return this;
+    }
+}
+```
+
+```java
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class StudentSeloution {
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>();
+        Collections.addAll(list, "张无忌，15", "赵敏，18", "周芷若，16", "张三丰，107", "周伯通，19", "张翠山，36");
+        List<Student> students = list.stream()
+                .map(Student::new)
+                .toList();
+        System.out.println(students);
+    }
+}
+```
+
+说明：
+①`list.stream()`意为将`list`集合转换为一个流，流是Java8中新增的一个概念，它可以对集合中的元素进行操作，例如筛选、映射、排序等。可以理解为它能将一个可迭代对象中的元素放到流水线上然后通过流式调用的方式可以对这些流水线上的元素进行操作。这里只做一个简单介绍，后续章节再详细学习。
+
+② `流.map(Function<T,R>)`，这个`map`方法接收一个`Function<T,R>`函数式接口作为参数，用于将接受到的`T`类型参数转换为`R`类型参数。（详见[Java四大函数式编程接口](./random-notes/Java四大函数式编程接口)），将`List<String>`转为流之后调用`map`方法时可以就可以将流水线上的每个元素按照提供的`Function<T,R>`函数式接口中的抽象方法进行转换，将每个元素转换为`Student`对象。
+
+#### 其他调用方式
+
+**使用类名引用成员方法**，格式：`类名::成员方法`，例`String::substring`。
+
+> 题目：集合里面有一些字符串，将它们变成大写后输出。
+>
+> ```java
+> import java.util.ArrayList;
+> import java.util.Collections;
+> import java.util.List;
+> 
+> public class MethodRefDemo {
+>     public static void main(String[] args) {
+>         List<String> list = new ArrayList<>();
+>         Collections.addAll(list, "aaa", "bbb", "ccc", "ddd");
+>         
+>         list.stream().map(String::toUpperCase).forEach(System.out::println);
+>     }
+> }
+> ```
+
+从上面的案例可以看到，`类名::方法名`这样的方式调用到了`String`类中的成员方法`public String toUpperCase()`（注意不是静态方法）。这种方法引用其实是根据函数式接口中抽象方法的第一个参数决定的，必须是该抽象方法参数列表中的**第一个参数**所属类的成员方法才可以这样调用。
+
+上述案例中，`map`的函数式接口`Function<T,R>`的抽象方法`apply(T t)`接收的第一个参数`T`是`String`，而`toUpperCase`是`String`的成员方法，所以可以这么调用。
+
+注意：成员方法的参数列表需要与所需接口的抽象方法参数列表中第二个参数到最后一个参数保持一致，如果只有一个参数，那么成员方法为无参。
+
+**引用数组的构造方法**，格式：`数据类型[]::new`，例`int[]::new`。
+
+> 题目：集合中存储一些整数，收集到数组中。
+>
+> ```java
+> import java.util.Arrays;
+> import java.util.Collections;
+> import java.util.List;
+> 
+> public class MethodRefDemo {
+>     public static void main(String[] args) {
+>         List<Integer> list = new ArrayList<>();
+>         Collections.addAll(list, 1, 2, 3, 4, 5);
+>         // Integer[] arr = list.toArray(new IntFunction<Integer[]>() {
+>         //     @Override
+>         //     public Integer[] apply(int value) {
+>         //         return new Integer[0];
+>         //     }
+>         // });
+>         // 改为使用方法引用
+>         Integer[] arr = list.toArray(Integer[]::new);
+>         System.out.println(Arrays.toString(arr));
+>     }
+> }
+> ```
+>
+> 注意：数组的类型需要跟流中的类型保持一致。
 
 ## 8、API&字符串
 
