@@ -1199,6 +1199,8 @@ public class MethodDemo {
 }
 ```
 
+> 说明：对于JavaSDK中，使用`native`关键字修饰的方法是没有方法体的，因为它是调用其他语言来实现的。
+
 ## 6、面向对象
 
 面向对象思想（Object Oriented）是一种以对象为核心的程序设计范式，其核心要素包括对象封装、类划分、继承机制及消息传递机制，要求程序系统直接映射现实世界的问题域结构。
@@ -3104,7 +3106,7 @@ public class StringDemo {
   
   这四种方式，前两种几乎不用，第三种一般用于变更字符串的场景，第四种则在网络编程中有较为广泛的应用，在网络环境中传输的数据一般都是字节信息，包括字符串，在将字节信息转为字符串时，就需要用到这个构造方法。
 
-字符串对象创建的内存模型：目前为止，关于Java的内存模型，已经了解了栈内存、堆内存以及方法区三个逻辑分区，而通过**直接使用双引号字面量赋值的字符串**都存在一个新的分区中——`StringTable`（串池，或者字符串常量池），这个分区在JDK7之前是独立的，但是从JDK7开始，这个分区被挪到了堆内存中，但是其核心逻辑并没有变更。
+字符串对象创建的内存模型：目前为止，关于Java的内存模型，已经了解了栈内存、堆内存以及方法区三个逻辑分区，而通过**直接使用双引号字面量赋值的字符串**都存在一个新的分区中——`StringTable`（串池，或者字符串常量池），这个分区在JDK7之前是独立的，但是从JDK7开始，这个分区被挪到了堆内存中，但是其核心逻辑并没有改变。
 
 串池工作原理：当通过双引号字面量直接赋值的方式创建字符串对象的时候，JVM会先检查串池中是否存在该字符串，如果存在直接返回该字符串地址，不存在则创建一个字符串再返回其地址。
 
@@ -3402,6 +3404,7 @@ public class StringDemo {
 ### 9.1 集合的基本使用
 
 <img src="https://yanglukuan.github.io/images/arrayList/Collections.png" alt="Java集合框架" align="left" />
+
 <div style="clear: both;"></div>
 
 在Java中，所有集合均实现自接口`java.util.Collection`，并且默认实现了很多种集合，每种集合都有其各自功能和特点，在节中，首先学习使用以后应用最广泛集合之一的`java.util.ArrayList`。
@@ -3523,16 +3526,774 @@ public class CollectionDemo {
 
 ## 10、常用API
 
-## 11、Stream流
+Java写好的各种功能的Java类，不需要刻意记忆，只需要记得类名和类的作用即可，需要的时候再通过API文档去查询即可。
 
-## 12、异常
+### 10.1 Math
 
-## 13、File
+`java.lang.Math`是一个专门用于数学计算的**工具类**，构造方法私有化，所有类都是静态的，对外使用的成员变量也定义为了常量。（自然对数的基数`E`和圆周率`PI`）
 
-## 14、IO流
+`Math`类的常用方法：
 
-## 15、多线程&JUC
+|                     方法名                     |                  说明                  |
+| :--------------------------------------------: | :------------------------------------: |
+|         `public static int abs(int a)`         |            获取参数的绝对值            |
+|     `public static double ceil(double a)`      |                向上取整                |
+|     `public static double floor(double a)`     |                向下取整                |
+|       `public static int round(float a)`       |                四舍五入                |
+|     `public static int max(int a, int b)`      |          获取两个数中的较大值          |
+| `public static double pow(double a, double b)` |              返回$a^{b}$               |
+|        `public static double random()`         | 返回范围为`[0.0, 1.0)`的`double`随机值 |
 
-## 16、网络编程
+使用说明：
 
-## 17、反射
+* 使用`public static int abs(int a)`时，如果传入-2147483648（`int`类型的最小值），由于`int`型的数值最大值为2147483647，该方法将会失效。如果要避免这样的问题，可以使用`public static int absExact(int a)`代替（JDK15新特性），使用该方法，如果传入了`int`最小值，它将会报错`ArithmeticException`，源码：
+
+  ```java
+  public static int absExact(int a) {
+      if (a == Integer.MIN_VALUE)
+          throw new ArithmeticException(
+              "Overflow to represent absolute value of Integer.MIN_VALUE");
+      else
+          return abs(a);
+  }
+  ```
+
+* `public static double ceil(double a)`功能为数值大小进一，在项目中一般用于类似文件分块这种场景，例如一个文件传输过程中，打算对文件进行分块传输，每个文件块为128MB，对于要传输的文件，你是无法保证其大小始终是128MB的整数倍的，所以需要对`fileSize / blockSize`的结果进行向上取整。
+
+* 对于`public static int max(int a, int b)`，很自然的提供了一个功能相反的方法`public static int min(int a, int b)`。
+
+* 对于`public static double pow(double a, double b)`的使用，一般利用数学的变换将指数转换为一个大于等于1的正整数传入；对开根号，`Math`类提供了`public static double sqrt(double a)`方法来开平方，`public static double cbrt(double a)`来开立方。
+
+* `public static double random()`方法本质上底层使用的也是`Random`类，可能是为了与其他语言保持一致，也有可能是为了`Math`类的完整性，但是它获取整数范围内的数值比较麻烦，例如获取`[10, 90]`之间的数值：`Math.floor(Math.random() * (90 - 10 + 1)) + 10`，解析，`[0, 1)`乘以`90 - 10 + 1`得到`[0, 81)`，向下取整得到`[0, 80]`，再加10，得到范围`[10, 90]`，所以得到如果要取正数区间`[min, max]`之间的随机整数，公式为`Math.floor(Math.random() * (max - min + 1) + min)`。如果是取`[0, max]`则可简化为`Math.floor(Math.random() * (max + 1))`。如果使用`java.util.Random`类取`[0, max]`则可以直接`random.nextXxx(max)`（`Xxx`为具体的基本数据类型），取`[min, max]`则可以使用公式`random.nextXxx(max - min + 1) + min`，推导原理是一样的。
+
+### 10.2 System
+
+`java.lang.System`也是一个工具类，提供了一些与系统相关的方法。
+
+常用方法：
+
+|                            方法名                            |           说明           |
+| :----------------------------------------------------------: | :----------------------: |
+|            `public static void exit(int status)`             | 终止当前运行的Java虚拟机 |
+|       `public static native long currentTimeMillis()`        | 返回当前系统时间的毫秒值 |
+| `public static native void arraycopy(Object src, int srcPos, Object dest, int destPos, int length)` |         数组拷贝         |
+
+使用说明：
+
+* `public static void exit(int status)`，状态码`status`为0说明虚拟机是正常停止，非0（一般传1）说明虚拟机异常停止。
+
+* 返回的是**计算机时间原点**（1970年1月1日 00:00:00）到到当前计算机系统时间总共经过了多少毫秒的值，项目中使用非常非常广泛，多用于计算某块代码执行时间，以打印日志。一般使用形式：`long startTime = System.currentTimeMillis();`，要记录的代码块运行结束位置`log.info("xxx总共耗时{}毫秒", System.currentTimeMillis() - startTime)`。
+
+  > 关于计算机时间原点
+  >
+  > 1969年8月，贝尔实验室的程序员肯汤普逊利用妻儿离开一个月的机会，开始着手创造了一个全新的革命性的操作系统。使用B编译语言在老旧的PDP-7机器上开发出了Unix的一个版本。随后，汤普逊和同事丹尼斯里奇改进了B语言，开发出了C语言，重写了Unix。
+  >
+  > 于是，就将1970年1月1日零时作为计算机的时间原点，之后的所有时间戳都是以此为时间原点进行计算。
+  >
+  > 中国处于东八区，所以获取到的时间原点为1970年1月1日 08:00:00，如果要将时间戳转为人眼查看的时间格式，需要注意时区问题，这个之后时间API再详述。
+
+* `public static native void arraycopy(Object src, int srcPos, Object dest, int destPos, int length)`参数说明：
+
+  ① `Object src`：数据源（要拷贝的数组）
+
+  ② `int srcPos`：要拷贝数据源数组的起始索引（要从第几个元素开始拷贝），索引不在源数组范围报数组索引越界异常。
+
+  ③ `Object dest`：拷贝数据的目的地（要拷贝到哪个数组），如果数据源数组和目的地数组都是基本数据类型，那么两者的类型必须保持一致，否则会报错，如果源数组和目标数组都是引用数据类型，那么子类类型可以赋值个父类类型。
+
+  ④ `int destPos`：拷贝数据目的地数组的起始索引（从目的地数组的第几个元素开始放置拷贝的数据），索引不在目的地数组范围，报数组索引越界异常。
+
+  ⑤ `int length`：拷贝数组的数量（从源数组的srcPos开始，要拷贝多少个元素），一旦超过超过目标数组或者源数组长度，就会报数组索引越界异常`ArrayIndexOutOfBoundsException`。
+
+### 10.3 Runtime
+
+`java.lang.Runtim`类表示当前虚拟机的运行环境，这个类里面的方法不是静态的，并且这个类不能创建，只能通过它提供的`getRuntime()`方法获取。
+
+|                方法名                 |                    说明                     |
+| :-----------------------------------: | :-----------------------------------------: |
+| `public static Runtime getRuntime()`  |            当前JVM的运行环境对象            |
+|    `public void exit(int status)`     |                 停止虚拟机                  |
+|  `public int abailableProcessors()`   |               获取CPU的线程数               |
+|       `public long maxMemory()`       |  JVM能从系统中获取总内存大小（单位：Byte）  |
+|      `public long totalMemory()`      | JVM已经从系统中获取总内存大小（单位：Byte） |
+|      `public long freeMemory()`       |        JVM剩余内存大小（单位：Byte）        |
+| `public Process exec(String command)` |                运行系统命令                 |
+
+使用说明：
+
+* `public static Runtime getRuntime()`，当前虚拟机运行环境唯一，所以运行环境设计成单例模式，所以将构造函数虚拟化，并在类中创建静态私有化实例，再提供此方法对外暴露使用，确保任意位置获取到的都是同一个虚拟机实例。
+* `public void exit(int status)`作用与`System`类中的`exit`方法一致，`System.exit(int status)`其实底层就是这个方法。
+
+### 10.4 Object和Objects
+
+#### Object
+
+`java.lang.Object`是Java中的顶尖父类，所有类都直接或间接地继承于`Object`类。它的方法可以被所有的子类访问，所以它的特性非常重要。
+
+|               方法名                |           说明           |
+| :---------------------------------: | :----------------------: |
+|          `public Object()`          | 空参构造（没有成员变量） |
+|     `public String toString()`      |   返回对象的字符串形式   |
+| `public boolean equals(Object obj)` |   比较两个对象是否相等   |
+|   `protected Object clone(int a)`   |         对象克隆         |
+
+* 关于构造方法，由于无法给所有对象规定统一的成员变量，它没有成员变量，也就只有空参构造，这也是子类构造方法默认调用`super()`的原因之一，因为如果直接父类是`Object`，那么它是没有成员变量的。
+
+* `public String toString()`，这个方法默认返回的是对象的地址值，地址值对于人（运维人员/程序员）来说，没有多大意义，人真正关心的是它的属性值，因此一般都需要手动重写这个方法。`toString`的应用极其广泛，项目中，几乎所有的类都要重写`toString()`方法，重写的内容为将对象的所有属性转为字符串（通过编辑器生成即可），并且这个方法是JavaSDK或者一些第三方包需要打印对象时的默认调用方法，例如Java的`System.out.println`，第三方日志`log4j2`的日志打印函数，底层都会调用对象的`toString`方法，把对象变成字符串然后再打印。
+
+  ```java
+  // 案例：
+  public class Student {
+      /**
+       * 学生姓名
+       */
+      private String name;
+  
+      /**
+       * 学生年龄
+       */
+      private int age;
+  
+      @Override
+      public String toString() {
+          return "Student{" +
+                  "name='" + name + '\'' +
+                  ", age=" + age +
+                  '}';
+      }
+  }
+  ```
+
+* `public boolean equals(Object obj)`方法底层比较的是地址值，前文已经提到，地址值对于人来说，是没有多大意义的，因此对于那些主要关注属性值的类，需要重写`equals`方法，例如`java.lang.String`、包装类以及其他主要关注数值的类。项目中不常重写，但是一旦重写，就需要连同`public native int hashCode()`一起重写（也都是代码编辑器生成）。
+
+* `protected Object clone(int a)`，把A对象的属性值完全拷贝给B对象，也叫做对象拷贝、对象复制。关于这个方法的使用，由于方法是`protected`的，所有无法直接调用（我们不可能在`java.lang`包下写代码），需要每个类自己去重写方法，此外，还需要在可以被克隆的JavaBean上实现`java.lang.Cloneable`接口，该接口中没有内容，主要作用是标记此类可被克隆，不实现该接口的类即使重写了`clone`方法，调用的时候也会报错`CloneNotSupportedException`。
+
+深克隆与浅克隆：
+
+* 浅克隆：不管对象内部的属性是基本数据类型还是引用数据类型，都完全拷贝过来；（`java.lang.Object#clone`就是浅克隆）
+* 深克隆：基本数据类型拷贝过来，字符串复用串池中的内容，**引用数据类型会重新创建新的**。
+
+深浅克隆代码演示：
+
+```java
+public class CloneDemo {
+    public static void main(String[] args) throws IOException {
+        CloneBean bean = new CloneBean(1, "cloneDemo", new int[] { 1, 3, 5 });
+        CloneBean cloneBean = bean.clone();
+        System.out.println("修改克隆对象前原对象：" + bean); // 修改克隆对象前原对象：CloneBean{id=1, name='cloneDemo', scores=[1, 3, 5]}
+        cloneBean.id = 2;
+        cloneBean.name = "cloneDemo2";
+        cloneBean.scores[0] = 2;
+        cloneBean.scores[1] = 4;
+        cloneBean.scores[2] = 6;
+        System.out.println("修改克隆对象后原对象：" + bean); // 修改克隆对象后原对象：CloneBean{id=1, name='cloneDemo', scores=[2, 4, 6]}
+    }
+
+    static class CloneBean implements Cloneable {
+        int id;
+        String name;
+        int[] scores;
+
+        @Override
+        public String toString() {
+            return "CloneBean{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", scores=" + Arrays.toString(scores) +
+                    '}';
+        }
+
+        public CloneBean(int id, String name, int[] scores) {
+            this.id = id;
+            this.name = name;
+            this.scores = scores;
+        }
+
+        @Override
+        public CloneBean clone() {
+            try {
+                return (CloneBean) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError();
+            }
+        }
+    }
+}
+```
+
+
+
+:::warning 注意
+
+① 如果在Java接口中，里面没有任何抽象方法以及其他内容，那么这个接口就是一个标记接口。
+
+② 如果要深克隆，可以考虑将对象转为JSON再通过JSON获取新对象。
+
+:::
+
+#### Objects
+
+`java.util.Objects`是一个工具类，提供了一些常用方法。
+
+|                       方法名                       |                           说明                            |
+| :------------------------------------------------: | :-------------------------------------------------------: |
+| `public static boolean equals(Object a, Object b)` |               先做非空判断，再比较两个对象                |
+|     `public static boolean isNull(Object obj)`     | 判断对象是否为`null`，为`null`返回`true`，反之返回`false` |
+|    `public static boolean nonNull(Object obj)`     |        判断对象是否为`null`，跟`isNull`的结果相反         |
+
+使用说明：
+
+* `public static boolean equals(Object a, Object b)`，方法的底层会判断`a`是否为空，为空直接返回`false`，不为空就利用`a`调用`equals`方法。
+
+### 10.5 BigInteger和BigDecimal
+
+#### BigInteger
+
+在Java中，整数有四种类型：`byte`、`short`、`int`、`long`，这几种数据类型，最多占用8个字节，尽管能表示的数非常大，但是终归是有数值范围限制，因此Java设计了`java.math.BigInteger`类来解决这种问题。
+
+构造方法：
+
+|                    方法名                    |                  说明                  |
+| :------------------------------------------: | :------------------------------------: |
+|   `public BigInteger(int num, Random rnd)`   | 获取随机大整数，范围$[0, 2^{num - 1}]$ |
+|       `public BigInteger(String val)`        |             获取指定大整数             |
+|  `public BigInteger(String val, int radix)`  |          获取指定进制的大整数          |
+| `public static BigInteger valueOf(long val)` |      静态方法获取`BigInteger`对象      |
+
+使用说明：
+
+* 构造方法参数中的`String val`必须是整数字符串，否则报错`NumberFormatException`。
+* `BigInteger`对象一旦创建，里面存储的值不可变。
+* 对于`public BigInteger(String val, int radix)`，其中字符串必须与`radix`指定的进制匹配，否则报错`NumberFormatException`。
+* `public static BigInteger valueOf(long val)`，能获取的范围有限，只能获取`long`类型的数值范围内的数。对于常用数字`-16~16`有内部有优化，提前将这些数字的`BigInteger`对象创建好，如果多次获取，不会创建新的。
+  ```java
+  import java.math.BigInteger;
+  
+  public class BigIntegerDemo {
+      public static void main(String[] args) {
+          BigInteger num1 = BigInteger.valueOf(16);
+          BigInteger num2 = BigInteger.valueOf(16);
+          System.out.println(num1 == num2); // true
+  
+          BigInteger num3 = BigInteger.valueOf(-17);
+          BigInteger num4 = BigInteger.valueOf(-17);
+          System.out.println(num3 == num4); // false
+          System.out.println(num3.equals(num4)); // true
+      }
+  }
+  ```
+* 对象一旦创建，不会发生改变，即使调用加减乘除等方法进行了运算，返回的也是一个新的`BigInteger`对象。
+
+常见成员方法：
+
+|                          方法名                          |                说明                 |
+| :------------------------------------------------------: | :---------------------------------: |
+|         `public BigInteger add(BigInteger val)`          |                加法                 |
+|       `public BigInteger subtract(BigInteger val)`       |                减法                 |
+|       `public BigInteger multiply(BigInteger val)`       |                乘法                 |
+|        `public BigInteger divide(BigInteger val)`        |                除法                 |
+| `public BigInteger[] divideAndRemainder(BigInteger val)` |         除法，获取商和余数          |
+|            `public boolean equals(Object x)`             |            比较是否相同             |
+|            `public BigInteger(int exponent)`             |                次幂                 |
+|       `public BigInteger max/min(BigInteger val)`        |           返回较大/较小值           |
+|                 `public int intValue()`                  | 转为`int`类型整数，超出范围数据有误 |
+
+使用说明：
+
+* 加减乘除省略，对于`public BigInteger[] divideAndRemainder(BigInteger val)`返回的数组，索引0是商，1是余数。
+* 对于`public BigInteger max/min(BigInteger val)`，返回的就是原对象，并没有创建新的对象。
+* `public int invValue(BiigInteger val)`，如果值超出`int`取值范围，数据有误（不报错）。除了`int`类型之外，也可以转为其他数值类型，包括浮点型`xxxValue`，其中`xxx`就是需要的基本数值类型。
+
+`BigInteger`底层存储方式：对于计算机而言，是没有数据类型的概念的，数据类型是编程语言自己规定的。在`BigInteger`中，利用`final int signum;`来表示符号，`signum`为1表示正数，为-1表示负数，为0表示0，然后将要存储的数值转为补码后，再以每32位为一组，再将每组补码转回10进制（32位，即4个字节，刚好是一个`int`型数字），存储在`final int[] mag;`数组中。
+
+`BigInteger`存储上限：根据`BigInteger`的底层存储方式可知，它使用`int`数组存储数据，而数组的索引是有上限的，上限值为`Integer.MAX_VALUE`，即$2^{31} - 1$，`int`型数值的最大值。（不过达到这个数值几乎不太可能了）
+
+#### BigDecimal
+
+计算机中，小数运算不精确的问题：
+
+```java
+public class BigDecimalDemo {
+    public static void main(String[] args) {
+        System.out.println(0.09 + 0.01); // 0.09999999999999999
+        System.out.println(0.216 - 0.1); // 0.11599999999999999
+        System.out.println(0.226 * 0.01); // 0.0022600000000000003
+        System.out.println(0.09 / 0.1); // 0.8999999999999999
+    }
+}
+```
+
+小数的存储：计算机中，数值的运算都是在二进制下进行，`float`和`double`等浮点型数据用于存储小数的比特位是有限的，当十进制的小数转为二进制时，其小数位数很有可能超出浮点型数据类型的存储位数（如下图），超出部分只能舍去。
+
+![image-20260106151801918](https://gitee.com/triabin/img_bed/raw/master/2026/01/06/1c62091efcc0d8b204736358c858f220-image-20260106151801918.png)
+<div style="clear: both;"></div>
+
+在计算机项目开发中，有些场景对于数据的精确度有着很高的要求，例如银行、金融以及航空航天等，所以Java设计了`java.math.BigDecimal`类，用于高精度的小数运算以及表示很大的小数。
+
+构造方法的使用说明：
+* 对于`public BigDecimal(double val)`，不建议使用这个构造方法，因为`double`在存储阶段就有可能已经出现了谬误（位数超出截取问题），此时再用它来获取到的`BigDecimal`对象，只能是一个不准确的对象，因此和`BigInteger`一样，还是推荐使用`public BigDecimal(String val)`构造方法，更为简单易用。
+
+  ```java
+  import java.math.BigDecimal;
+  
+  public class BigDecimalDemo {
+      public static void main(String[] args) {
+          BigDecimal num1 = new BigDecimal(0.09);
+          BigDecimal num2 = new BigDecimal(0.01);
+          System.out.println(num1); // 0.0899999999999999966693309261245303787291049957275390625
+          System.out.println(num2); // 0.01000000000000000020816681711721685132943093776702880859375
+      }
+  }
+  ```
+  
+* 也可以通过静态方法`public static BigDecimal valueOf(long/double val)`获取实例。内存优化：如果传入`long`型，并且数值范围为`[0, 10]`，则可以直接返回提前创建好的对象（缓冲区/缓存），不会创建新对象。
+
+* 如果要表示的数字不大，没有超出`double`的取值范围，建议使用静态方法，如果超出范围，建议使用构造方法。
+
+常见成员方法：
+
+|                            方法名                            |               说明               |
+| :----------------------------------------------------------: | :------------------------------: |
+|        `public static BigDecimal valueOf(double val)`        |             获取对象             |
+|           `public BigDecimal add(BigDecimal val)`            |               加法               |
+|         `public BigDecimal subtract(BigDecimal val)`         |               减法               |
+|         `public BigDecimal multiply(BigDecimal val)`         |               乘法               |
+|         `public BigDecimaol mdivide(BigDecimal val)`         |               除法               |
+| `public BigDecimal divide(BigDecimal divisor, int scale, int roundingMode)` | 除法，指定保留小数位数和舍入模式 |
+
+方法使用说明：
+* `public static BigDecimal valueOf(double val)`，由于传入的不是`long`型数据，即使数值范围在`[0, 10]`，也不会直接返回缓存中的对象，而是先将其转为`String`型，再调用`public BigDecimal(String val)`构造方法。
+* `public BigDecimal divide(BigDecimal divisor, int scale, int roundingMode)`，在JDK9已经标记为过时，因为考虑到舍入模式不应该定义在`java.math.BigDecimal`类中，于是将其单独定义为一个枚举类`java.math.RoundingMode`（枚举类为一种特殊的类，现在可以暂时理解为它的对象无法手动创建并且都是常量），并重新定义一个舍入模式为枚举对象的方法来完成同样的功能，方法为`public BigDecimal divide(BigDecimal divisor, int scale, RoundingMode roundingMode)`，而关于`RoundingMode`中，也定义了几种舍入模式，常用的还是四舍五入`HALF_UP`。
+
+`java.math.RoundingMode`枚举常量：
+
+|   枚举常量    | 名称 |                             作用                             |
+| :-----------: | :--: | :----------------------------------------------------------: |
+|     `UP`      |向上舍入|                        向远离零的方向舍入。无论正负，都向数值变大的方向进一位。                        |
+|    `DOWN`     |向下舍入|                         向接近零的方向舍入。无论正负，都向数值变小的方向舍弃。                         |
+|   `CEILING`   |向正无穷大舍入|                      向正无穷方向舍入。正数时相当于UP，负数时相当于DOWN。                      |
+|    `FLOOR`    |向负无穷大舍入|                      向负无穷方向舍入。正数时相当于DOWN，负数时相当于UP。                      |
+|   `HALF_UP`   |四舍五入| 最经典的四舍五入。舍弃部分`>= 0.5`时向上(UP)，否则向下(DOWN)。 |
+|  `HALF_DOWN`  |五舍六入| 舍弃部分`> 0.5`时向上(UP)，否则向下(DOWN)。0.5被舍弃。 |
+|  `HALF_EVEN`  |四舍六入五成双| 银行家舍入法。若舍弃部分左边的数字是奇数，则HALF_UP；若是偶数，则HALF_DOWN。 |
+| `UNNECESSARY` |不舍入|   断言操作结果是精确的，无需舍入。若需要舍入，则抛出`ArithmeticException`。   |
+
+`BigDecimal`底层存储方式：由于一些小数的二进制很长很长，如果`BigDecimal`使用和`BigInteger`相同的方式来存储数据的话，操作起来效率较低切浪费内存，所以`BigDecimal`设计了一套自己的存储方案。`BigDeciaml`在创建对象的时候，都会将数值转为字符串，然后再将字符串拆分为一个个字符（包括负号`-`和小数点`.`），然后将这些字符转为ASCII码后，按照顺序存储到`byte`数组中。
+
+`BigDecimal`存储的数值上限：与`BigInteger`一样，也是受限于数组的长度`Integer.MAX`，近乎无限。
+
+### 10.6 正则表达式
+
+在Java中关于正则表达式的应用参见[正则表达式（Java）](../common/正则表达式（Java）)。
+
+### 10.7 时间日期类
+
+> 关于时间的一些地理知识
+>
+> 以前，以地球0度经线位的时间为标准时间（本初子午线），英国伦敦的格林威（尼）治天文台就在这条线上，因此以前的世界时间也叫格林威治时间（Greenwich Mean Time，即**GMT**）。
+>
+> 对于地球上的每一个地方来说，太阳直射时为正午12点，地球上的时间需要一个统一的计算标准，而计算的核心就是地球的自转，地球自转一周是24小时，于是将地球从经度方向分为24个不同的时区，本初子午线所在时区为零时区，往西为西时区共12个，与本初子午线每差一个时区时间就早一个小时；往东为东时区也是12个，东西十二区重叠在一起（注意，重叠在一起，不代表时间相同，因为时间实际上是人为规定的），时区与本初子午线每差一个时区时间就往后晚一个小时。中国所使用的时间北京时间就是东八区时间，而东八区的标准时间实际上在上海，因此Linux系统或者一些地方表示中国时间的时候只能选`Asia/Shanghai`。
+>
+> 由于东西十二区重叠，为了避免该时区内的人日期混乱，于是规定了一条国际日期变更线（日界线），变更线东侧日期减一天，西侧日期加一天。为了避免同一个国家/地区两个时间的尴尬情况，该变更线从180度经线附近延伸出来后多处采用曲折走向避开陆地，并且也经过多次变更。
+>
+> 然而，实际上地球的自转并不是均匀的，这就会导致出现记录的实际时间与自转时间出现误差的情况，据统计，最大误差长达16分钟。
+>
+> 2012年1月，取消用了将近130年的格林威治标准时间，标准时间改为使用原子钟提供。原子钟是利用铯原子的震动频率计算出来的时间，作为世界标准时间（**UTC**），铯原子每震动9192631770次等于1秒。
+
+需要了解的前置知识：
+
+* 以前的标准时间为格林威治时间（Greenwich Mean Time，即**GMT**），现在的标准时间为原子钟提供的时间**UTC**。
+* 中国处于东八区，时间为标准时间加8小时。
+* 1秒＝1000毫秒，1毫秒＝1000微秒，1微秒＝1000纳秒
+* 时间原点：`1970-01-01 00:00:00.000`
+
+#### `Date`时间
+
+`java.util.Date`是一个Java写好的JavaBean类，用来描述时间，精确到毫秒。利用空参构造创建对象，默认表示系统当前时间，利用有参构造则表示创建指定时间。
+
+根据以上初步功能再结合之前学过的面向对象的设计，其实可以推测`Date`类的核心设计：定义一个字段来存储当前时间戳，空参构造使用`System.currentTimeMillis()`获取当前时间戳，有参构造则传入一个`long`型的数字。再配合存储时间戳的变量的`getter/setter`即可初步完成对`Date`类的设计与使用。事实上，`java.util.Date`类的设计确实差不多就是这样：
+
+<img src="https://gitee.com/triabin/img_bed/raw/master/2026/01/06/227eb354150a62d7e9648a9b290fcf69-image-20260106172442407.png" alt="image-20260106172442407" style="zoom:80%;" align="left"/>
+
+<div style="clear: both;"></div>
+
+> 通过练习题熟悉这些方法特性的使用：
+>
+> 需求1：打印时间原点开始一年之后的时间。
+>
+> 需求2：定义任意两个`Date`对象，比较一下哪个时间在前，哪个时间在后。
+>
+> ```java
+> import java.util.Date;
+> import java.util.Random;
+> 
+> public class DateDemo {
+>     public static void main(String[] args) {
+>         solution1(); // 时间原点一年以后的时间为：Fri Jan 01 08:00:00 CST 1971
+>         solution2();
+>     }
+> 
+>     /**
+>      * 题解1
+>      */
+>     public static void solution1() {
+>         Date date = new Date(0L);
+> 
+>         long time = date.getTime() + 365 * 24 * 60 * 60 * 1000L;
+>         date.setTime(time);
+>         System.out.println("时间原点一年以后的时间为：" + date);
+>     }
+> 
+>     public static void solution2() {
+>         Random random = new Random();
+>         long currentTime = System.currentTimeMillis();
+>         Date date1 = new Date(random.nextLong(currentTime));
+>         Date date2 = new Date(random.nextLong(currentTime));
+>         if (date1.getTime() >  date2.getTime()) {
+>             System.out.println("在前面的时间为：" + date2);
+>             System.out.println("在后面的时间为：" + date1);
+>         } else if (date2.getTime() >  date1.getTime()) {
+>             System.out.println("在前面的时间为：" + date1);
+>             System.out.println("在后面的时间为：" + date2);
+>         } else {
+>             System.out.println("时间相同：" + date1);
+>         }
+>     }
+> }
+> ```
+
+关于`Date`类中的其他方法，不管是静态方法还是成员方法，都比较见名知意，属于一看就知道怎么用的那种，就不详细介绍了。
+
+#### `SimpleDateFormat`格式化时间
+
+从前面的联系中可以看到，默认的`Date`类`toString`方法返回的结果是不利于直接查看的`Fri Jan 01 08:00:00 CST 1971`，对于时间对象的使用，每个国家所需的显示标准是不一样的，而且在开发过程中，也有将字符串转为`Date`对象的需求，于是就设计了`java.text.SimpleDateFormat`来格式化或者解析时间。例，使用`SimpleDateFormat`可以将`Date`对象转为诸如`2017-09-01 08:56:16`、`2020年6月`这样格式的字符串，也可以将对应格式字符串转为`Date`对象。
+
+|                 构造方法                  |                     说明                     |
+| :---------------------------------------: | :------------------------------------------: |
+|        `public SimpleDateFormat()`        | 构造一个`SimpleDateFormat`对象，使用默认格式 |
+| `public SimpleDateFormat(String pattern)` | 构造一个`SimpleDateFormat`对象，使用指定格式 |
+
+|                常用方法                 |            说明            |
+| :-------------------------------------: | :------------------------: |
+| `public final String format(Date date)` | 格式化（`Date -> String`） |
+|   `public Date parse(String source)`    |  解析（`String -> Date`）  |
+
+格式化的时间形式常用的模式对应关系：
+
+* `y`：年，如果使用`yy`，则取后两位，如果是`yyyy`，则是完整的年份
+* `M`：月，如果取`MM`，则月份小于10的时候，补0，`M`不补0
+* `d`：日，日期在当前月份中的第几天，补0规则同上
+* `H`：时，24小时制的时间，补0规则同上，如果是小写的`h`，则采用12小时制，使用12小时制时可以使用`a`来显示`AM/PM`（具体显示上下午的内容取决于系统语言，中文的话显示的是`上午/下午`）
+* `m`：分，补0规则同上
+* `s`：秒，补0规则同上
+* `S`：毫秒，只需要一个`S`，就可以显示三位数的毫秒数，或者也可以使用`SSS`，这样不足位数的时候也会补0
+* `E`：星期，会显示系统语言本地对于星期的名称，例如中文的`周几`
+
+以上为开发过程中会用到的几乎全部匹配符了，如果还有其他需求，可以查阅JDK的API文档`java.text.SimpleDateFormat`。以下是关于它的基本使用演示：
+
+```java
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class SDFDemo {
+    public static void main(String[] args) throws ParseException {
+        long currentTimeMillis = System.currentTimeMillis();
+        System.out.println("当前时间戳：" + currentTimeMillis); // 1610005955415L
+
+        // 创建Date对象
+        Date date = new Date(currentTimeMillis);
+        // 将其格式化为：yyyy-MM-dd HH:mm:ss
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String format = sdf.format(date);
+        System.out.println("格式化后的时间：" + format); // 2021-01-07 15:52:35
+        // 将格式化后的字符串解析回去
+        Date parse = sdf.parse(format);
+        System.out.println("解析后的时间戳：" + parse.getTime()); // 1610005955000
+    }
+}
+```
+
+说明：上述时间戳前后不一致的原因是因为格式`yyyy-MM-dd HH:mm:ss`中不包含对毫秒数的格式化，导致了字符串转回日期对象的时候丢失了毫秒数，所以转换回来的时间戳最后三位全部归零。另外，在调用`parse`方法的时候，如果要解析的时间字符串与格式字符串格式不匹配，可能会抛出`ParseException`异常。
+
+:::info Tips
+
+① `SimpleDateFormat`中文系统语言下，默认的匹配模式为Windows系统：`yyyy/M/d aH:mm`，Unix系统：`yyyy/M/d HH:mm`，不过最好不要用这个，不确定性太强；
+
+② 开发过程中最好在项目中规划好常用的几种格式化模式（例如`yyyy-MM-dd HH:mm:ss`、`yyyy/MM/dd`、`yyyy年MM月dd日 HH:mm:ss`等），然后将其作为常量规定好，之后所有人在使用时间格式化的时候都先去常量中找，找不到再考虑自定义或扩充常量，这样既能方便使用，又能统一项目中的时间格式化格式。
+
+:::
+
+#### `Calendar`日历
+
+在有了`Date`类之后，关于日期的使用，又遇到了新的问题，比如，如果我只想给当前日期对象的月份加一，那样并不是简单的给时间戳加上`30 * 24 * 60 * 60 * 1000L`就行了的，还需要判断大小月份、是否为2月等一系列关于日历的复杂问题，于是就设计了`java.util.Calendar`日历类来专门解决这些问题。
+
+`Calendar`代表了系统当前时间的日历对象，可以单独修改、获取时间中的年、月、日。此外，`Calendar`是一个抽象类，不能直接创建对象，只能通过它提供的静态方法`public static Calendar getInstance()`获取子类实例，并且这个静态方法还能通过传入对应的地区或者时区对象获取指定地区的日历实例，不传则获取系统所在地区的日历实例。
+
+`public static Calendar getInstance()`底层实现细节：会根据系统时区来获取不同的日历对象（默认为当前时间），目前（截至JDK21）只有三个选项，分别是佛教日历`BuddhistCalendar`、日本历`JapaneseImperialCalendar`以及格林威治日历`GregorianCalendar`，一般都是返回第三个，会将时间中的纪元、年、月、日、时、分、秒、星期等信息都放到一个数组中。
+
+常用方法：
+
+|                   方法名                   |            说明             |
+| :----------------------------------------: | :-------------------------: |
+|       `public final Date getTime()`        |        获取日期对象         |
+|     `public final setTime(Date date)`      |   给日历对象设置日期对象    |
+|      `public long getTimeInMillis()`       |  获取日历日期的时间毫秒值   |
+| `public void setTimeInMillis(long millis)` |    给日历设置时间毫秒值     |
+|        `public int get(int field)`         |   获取日历中某个字段信息    |
+|  `public void set(int field, int value)`   |   修改日历的某个字段信息    |
+|  `public void add(int field, int amount)`  | 为某个字段增加/减少指定的值 |
+
+使用说明：
+
+* 关于日历对象中时间的获取与修改，可以通过`Date`对象来操作也可以通过时间戳来操作（即上表中的前四个方法）；
+
+* `public int get(int field)`：对于属性的获取，传参虽然是一个数字（底层使用数组存放数据），但是一般不会使用数字字面量，而是已经在`Calendar`中定义了大量的`int`常量，这些常量名基本都见名知意。
+
+  要关注的点：
+
+    ① 月份的取值范围是`[0, 11]`，0表示1月（坑爹玩意儿😒）；
+
+    ② 星期的数值，1为星期天，7为星期六（老外认为星期天是一周的起点）。
+
+    ③ 常用的属性：`1:Calendar.YEAR`、`2:Calendar.MONTH`、`5:Calendar.DATE/Calendar.DAY_OF_MONTH`（开发者认为`DATE`不够见名知意就改了）、`7:Calendar.DAY_OF_WEEK`
+
+* `public void add(int field, int amount)`，`amount`可以传负数，传入负数代表减。
+
+> 由于时间相关的这三个类功能各异以及比较分散，项目中，一般会创建一个`DateUtils`之类的工具类，里面会整合三个类以及放置时间格式化所需格式常量等，以方便项目中关于时间的各种公共方法调用。
+>
+> 对于星期和月份的问题，可以定义类似这样的数组`String[] weeks = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };`，然后就能直接将`Calendar`类返回的值与数组索引对应上了。
+
+#### JDK8新增时间相关类
+
+在之前的时间日期类使用中，对于两个时间字符串之间的比较，涉及到解析、以及格式化模式字符串这种魔法值的管理，最终比较还需要使用毫秒值进行比较。还有计算时间间隔也需要转为毫秒值再转为其他单位，操作过于繁琐。并且，对于`Date`对象的修改，如果在多线程情况下操作，还涉及到数据安全问题。于是JDK8中，重新设计了时间类，提供了比较先后、计算时间间隔等方法，并且创建时间类也是通过具体的年月日时分秒等整数类型。此外，为了解决线程安全问题，新设计的时间类创建的对象都是不可变的。
+
+JDK8新增了10个时间相关的类，可以分为四个种类，时间日期类`Date`、格式化类`SimpleDateFormat`、日历类`Calendar`以及工具类。
+
+① **时间日期类**：
+
+* `java.time.ZoneId`：时区
+  时区格式：`大洲英文名/城市英文名`，例如`Asia/Shanghai`、`Asia/Taipei`、`Asia/Chongqing`、`America/New_York`等。
+  
+  |                      方法名                       |           说明           |
+  | :-----------------------------------------------: | :----------------------: |
+  | `public static Set<String> getAvailableZoneIds()` | 获取Java中支持的所有时区 |
+  |      `public static ZoneId systemDefault()`       |     获取系统默认时区     |
+  |     `public static ZoneId of(String zoneId)`      |     获取一个指定时区     |
+  
+  使用说明：
+  
+  * `public static Set<String> getAvailableZoneIds()`，返回的是一个`java.util.Set`集合类对象，`Set`后续再学习，现在只需要知道他是一个类似于`ArrayList`的类即可，区别就是`ArrayList`元素可以重复而`Set`的元素不可以重复（重复添加无效），并且`Set`查找元素效率一般较高。
+  *  `public static ZoneId of(String zoneId)`，如果传入的参数不在Java的支持列表中，则抛出`ZoneRulesException`异常，如果不指定时区ID，则报`DateTimeException`异常。
+  
+* `java.time.Instant`：时间戳
+
+  |                      方法名                      |                  说明                   |
+  | :----------------------------------------------: | :-------------------------------------: |
+  |          `public static Instant now()`           | 获取当前时间的`Instant`对象（标准时间） |
+  |  `public static Instant ofXxx(long epochMilli)`  |  根据（秒/毫秒/纳秒）获取`Instant`对象  |
+  |    `public ZonedDateTime atZone(ZoneId zone)`    |                指定时区                 |
+  |   `public boolean isXxx(Instant otherInstant)`   |             判断系列的方法              |
+  | `public Instant minusXxx(long millisToSubtract)` |           减少时间系列的方法            |
+  | `public Instant plusXxx(long millisToSubtract)`  |           增加时间系列的方法            |
+
+  使用说明：
+
+  * `public static Instant now()`获取到的是一个**不带时区的**标准时间。
+  * `public static Instant ofXxx(long epochMilli)`，根据方法名见名知意，`ofEpochMilli(long epochMilli)`为通过毫秒值获取时间戳的方法，`ofEpochSecond(long epochSecond)`为通过秒获取时间戳的方法，`ofEpochSecond(long epochSecond, long nanoAdjustment)`为通过秒和纳秒获取时间戳对象的方法（若只想通过纳秒数获取，确保参数`epochSecond`为0即可）。
+  * `public ZonedDateTime atZone(ZoneId zone)`，获取到一个没有时区的时间戳对象之后，调用这个方法可以返回一个带时区的`ZonedDateTime`对象。
+  *  `public boolean isXxx(Instant otherInstant)`，与传统的`Date`对象一样，主要有两个方法`isAfter`和`isBefore`，用于判断时间先后的。
+  * `minusXxx`和`plusXxx`都有三个方法，分别是纳秒、毫秒和秒，用于增减时间，由于`Instant`对象不可变，因此操作后返回的是一个新的对象。
+
+* `java.time.ZonedDateTime`：带时区的时间
+
+  |                方法名                 |                         说明                          |
+  | :-----------------------------------: | :---------------------------------------------------: |
+  |  `public static ZonedDateTime now()`  |           获取当前时间的`ZoneDateTime`对象            |
+  | `public static ZonedDateTime of(...)` | 重载了多个方法，用于获取指定时间的`ZonedDateTime`对象 |
+  | `public ZonedDateTime withXxx(时间)`  |                  修改时间系列的方法                   |
+  | `public ZonedDateTime minusXxx(时间)` |                  减少时间系列的方法                   |
+  |  `public ZoneDateTime plusXxx(时间)`  |                  增加时间系列的方法                   |
+
+  使用说明：
+
+  * `public static ZonedDateTime of(...)`，参数列表可以传递时分秒和时区以及`LocalDate`系列值以及`Instant`值等来获取指定时间的`ZonedDateTime`对象，总之见名知意即可。
+  * `public ZonedDateTime withXxx(时间)`，修改年月日时分秒等一系列的参数，具体看参数列表和`with`后面的单词，都是见名知意的。由于`ZonedDateTime`对象一经创建不可更改，所以修改后会返回一个新的对象。
+  * `public ZonedDateTime minusXxx(时间)`与`public ZoneDateTime plusXxx(时间)`一样，具体增减的值也都是看`Xxx`具体是哪个单词。由于`ZonedDateTime`对象一经创建不可更改，所以修改后会返回一个新的对象。
+
+② **日期格式化类**：
+
+* `java.time.format.DateTimeFormatter`：用于时间的格式化和解析
+
+  |                           方法名                            |        说明        |
+  | :---------------------------------------------------------: | :----------------: |
+  | `public static DateTimeFormatter ofPattern(String pattern)` |    获取格式对象    |
+  |                   `public String format`                    | 按照指定方式格式化 |
+
+③ **日历类**：
+
+* `java.time.LocalDate`：年、月、日
+* `java.time.LocalTime`：时、分、秒
+* `java.time.LocalDateTime`：年、月、日、时、分、秒
+
+三个类常用方法：
+
+|           方法名            |                   说明                   |
+| :-------------------------: | :--------------------------------------: |
+|  `public static Xxx now()`  |            获取当前时间的对象            |
+| `public static Xxx of(...)` |            获取指定时间的对象            |
+|       `get`开头的方法       | 获取日历中的年、月、日、时、分、秒等信息 |
+|    `isBefore`、`isAfter`    |        比较两个对象代表的时间先后        |
+|        `with`开头的         |            修改时间系列的方法            |
+|      `plusminus`开头的      |            增减时间系列的方法            |
+
+`LocalDateTime`转为`LocalDate`和`LocalTime`的方法：
+
+|              方法名              |                说明                |
+| :------------------------------: | :--------------------------------: |
+| `public LocalDate toLocalDate()` | `LocalDateTime`转为`LocalDate`对象 |
+| `public LocalDate toLocalTime()` | `LocalDateTime`转为`LocalTime`对象 |
+
+④ **工具类**：
+
+* `java.time.Duration`：时间间隔（秒、纳秒）
+
+  ```java
+  public class DurationDemo {
+      public static void main(String[] args) {
+          // 当前本地年月日
+          LocalDateTime now = LocalDateTime.now();
+          System.out.println("现在：" + now);
+          // 生日
+          LocalDateTime birthday = LocalDateTime.of(1998, 5, 2, 0, 28, 53, 822324);
+          System.out.println("生日：" + birthday);
+          // 计算年龄
+          Duration duration = Duration.between(birthday, now);
+          System.out.println("Duration: " + duration);
+          System.out.println("天数：" + duration.toDays());
+          System.out.println("小时数：" + duration.toHours());
+          System.out.println("分钟数：" + duration.toMinutes());
+          System.out.println("秒数：" + duration.getSeconds());
+          System.out.println("毫秒数：" + duration.toMillis());
+          System.out.println("纳秒数：" + duration.toNanos());
+      }
+  }
+  ```
+
+  
+
+* `java.time.Period`：时间间隔（年、月、日）
+
+  ```java
+  public class PeriodDemo {
+      public static void main(String[] args) {
+          // 当前本地年月日
+          LocalDate today = LocalDate.now();
+          System.out.println("今天：" + today);
+          // 生日
+          LocalDate birthday = LocalDate.of(1998, 5,2);
+          System.out.println("生日：" + birthday);
+          // 计算年龄
+          Period period = Period.between(birthday, today);
+          System.out.println("Period: " + period);
+          System.out.println("年龄：" + period.getYears());
+          System.out.println("月数：" + period.getMonths());
+          System.out.println("天数：" + period.getDays());
+  
+          System.out.println("总月数：" + period.toTotalMonths());
+      }
+  }
+  ```
+
+* `java.time.temporal.ChronoUnit`：时间单位枚举（所有单位），并且提供了计算时间差的方法
+
+  ```java
+  public class ChronoUnitDemo {
+      public static void main(String[] args) {
+          // 当前本地年月日
+          LocalDateTime now = LocalDateTime.now();
+          System.out.println("现在：" + now);
+          // 生日
+          LocalDateTime birthday = LocalDateTime.of(1998, 5, 2, 0, 28, 53, 822324);
+          System.out.println("生日：" + birthday);
+          // 计算时间差
+          System.out.println("相差的纪元数：" + ChronoUnit.ERAS.between(birthday, now));
+          System.out.println("相差的千年数：" + ChronoUnit.MILLENNIA.between(birthday, now));
+          System.out.println("相差的世纪数：" + ChronoUnit.CENTURIES.between(birthday, now));
+          System.out.println("相差的十年数：" + ChronoUnit.DECADES.between(birthday, now));
+          System.out.println("相差的年数：" + ChronoUnit.YEARS.between(birthday, now));
+          System.out.println("相差的月数：" + ChronoUnit.MONTHS.between(birthday, now));
+          System.out.println("相差的周数：" + ChronoUnit.WEEKS.between(birthday, now));
+          System.out.println("相差的天数：" + ChronoUnit.DAYS.between(birthday, now));
+          System.out.println("相差的小时数：" + ChronoUnit.HOURS.between(birthday, now));
+          System.out.println("相差的分钟数：" + ChronoUnit.MINUTES.between(birthday, now));
+          System.out.println("相差的秒数：" + ChronoUnit.SECONDS.between(birthday, now));
+          System.out.println("相差的毫秒数：" + ChronoUnit.MILLIS.between(birthday, now));
+          System.out.println("相差的微秒数：" + ChronoUnit.MICROS.between(birthday, now));
+          System.out.println("相差的纳秒数：" + ChronoUnit.NANOS.between(birthday, now));
+      }
+  }
+  ```
+
+### 10.8 包装类
+
+![image-20260109142609483](https://gitee.com/triabin/img_bed/raw/master/2026/01/09/0cfbb34ed7dd4ba17d9d92d3c3ed2b10-image-20260109142609483.png)
+
+<div style="clear: both;"></div>
+
+在Java中，万物皆对象，然而八大基本数据类型却是例外，它们的数据存储在栈内存中，不利于集合的存储，也不利于离散堆内存的使用，于是就为每一个基本数据类型设计了一个用来描述它的类，这些类就是包装类（包装类作为基础类，都存放在`java.lang`包下）。
+
+|  byte  |  short  |    int    |  long  |  float  |  double  |  boolean  |    char     |
+| :----: | :-----: | :-------: | :----: | :-----: | :------: | :-------: | :---------: |
+| `Byte` | `Short` | `Integer` | `Long` | `Float` | `Double` | `Boolean` | `Character` |
+
+可以看得出来，除了`int`和`char`的包装类名字特殊一点外，其余标桩类均为基本数据类型首字母大写即可。以后使用最多的类为`java.lang.Integer`，因此以它来举例讲解即可，其余都大同小异。
+
+获取`Integer`对象的方式（JDK5以前，JDK5做了优化，因此了解即可）：
+
+|                        方法名                        |                    说明                     |
+| :--------------------------------------------------: | :-----------------------------------------: |
+|             `public Integer(int value)`              |     根据传递的整数创建一个`Integer`对象     |
+|              `public Integer(String s)`              |    根据传递的字符串创建一个`Integer`对象    |
+|        `public static Integer valueOf(int i)`        |     根据传递的整数创建一个`Integer`对象     |
+|      `public static Integer valueOf(String s)`       |    根据传递的字符串创建一个`Integer`对象    |
+| `public static Integer valueOf(String s, int radix)` | 根据传递的字符串和进制创建一个`Integer`对象 |
+
+**缓冲区/缓存**：与`BigDecimal`和`BigInteger`一样，`Integer`也有缓冲区的概念，它的缓存范围为`[-128, 127]`，也是调用`valueOf`方法的时候会优先走缓存，如果在这个区间内的值，就直接返回静态代码块中初始化的值。
+
+**自动拆/装箱（JDK5优化）**：之前对于包装类的运算，需要先将其转为基本数据类型，运算结束后再将结果转为包装类，这使得包装类的使用非常麻烦，于是就引入了自动装箱和自动拆箱的概念。
+
+* 自动装箱：把基本数据类型自动变成对应的包装类，例，`Integer i = 10;`等价于`Integer i = Integer.valueOf(10);`。
+* 自动拆箱：把包装类自动变成对应的基本数据类型，例，`int i = new Integer(10);`等价于`int i = new Integer(10).intValue();`。
+
+由于自动拆/装箱的引入，JDK5以后，`Integer`和`int`基本可以看成是同一个东西。
+
+`Integer`成员方法：
+
+|                    方法名                    |                 说明                  |
+| :------------------------------------------: | :-----------------------------------: |
+| `public static String toBinaryString(int i)` |              得到二进制               |
+| `public static String toOctalString(int i)`  |              得到八进制               |
+|  `public static String toHexString(int i)`   |             得到十六进制              |
+|    `public static int parseInt(String s)`    | 将字符串类型的整数转为`int`类型的整数 |
+
+## 11、常见算法
+
+### 11.3 排序算法
+
+### 11.4 字符串匹配算法
+
+### 11.5 常见算法的API-Arrays
+
+## 12、Stream流
+
+## 13、异常
+
+## 14、File
+
+## 15、IO流
+
+## 16、多线程&JUC
+
+## 17、网络编程
+
+## 18、反射
