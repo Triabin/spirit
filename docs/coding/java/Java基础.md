@@ -3401,13 +3401,164 @@ public class StringDemo {
 * 数组可以存基本数据类型和引用数据类型，集合只能存储引用数据类型；
 * 数组长度固定，集合长度可变
 
-### 9.1 集合的基本使用
+### 9.1 Java中集合的体系结构
 
-<img src="https://yanglukuan.github.io/images/arrayList/Collections.png" alt="Java集合框架" align="left" />
+![image-20260115173710728](https://gitee.com/triabin/img_bed/raw/master/2026/01/15/df5e93e64ebfc88cf64daa79bcd782ed-image-20260115173710728.png)
 
 <div style="clear: both;"></div>
 
-在Java中，所有集合均实现自接口`java.util.Collection`，并且默认实现了很多种集合，每种集合都有其各自功能和特点，在节中，首先学习使用以后应用最广泛集合之一的`java.util.ArrayList`。
+Java中有很多种集合，但是总体上可以分为两类，以`java.util.Collection`接口为首的单列集合和以`java.util.Map`接口为首的双列集合。
+
+单列集合：每次添加元素只有一个元素，或者说加入的数据只有“一列”
+
+双列集合：每次添加元素都是一个键值对，加入的数据有“两列”
+
+### 9.2 Collection系列集合
+
+以下为`java.util.Collection`接口在JDK中的实际继承关系图：
+
+<img src="https://yanglukuan.github.io/images/arrayList/Collections.png" alt="Java集合框架"/>
+
+<div style="clear: both;"></div>
+
+但是我们暂时需要学的只有两大类，一个是`java.util.List`接口下的，一个是`java.util.Set`接口下的：
+
+![image-20260115184028417](https://gitee.com/triabin/img_bed/raw/master/2026/01/15/52aa605442605e7ad204fb998b2f5480-image-20260115184028417.png)
+
+<div style="clear: both;"></div>
+
+`List`系列集合：添加的元素有序、可重复、有索引，当然这里的有序指的是存放顺序，其中`Vector`基本已经弃用。
+
+`Set`系列集合：添加的元素无序、不可重复、没有索引。
+
+`Collection`是单列集合的祖宗接口，它的功能是全部单列集合都可以继承使用的。常见方法：
+
+|            方法名            |               说明               |
+| :--------------------------: | :------------------------------: |
+|  `public boolean add(E e)`   |   把指定的对象添加到当前集合中   |
+|    `public void clear()`     |       清空集合中所有的元素       |
+| `public boolean remove(E e)` |   把给定的对象在当前集合中删除   |
+| `public boolean contains()`  | 判断当前集合中是否包含给定的对象 |
+|  `public boolean isEmpty()`  |       判断当前集合是否为空       |
+|     `public int size()`      | 返回集合中元素的个数/集合的长度  |
+
+使用说明：
+
+* `public boolean add(E e)`，在`List`集合中，这个方法始终返回`true`，因为它是允许重复的，如果是`Set`集合，当重复添加时，因为不允许重复，会导致添加元素失败。
+* `public boolean remove(E e)`，因为是`Collection`中定义的通用方法，而`Set`集合中没有索引，所以只能通过元素进行删除，返回一个`boolean`类型的值，不存在的时候会删除失败。
+* `public boolean contains()`，底层依赖`equals()`方法进行比较，如果是自定义的对象，注意重写`equals`方法。
+
+`Collection`的遍历方式：从`Collection`继承关系中可以看到，它实现了`Iterable`接口，因此它可以通过迭代器遍历，此外还有增强for循环、Lambda表达式等遍历方式。（普通for循环只有`List`系列集合能使用，`Set`系列集合没有索引无法使用）
+
+* 迭代器遍历：迭代器在Java中的类是`java.util.Iterator`，迭代器是集合专用的遍历方式，它不依赖索引。由于`Collection`继承了`Iterable`接口，因此它的所有实现类都必须重写`Iterator<T> iterator();`方法，调用该方法即可返回`Iterator`对象，默认指向当前集合的0索引。`Iterator`中常用的方法：
+
+  |          方法名称          |                             说明                             |
+  | :------------------------: | :----------------------------------------------------------: |
+  | `public boolean hasNext()` | 判断当前位置是否有元素，有元素返回`true`，没有元素返回`false` |
+  |     `public E next()`      |       获取当前位置的元素，并将迭代器对象移向下一个位置       |
+  |   `public void remove()`   |        利用迭代器，删除集合中当前迭代器指针指向的元素        |
+
+  使用说明：`Iterator`接口的实现类中，使用字段`cursor`记录迭代器当前指向的索引，`lastRet`记录上次取值的索引，每当调用`next()`方法的时候，将`cursor`对应的索引值取出，`cursor`的值赋值给`lastRet`，再将`cursor`加1，有了这些逻辑，当调用`hasNext()`方法的时候，直接判断`cursor`是否等于集合的长度即可，如果相等则代表已经没有下一位了，不能再调用`next`，不相等则还有下一位元素，可以直接调用`next`方法返回该索引的值。
+
+  注意事项：
+
+  * 当指针到达末尾，再调用`next`方法，则报`NoSuchElementException`异常
+  * 迭代器遍历完毕，指针不会复位，如果想再次遍历，只能使用集合对象再次调用`iterator`方法创建一个新的迭代器对象
+  * 迭代器遍历时，不能调用集合自身的`remove`方法删除元素，但是可以调用迭代器对象的`remove`方法删除元素，该方法会去修改结合对象中的参数，避免报`ConcurrentModificationException`异常，当然，也不能添加元素。
+  * 在循环中，最好调用一次`next`方法，不然遇到边界就会触发`NoSuchElementException`异常
+  * 关于`modCount`，该字段主要用来记录集合变化次数（相当于版本号），在集合中，每`add/remove`一次，这个变量的值都会自增。在迭代器中，创建迭代器对象时，会传入并记录这个值，每次`next`都会检查一遍当前集合中的`modCount`与传入时的值是否相等，不等就抛出并发修改异常，这也是不能再迭代过程中调用集合自身的增删方法的原因
+
+* 增强for循环：底层其实就是一个迭代器，增强for循环其实就是为了简化迭代器书写的（JDK5新增），所有的单列集合和数组都能使用增强for循环来遍历，格式为`for (元素数据类型 变量名 : 数组/集合对象) { ... }`
+
+  注意事项：
+
+  * 与迭代器一样，也不能在遍历期间调用集合自身`remove`方法对其进行修改或者添加元素
+  * 增强for循环中的变量名只是一个形参，给形参重新赋值不影响集合中的元素，当然，如果是修改形参指向的对象中的属性肯定有效
+
+  > IDEA快速生成for循环代码模板：
+  >
+  >   ① `fori + 回车（在弹窗出来的时候回车）`，快速进入`for (int i = 占位; i < 占位; i++) {}`的代码模板，占位位置填完后回车即可进入下一个占位位置，不填写则是有默认值就使用默认值，没有默认值就空着（关于IDEA代码模板的编写，以后有空再详述）；
+  >
+  >   ② `数组/单列集合对象.for + 回车`，快速进入增强for循环代码模板。
+
+* Lambda表达式：JDK8引入Lambda表达式时，提供的一种更简洁直接的遍历方式，主要依托于`Iterable`接口中新增的`default void forEach(Consumer<? super T> action)`方法，该方法通过一个`Consumer`接口，接收一个用于处理可迭代对象中每一个元素的方法即可完成遍历。
+
+三种遍历方式演示：
+
+```java
+public class CollectionDemo {
+    public static void main(String[] args) {
+        Collection<Integer> list = new ArrayList<>(Arrays.asList(18, 2, 8, 50, 30, 22, 41, 44, 17, 12));
+
+        // 1. 迭代器遍历
+        System.out.print("迭代器遍历：");
+        Iterator<Integer> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            Integer item = iterator.next();
+            System.out.print(item + " ");
+        }
+        System.out.println();
+
+        // 2. 增强for循环遍历
+        System.out.print("增强for循环遍历：");
+        for (Integer item : list) {
+            System.out.print(item + " ");
+        }
+        System.out.println();
+
+        // 3. Lambda表达式遍历
+        System.out.print("Lambda表达式遍历：");
+        list.forEach(item -> System.out.print(item + " "));
+        System.out.println();
+    }
+}
+```
+
+### 9.3 List系列集合
+
+List集合特有的方法：由于`List`有索引，因此除了`Collection`中继承而来的方法外，它还多了许多索引相关的特有方法。
+
+|                方法名称                 |                  说明                  |
+| :-------------------------------------: | :------------------------------------: |
+| `public void add(int index, E element)` |   在此集合中的指定位置插入指定的元素   |
+|      `public E remove(int index)`       |       删除指定索引处的元素并返回       |
+|  `public E set(int index, E element)`   | 修改指定索引处的元素，返回被修改的元素 |
+|        `public E get(int index)`        |          返回指定索引处的元素          |
+
+使用说明：
+
+* `public void add(int index, E element)`，将元素插入指定位置，原来元素依次后移一位索引。
+* `public E remove(int index)`，如果是`Integer`类型的集合，调用`remove`方法时如果调用的是`Collection`中的`remove`方法，需要注意需要手动装箱。（调用方法的时候，如果出现了重载现象，优先调用实参跟形参类型一致的那个方法）
+
+List集合的遍历方法：除了`Collection`中的三种遍历方法，`List`集合还有另外两种遍历方式，普通for循环和列表迭代器。
+
+* 普通for循环主要依托于`List`的`get(int index)`方法和`size()`方法。
+* 列表迭代器`java.util.ListIterator`，继承`Iterator`，相比普通迭代器，它多出了获取索引和向前移动指针的以及修改元素的方法。
+
+List相关的数据结构：在学习List系列集合的具体实现之前需要先了解和其相关的几种数据结构，主要是线性数据结构栈、队列、数组和链表。关于数据结构的学习其实只需要知道数据结构“长什么样子”、如何添加和删除数据即可。
+
+* 栈`stack`：后进先出，先进后出，先存入其中的数据最后被取出来，JVM内存中的栈空间使用的就是这种结构。
+  * 数据进入栈模型过程称为压/进栈
+  * 数据离开栈模型过程成为弹/出栈
+  * 最顶部元素称为栈顶元素
+  * 最底部元素称为栈底元素
+* 队列`queue`：先进先出，后进后出，存入顺序与取出顺序相同
+  * 存入数据：入队列
+  * 取出数据：出队列
+* 数组`array`：相同类型的元素存储在连续的内存空间中，通过索引（实际上是数组对象地址的偏移量）访问元素
+  * 查询速度快，查询数据通过地址值和索引定位，查询任意数据耗时相同（移位极快）
+  * 删除效率低：要将原始数据删除，同时后面每个数据前移
+* 链表`linked list `：每个元素都是一个节点，节点之间通过“引用”相连接，引用记录了下一个节点的内存地址（迭代器对象其实本质就是一个链表）
+  * 第一个节点叫做头结点，最后节点叫做尾节点
+  * 与数组相反，由于其数据结构特性，链表查询效率低（需要遍历），增删效率高（修改节点指向即可）
+  * 特殊的链表：双向链表、环形链表（首尾相连）
+  * 相较于数组，链表不需要连续的内存区间，可以将内存中离散的内存区域使用起来
+
+> Java语言特性学习到这里，已经可以利用它去学习数据结构与算法了，甚至上[力扣](https://leetcode.cn/)去刷算法题，为了方便后续的学习，建议系统的学习数据结构与算法的知识后再学习后续内容（当然，就算不学习也能看都后续内容），至少了解一下数组与链表、栈与队列、哈希表、树、堆、图等数据结构对于后续的学习会更加轻松，以及更加容易理解“JDK的开发团队为什么这样设计”。数组与链表以及栈与队列等都比较容易理解，基本上都能一句话说清楚，但是哈希表与堆的设计就需要一定的理解了，这对于后续的优先级队列`java.util.PriorityQueue`（涉及到堆）和集合中的`java.util.HashMap`（涉及到树与哈希表以及链表）以及`java.util.HashSet`（涉及到哈希表）的底层实现逻辑的理解都有很重要的作用。
+>
+> 关于数据结构与算法的学习，推荐我见过的最简单易学的一个项目：[krahets/hello-algo](https://github.com/krahets/hello-algo)，可以直接下载他的Java版PDF文档学习。（提示：截至`hello-algo_1.3.0`版本，还没有加入`KMP`算法，该算法是用于字符串匹配的）
+
+#### ArrayList
 
 结合JDK API文档中关于这个类的构造方法和类方法列表，可以初步了解该类的使用：
 
@@ -3522,7 +3673,514 @@ public class CollectionDemo {
 }
 ```
 
-> 一旦访问到`ArrayList`中不存在的索引，也会报索引越界异常`java.lang.IndexOutOfBoundsException`
+> 一旦访问到`ArrayList`中不存在的索引，也会报索引越界异常`java.lang.IndexOutOfBoundsException`。
+
+`ArrayList`底层原理：
+
+* 利用空参构造创建集合，会在底层创建一个默认长度为0的数组`elementData`，初始化成员变量`size`为0。
+* 添加第一个元素时，底层会创建一个新的长度为10的数组，并在数组的`size++`位置存入第一个元素（`size`既表示下一个元素在数组中的索引，也表示集合长度）。
+* 存满时，数组将扩容1.5倍（创建新数组，拷贝旧数据）。
+* 如果一次添加多个元素并且1.5倍还放不下，则新建的数组长度以实际为准。
+* 如果利用有参构造方法`public ArrayList(int initialCapacity)`创建集合，则是直接先创建长度为`initialCapacity`数组，可以有效避免中间的扩容操作，节约性能。
+* 如果利用有参构造方法`public ArrayList(Collection<? extends E> c)`创建集合，则是将传入的集合`c`转为数组，再赋给`elementData`。
+
+扩容源码分析：
+
+* 调用空参`grow()`，空参中调用有参`grow(size + 1)`；
+
+* `size + 1`作为最小需要扩容的空间，如果老容量不满足条件`oldCapacity > 0 || elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA`，则表示第一次扩容，直接扩容为`new Object[Math.max(DEFAULT_CAPACITY, minCapacity)]`即可，其中`DEFAULTCAPACITY_EMPTY_ELEMENTDATA`表示空参构造创建时初始化的默认空数组；
+
+* 如果满足条件`oldCapacity > 0 || elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA`，则调用`int newCapacity = ArraysSupport.newLength(oldCapacity, minCapacity - oldCapacity, oldCapacity >> 1);`，然后利用`Arrays.copyOf(elementData, newCapacity)`复制老数据。其中`newLength`方法体为：
+
+  ```java
+  public static int newLength(int oldLength, int minGrowth, int prefGrowth) {
+      // preconditions not checked because of inlining
+      // assert oldLength >= 0
+      // assert minGrowth > 0
+  
+      int prefLength = oldLength + Math.max(minGrowth, prefGrowth); // might overflow
+      if (0 < prefLength && prefLength <= SOFT_MAX_ARRAY_LENGTH) {
+          return prefLength;
+      } else {
+          // put code cold in a separate method
+          return hugeLength(oldLength, minGrowth);
+      }
+  }
+  ```
+
+  其中，`int prefLength = oldLength + Math.max(minGrowth, prefGrowth);`表示扩容量为最小需要扩容容量和默认扩容容量中的较大值。而传参中的`oldCapacity >> 1`表示`oldCapacity`的一半，这也是默认扩容1.5倍的原因。
+
+#### LinkedList
+
+`java.util.LinkedList`底层是一个双向链表，查询慢，增删快，但是如果操作的是首尾元素，速度也是极快的，因此`LinkedList`本身多了很多直接操作首尾元素的特有API：
+
+|          特有方法           |               说明               |
+| :-------------------------: | :------------------------------: |
+| `public void addFirst(E e)` |    在该列表开头插入指定的元素    |
+| `public void addLast(E e)`  |  将指定的元素追加到此列表的末尾  |
+|    `public E getFirst()`    |     返回此列表中的第一个元素     |
+|    `public E getLast()`     |    返回此列表中的最后一个元素    |
+|  `public E removeFirst()`   |  从此列表中删除并返回第一个元素  |
+|   `public E removeLast()`   | 从此列表中删除并返回最后一个元素 |
+
+当然，这些API了解即可，用得较少，有`Collection`和`List`中的那些API已经基本够用了。
+
+由于`LinkedList`是一个双向链表，因此它的每个节点主要有三个部分，即节点自身数据`E item`、下一个节点的地址`Node<E> next`和前一个节点的地址`Node<E> prev`。
+
+底层原理：
+
+* 维护了三个成员变量，`transient int size = 0;`、`transient Node<E> first;`、`transient Node<E> last;`用来存储链表大小、头结点和尾节点。（`transient`关键字修饰的成员变量不会被序列化，既不会随着网络传输，包括数据库的IO。`Node`为`LinkedList`私有化内部类）
+* 调用`add`方法时，底层调用了`linkLast`方法，直接操作尾节点的`next`指向要添加的元素以及将要添加元素创建节点的`prev`指向尾节点`final Node<E> newNode = new Node(last, e, null);`，然后修改尾节点为新创建的节点`last = newNode;`。
+* 此外，底层也有相应的`linkBefore`方法来操作头结点。
+
+### 9.4 泛型
+
+泛型：是JDK5引入的特性，可以在编译阶段约束操作的数据类型，并进行检查，格式为`<数据类型>`。
+
+注意：泛型只支持引用数据类型。
+
+在引入泛型之前，集合中可以加入任意类型数据，导致了在使用集合时还需要强转数据，否则无法使用存入的实际数据类型的特有方法，只能使用`Object`中的方法。但是每次强转既麻烦又不安全。
+
+泛型的好处：
+
+* 统一数据类型
+* 把运行时的问题提前到编译时，避免了强制类型转换可能出现的异常
+
+扩展知识点：Java中泛型是伪泛型，前面提到的集合底层原理时，其中的`elementData`数组实际上就是`Ojbect`数组，只不过在取的时候进行了强转`return (E) elementData[index];`，之所以这样设计，最初也是为了向上兼容，因为当时已经有很多Java项目在运行，所以需要兼容旧的代码。
+
+泛型使用细节：
+
+* 泛型中不能写基本数据类型
+* 指定泛型的具体类型后，传递数据时，可以传入该类型或者其子类型
+* 如果不写泛型，类型默认是Object
+
+泛型的的使用：泛型可以在很多地方进行定义，它可以定义在类后面（泛型类）、方法上面（泛型方法）和接口后面（泛型接口）。
+
+#### 泛型类
+
+使用场景：当一个类中，有变量的数据类型不确定时，就可以定义带有泛型的类，格式为`修饰符 class 类名<类型1, 类型2, ...> {}`，例如前文中的`ArrayList`其源码为`public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable {`，当创建`ArrayList`对象的时候，`E`代表的类型才被确定，这里的`E`可以理解为一个变量或者说占位符，但是这个变量不是用来记录数据的，而是用来记录类型的。
+
+类后面声明的泛型，在整个类中都可使用。
+
+> 常用泛型变量：
+>
+> * `T`：Type，无意义的泛型类型最常用
+> * `E`：Element，一般用来表示元素类型
+> * `K`：key，一般用来表示键值对中的键
+> * `V`：value，一般用来表示值
+
+应用举例：定义一个网络响应的类。
+
+```java
+package com.triabin.ideasy_server.common.dto;
+
+import lombok.Getter;
+
+/**
+ * 类描述：前后端交互响应类
+ * @author Triabin
+ * @date 2021-07-14 13:46:20
+ */
+@Getter
+public class Response<T> {
+
+    /**
+     * 响应码，说明：响应码最好使用Integer，因为null和0的含义不一样
+     */
+    private Integer code;
+
+    /**
+     * 提示信息
+     */
+    private String msg;
+
+    /**
+     * 响应携带数据
+     */
+    private T data;
+
+    public Response(Integer code, String msg, T data) {
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
+    }
+
+    public static <T> Response<T> success() {
+        return new Response<>(200, "success", null);
+    }
+
+    public static <T> Response<T> success(T data) {
+        return new Response<>(200, "success", data);
+    }
+
+    public static <T> Response<T> success(String msg, T data) {
+        return new Response<>(200, msg, data);
+    }
+
+    public static <T> Response<T> fail() {
+        return new Response<>(400, "fail", null);
+    }
+
+    public static <T> Response<T> fail(String msg) {
+        return new Response<>(400, msg, null);
+    }
+
+    public static <T> Response<T> error() {
+        return new Response<>(500, "error", null);
+    }
+
+    public static <T> Response<T> error(String msg) {
+        return new Response<>(500, msg, null);
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public Response<T> setCode(Integer code) {
+        this.code = code;
+        return this;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public Response<T> setMsg(String msg) {
+        this.msg = msg;
+        return this;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public Response<T> setData(T data) {
+        this.data = data;
+        return this;
+    }
+}
+```
+
+#### 泛型方法
+
+方法中，参数列表中如果有参数的数据类型不确定，如果在泛型类中并且不确定的类型恰好是类上的泛型，则可以直接使用泛型类的泛型，如果不在泛型类的类型列表中，则可以在方法上声明泛型，格式为`修饰符 <类型1，类型2, ...> 返回值类型 方法名(类型, 变量名) { ... }`。
+
+方法上面声明的泛型，只在方法中可以使用。
+
+定义一个静态方法`getList`，用来通过数组直接获取`ArrayList`对象。
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class ListUtils {
+    private ListUtils() {}
+    
+    @SafeVarargs
+    public static <E> ArrayList<E> getList(E... elements) {
+        return new ArrayList<>(Arrays.asList(elements));
+    }
+}
+```
+
+```java
+// 使用：
+public class GenericsDemo {
+    public static void main(String[] args) {
+        List<Integer> list = ListUtils.getList(1, 2, 3, 4, 5, 6, 7, 8);
+        System.out.println(list); // [1, 2, 3, 4, 5, 6, 7, 8]
+    }
+}
+```
+
+> `(E… elements)`：表示可变参数，即只要是`E`类型的参数，你写多少个都行，最终数据都存入指定的变量`elements`中，数据类型为数组。
+
+#### 泛型接口
+
+接口中有不确定的类型时，就可以使用泛型接口，格式为`修饰符 interface 接口名<类型1, 类型2, ...> {}`。对于泛型接口的声明其实与泛型类的声明相差不大，对于泛型接口更重要的是如何去使用一个带泛型的接口：
+
+* 实现类给出具体类型：`public class Clazz implements GenericsInterface<具体类型> {...}`，实现类中就直接使用具体类型，不再使用泛型。
+* 实现类延续泛型，创建对象时再确定：`public class Clazz<泛型列表> implements GenericsInterface<泛型列表> {...}`，就和普通泛型类使用一样了。
+
+#### 泛型的继承和通配符
+
+泛型不具备继承性，但是数据具备继承性。
+
+当一个方法`public static void method(List<Perent> list) `，参数列表中存在参数`List<Perent> list`，如果想要传入其子类集合`List<Son> list`，方法是不允许的，但是如果利用泛型将方法定义为`public static <E> void method(List<E> list)`，方法则变成了可以传入任意类型的集合，而不是**只传入自身以及和自身有继承关系的类**，于是就引入了泛型的通配符来`?`，`?`表示不确定的类型，它可以对类型进行限定：
+
+* `? extends E`，表示可以传递`E`或者`E`所有的子孙类；
+* `? super E`，表示可以传递`E`或者`E`所有的父类类型。
+
+例如上述`public static void method(List<Perent> list)`方法的问题可利用通配符和限定符解决：`public static void method(List<? extends Perent> list)`。
+
+> 注意：限定符`extends`和`super`不仅是通配符`?`可以用，普通的泛型也可以用。
+
+### 9.5 Set系列集合
+
+Set系列集合特性：
+
+* 无序：存取顺序不一致
+* 不重复：可以去重
+* 无索引：没有带索引的方法，所以不能使用普通for循环遍历，也不能通过索引获取元素
+
+Set序列集合实现类及特点：
+
+* HashSet：无序、不重复、无索引
+* LinkedHashSet：有序、不重复、无索引
+* TreeSet：可排序、不重复、无索引
+
+> Set接口中的方法基本上与Collection的API一致，所以基本上没有特有方法。
+
+#### 相关数据结构
+
+在学习`Set`系列集合之前，需要先了解`Set`系列集合涉及到的非线性数据结构——树，包括二叉树、二叉查找树、平衡二叉树和红黑树的概念。
+
+**二叉树**`binary tree`：是一种非线性数据结构，代表“祖先”与“后代”之间的派生关系，体现了“一分为二”的分治逻辑。与链表类似，二叉树的基本单元是节点，每个节点包含值、左子节点引用和右子节点引用。
+
+![image-20260120162950349](https://gitee.com/triabin/img_bed/raw/master/2026/01/20/6695e84fc4959976b0cc230e8b47603c-image-20260120162950349.png)
+
+<div style="clear: both;"></div>
+
+二叉树节点内部结构：父节点地址、值、左子节点地址、右子节点地址。
+
+二叉树常见术语：
+
+* 根节点`root node`：位于二叉树顶层的节点，没有父节点
+* 叶节点`leaf node`：，没有子节点的节点，其两个指针均指向`null`
+* 边`edge`：连接两个节点的线段，即节点引用（指针）
+* （节点所在的）层`level`：从顶至底递增，根节点所在层为1
+* 度`degree`：节点的子节点数量，二叉树中，度的取值范围为0、1、2
+* 二叉树的高度`height`：从根节点到最远叶节点所经过的边的数量
+* 节点的深度`depth`：从根节点到该节点所经过的边的数量
+* 节点的高度`height`：从距离该节点最远的叶节点到该节点所经过的边的数量
+
+二叉树的遍历（代码实现略）：
+
+* 前序遍历：从根节点开始，按照当前节点，左子结点，右子节点的顺序遍历
+* 中序遍历：从最左边的子节点开始，然后按照左子结点，当前节点，右子节点的顺序遍历（最常用）
+* 后序遍历：从最左边的子节点开始，然后按照左子结点，右子节点，当前节点的顺序遍历
+* 层序遍历：从根节点开始，一层一层的遍历
+
+> 说明
+>
+> ① 关于前中后序遍历，只需要记住当前节点位置即可记住特性，即当前节点在前面就是前序遍历，在中间就是中序遍历，在后面就是后序遍历，不存在从右往左这种反人类遍历。
+>
+> ② 中序遍历最常用，在二叉查找树中，按照中序遍历的顺序遍历出来的数据刚好从小到大。
+
+二叉树的弊端：内部数据没有要求，没有任何规律可言，不利于查找。
+
+**二叉查找树:** 又称二叉排序树、二叉搜索树，满足任意节点左子节点小于当前节点，右子节点大于当前节点的二叉树就是二叉查找树。
+
+* 添加数据规则：小的存左边，大的存右边，一样的不存。添加过程为从根节点比较，没有根节点就将自己作为根节点，比当前节点小就存入左子结点，比当前节点大就存入右子节点，如果左（右）子节点上已经有元素，就继续比较，直到存储成功为止。
+* 查找规则：根据添加数据的规则查找即可。
+* 弊端：如果遇到特殊数据，二叉查找树有退化成链表的可能，例如如果按顺序添加从小到大排列的数字，那么到最后就变成了只有右子树的二叉搜索树，即完全退化成了链表。
+
+**二叉平衡树:** 任意节点左右子树高度差不超过1的二叉搜索树。
+
+平衡二叉树保持平衡的方式——旋转机制：
+
+* 触发时机：当添加一个节点后，该树不再是一颗平衡二叉树。
+
+* 确定支点：从添加节点开始，不断往父节点找不平衡的节点（不满足平衡二叉树条件的点）。
+
+* 左旋：以不平衡的点作为支点，将原来的右子节点晋升到支点所在位置，把支点左旋降级，变成晋升节点的左子结点；如果支点右子节点有自己的左子结点，那么旋转后，要将原右子节点的左子结点转给降级到左子结点的支点作为其右子节点（这个被转让的左子结点原先在支点右侧，一定比它大，所以作为右子节点刚好合适也不会占用其左子结点位置）。
+
+  案例：
+
+  ![image-20260122134906508](https://gitee.com/triabin/img_bed/raw/master/2026/01/22/5b07d2acda93cef2b6e22aa3b064e662-image-20260122134906508.png)
+
+  <div style="clear: both;"></div>
+
+  如上图案例（左）：当添加节点`12`后，向上逐级检查，到节点`10`，发现该节点左侧高度为0，右侧高度为2，不再符合平衡二叉树条件，对其以`10`为支点进行左旋，将其右节点`11`晋升到支点位置，支点左旋降级为晋升节点`11`的左节点。
+
+  特殊情况（上图案例右）：当添加节点`12`后，向上逐级检查，发现根节点`7`不再满足平衡二叉树条件，于是以`7`为支点进行左旋，将右节点`10`晋升到`7`的位置，支点`7`左旋降级为`10`的左节点，但是`10`原先是有左子结点的，于是将`10`原先左子结点转给降级后的`7`作为右子节点。
+
+* 右旋：和左旋相反即可。
+
+平衡二叉树触发旋转的四种情况：
+
+* 左左：当根节点左子树的左子树有节点插入，导致二叉树不平衡。`一次右旋解决`
+
+  <img src="https://gitee.com/triabin/img_bed/raw/master/2026/01/22/8e4dbed4c28c8466f05d944d4200dfa9-image-20260122140055782.png" alt="image-20260122140055782" align="left" />
+
+  <div style="clear: both;"></div>
+
+* 左右：当根节点左子树的右子树有节点插入，导致二叉树不平衡。`先局部左旋，再整体右旋`
+
+  <img src="https://gitee.com/triabin/img_bed/raw/master/2026/01/22/f59193a59b04c4a07f8102455bfb09b7-image-20260122140223496.png" alt="image-20260122140223496" align="left" />
+
+  <div style="clear: both;"></div>
+
+* 右右：当根节点右子树的右子树有节点插入，导致二叉树不平衡。`一次左旋解决`
+
+  <img src="https://gitee.com/triabin/img_bed/raw/master/2026/01/22/b0c5dfe7fa8220e3bf069818017ddb00-image-20260122140912639.png" align="left"/>
+
+  <div style="clear: both;"></div>
+
+* 右左：当根节点右子树的左子树有节点插入，导致二叉树不平衡。`先局部右旋，再整体左旋`
+
+  <img src="https://gitee.com/triabin/img_bed/raw/master/2026/01/22/51f2688ab07a19fb6221c3c645ae9295-image-20260122141140511.png" alt="image-20260122141140511" align="left" />
+
+  <div style="clear: both;"></div>
+
+**红黑树:** 红黑树是一种自平衡的二叉查找树，刚出现时称为“平衡二叉B树”，后改为红黑树。是一种特殊的二叉查找树，红黑树的每一个节点上都有存储位表示节点的颜色，每一个节点可以是红或黑，红黑树不是高度平衡的，它的平衡是通过“红黑规则”进行实现的。
+
+![image-20260122141734283](https://gitee.com/triabin/img_bed/raw/master/2026/01/22/00348b157d3cf4494200157c6ff784d0-image-20260122141734283.png)
+
+<div style="clear: both;"></div>
+
+平衡二叉树弊端：当左右子树高度差超过1时就进行旋转，旋转操作过于频繁，性能消耗大。
+
+红黑树改进：是一个二叉查找树，但不是高度平衡的二叉查找树，需要触发特有的**红黑规则**才会触发旋转。
+
+红黑规则：
+
+* 每一个节点都是红色或者黑色（相较于二叉树节点，红黑树节点多一个颜色属性）
+* 根节点必须是黑色
+* 如果一个节点没有子节点或父节点，则该节点相应的子/父节点指针属性值为`Nil`，这些`Nil`视为叶节点，每个叶节点（`Nil`）是黑色的
+* 如果某一个节点是红色，那么它的子节点必须是黑色，不能出现两个红色节点相连的情况
+* 对每一个节点，从该节点到其所有后代节点的简单路径上，均包含相同数目的黑色节点
+
+红黑树添加节点的规则（节点颜色默认为红，效率高，因为能有效减少颜色调整次数）：
+
+![image-20260122143858822](https://gitee.com/triabin/img_bed/raw/master/2026/01/22/eab426cc58c19419033820382de4583a-image-20260122143858822.png)
+
+<div style="clear: both;"></div>
+
+这套处理方案的使用，使得红黑树的增删改查性能都很好，因为其跟多的是修改节点颜色（修改属性值而已），旋转操作相对平衡二叉树少得多。
+
+#### HashSet
+
+`java.util.HashSet`，由于它没有特有的API，所以只需要了解学习其底层原理即可：`HashSet`集合底层采用哈希表存储数据，哈希表是一种对于增删改查数据性能都较好的结构。
+
+哈希表的组成：
+
+* JDK8之前：数组+链表
+* JDK8开始：数组+链表+红黑树
+
+哈希表`hash table`：又称散列表，是通过哈希函数计算出对象的哈希值（单向），将对象与一个唯一确定的数值建立对应关系并存储的一种数据结构。举例：如果将存入集合对象计算出哈希值后利用哈希值作为数组索引，然后直接将对象存入数组，这样就相当于给对象创建了一个哈希表。
+
+哈希值：对象的整数表现形式。
+
+* 根据`hashCode`方法算出来的`int`类型的整数
+* 该方法定义在`java.lang.Object`类中，所有对象都可以调用，默认使用地址值进行计算
+* 一般情况下，会重写`hashCode`方法，利用对象内部的属性值计算哈希值
+
+对象的哈希值特点：
+
+* 如果没有重写`hashCode`方法，不同对象计算出的哈希值是不同的
+* 如果已经重写`hashCode`方法，不同的对象只要属性相同，计算出的哈希值就是一样的
+* 在小部分情况下，不同的属性值或者不同的地址值计算出来的哈希值也有可能是一样的（哈希碰撞）
+
+基于哈希表的特性，在实际的使用中（例如Java中`java.util.HashSet`类的设计），需要考虑哈希算法（计算哈希值的函数）、哈希表容量`capacity`、触发扩容的负载因子`loadThres`以及扩容倍数等属性的设计。（关于哈希表的系统学习，还是建议移步[krahets/hello-algo](https://github.com/krahets/hello-algo)的第六章 哈希表）
+
+`HashSet`底层原理：
+
+* 创建一个默认长度为16，默认加载因子为0.75的数组，数组名为`table`
+* 根据元素的哈希值和数组长度，计算出应存入的数组索引位置`int index = (数组长度 - 1) & 哈希值;`
+* 判断对应索引位置是否为空， 如果为空直接存入
+* 如果不为空（发生哈希冲突），则表示有元素，此时调用存入对象的`equals`方法比较属性值
+* 如果属性值也相同，则不存入数组
+* 如果属性值不同，则存入数组，形成链表。JDK8以前，新元素存入数组，老元素挂在新元素下面；JDK8以后，新元素直接挂在老元素下面
+* 如果该位置本来就已经是链表，则挨个调用`equals`进行比较，都返回`false`才会添加
+* 如果添加后`table`中的元素达到`16 x 0.75 = 12`的时候，数组就会扩容2倍
+* 当链表长度大于8且数组长度大于等于64，当前链表就转为红黑树（JDK8 later）
+
+注意：
+
+* JDK8以后，当链表长度**超过8**，而且数组长度**大于等于64**时，自动转为红黑树
+* 如果集合中存储的是自定义对象，必须要重写`equals`和`hashCode`方法（这也是前文说自定义对象几乎都要重写这两个方法的原因），这两个方法是去重的核心
+
+基于上面这一套机制，所以`HashSet`才有无序、无索引、不可重复等特点。
+
+#### LinkedHashSet
+
+`java.util.LinkedHashSet`，是`HashSet`子类，与`HashSet`的区别就是它的存取是有序的，这里的有序指的是存储和取出元素的顺序一致。
+
+原理：底层数据结构依然是哈希表，只是每个元素又额外多了一个双链表的机制记录存储的顺序。
+
+#### TreeSet
+
+`java.util.TreeSet`，与普通Set集合相比，它是可排序的，一般按照元素的默认规则从小到大排序，也可以通过构造方法传入排序所需的`java.util.Comparator`接口实现排序。
+
+之所以默认是从小到大，是因为`TreeSet`集合底层是基于红黑树的数据结构实现排序的，增删改查性能都比较好。
+
+`TreeSet`集合默认的排序规则：
+
+* 对于数值类型：`Integer`、`Double`，默认按照从小到大的顺序排序
+* 对于字符、字符串类型，按照字符在ASCII码表中的数字升序排序，如果是字符，直接比较即可，如果是字符串，则每个字符逐一比较，直到比出大小为止（后面不管有什么能容都不再比较）
+
+`TreeSet`的两种比较方式：
+
+* `java.util.Comparable`接口的使用（默认/自然排序）：可以将要比较的类直接实现该接口，重写其`compareTo()`方法，然后直接存入`TreeSet`中即可自然排序。
+
+   ```java
+   public class Student implements Comparable<Student> {
+       private String name;
+       private int age;
+   
+       public Student() {
+       }
+   
+       public Student(String name, int age) {
+           this.name = name;
+           this.age = age;
+       }
+   
+       public String getName() {
+           return name;
+       }
+   
+       public Student setName(String name) {
+           this.name = name;
+           return this;
+       }
+   
+       public int getAge() {
+           return age;
+       }
+   
+       public Student setAge(int age) {
+           this.age = age;
+           return this;
+       }
+   
+       @Override
+       public int compareTo(Student o) {
+           // 按照年龄升序排序
+           return this.getAge() - o.getAge();
+       }
+   }
+   ```
+   
+   将该类存入`TreeSet`中时，运行`compareTo`方法进行比较，其中，`this`表示当前要添加的元素，`o`表示已经在红黑树中存在的元素。对于返回值，如果是负数，就认为要添加的元素是小的，存入节点左边；如果是正数，认为要添加的元素是大的，存入节点右边；如果是0，认为要添加的元素已经存在，直接舍弃不存。
+   
+* `java.util.Comparator`接口的使用（比较器排序）：可以在创建`TreeSet`对象的时候，传入比较器`Compartor`指定比较规则。（这样对于要比较的对象没有侵入性且更加灵活）
+
+   ```java
+   import java.util.Comparator;
+   import java.util.Set;
+   import java.util.TreeSet;
+   
+   public class TreeSetDemo {
+       public static void main(String[] args) {
+           Set<Student> set = new TreeSet<>(Comparator.comparing(Student::getAge));
+       }
+   }
+   ```
+
+   这样也能达到和上面实现`Comparable`接口同样的效果，`comparing`方法会返回一个指定比较方法的`Comparator`接口。
+
+> `HashSet`底层其实是创建了一个`HashMap`，只不过所有的`key`都指向同一个`value`，对于`HashMap`的见后续。
+
+### 9.6 双列集合
+
+#### HashMap
+
+#### LinkedHashMap
+
+#### TreeMap
 
 ## 10、常用API
 
@@ -4278,11 +4936,373 @@ JDK8新增了10个时间相关的类，可以分为四个种类，时间日期�
 
 ## 11、常见算法
 
+说到算法，再次强烈建议学习[krahets/hello-algo](https://github.com/krahets/hello-algo)项目中的算法。
+
+### 11.1 复杂度
+
+算法效率评估：在算法的设计中，首先需要找到问题的解法，在这个基础上再找到算法的最优解法，即找到尽可能高效的解法。在能够解决问题的前提下，算法效率就是衡量算法优劣的主要评价指标，它包括两个维度：
+
+* 时间效率：算法运行时间的长短。
+* 空间效率：算法占用内存空间的大小。
+
+#### 时间复杂度
+
+时间复杂度并不是要去统计算法的具体运行时间，因为这既不合理也不现实，算法在不同的编程语言、不同的操作系统、不同的运行环境下，最终的运行时间是不一样的，并且代码中具体的操作，例如加减乘除、移位、打印等操作的时间也各不相同，因为很难获悉每种操作的运行时间，这给预估的过程带来了极大的困难，并且如果将算法的复杂度与编程语言/环境/系统绑定，那么复杂度的意义将大大减小。
+
+> 一些常规操作耗时：`+`需要1纳秒，`*`需要10纳秒，打印需要5纳秒。
+
+时间复杂度分析统计的不是算法运行时间，**而是算法运行时间随着数据量变大时的增长趋势**。举例：
+
+```java
+// 算法 A 的时间复杂度：常数阶
+void algorithm_A(int n) {
+	System.out.println(0);
+}
+// 算法 B 的时间复杂度：线性阶
+void algorithm_B(int n) {
+    for (int i = 0; i < n; i++) {
+    	System.out.println(0);
+    }
+}
+// 算法 C 的时间复杂度：常数阶
+void algorithm_C(int n) {
+    for (int i = 0; i < 1000000; i++) {
+    	System.out.println(0);
+    }
+}
+```
+
+* 算法`A`只有一个打印操作，不管输入的数据`n`是多少，算法都只执行固定的次数即可结束，这样的时间复杂度称为“常数阶”
+* 算法`B`中打印操作需要执行`n`次，算法的运行时间随着输入数据`n`的增大呈线性增长，这样的时间复杂度称为“线性阶”
+* 算法`C`中打印操作需要执行一百万次，且不管输入的数据`n`是多少，算法都只执行固定的次数`1,000,000`，所以时间复杂度也是“常数阶”
+
+相较于直接统计算法的运行时间，时间复杂度的分析能够摒弃外在的代码运行环境影响，有效地评估算法效率，并且简化了算法的推算过程，简单地将所有计算操作的执行时间都视为相同的“单位时间”（反正都是常数）。
+
+局限性：由于脱离了实际的执行过程，对于算法实际执行效率的把控降低。例如上述算法中，`B`和`C`，尽管`C`的算法复杂度比`B`高，但是当输入数据量`n < 1000000`时，算法`B`的实际执行效率是高于算法`C`的。
+
+给定一个输入大小为`n`的函数：
+
+```java
+void algorithm(int n) {
+    int a = 1; // +1
+    a = a + 1; // +1
+    a = a * 2; // +1
+    // 循环 n 次
+    for (int i = 0; i < n; i++) { // +1（每轮都执行 i ++）
+    	System.out.println(0); // +1
+    }
+}
+```
+
+设算法的操作数量是一个关于输入数据大小`n`的函数，记为$T(n)$，则以上函数的操作数量为：
+$$
+T(n) = 3 + 2n
+$$
+$T(n)$ 是一次函数，说明其运行时间的增长趋势是线性的，因此它的时间复杂度也是线性阶。
+
+线性阶的时间复杂度记为$O(n)$，这个数学符号称为大`𝑂`记号（big‑𝑂 notation），表示函数 $𝑇(𝑛)$ 的**渐近上界**（asymptotic upper bound）。时间复杂度分析本质上是计算“操作数量 $𝑇(𝑛)$”的渐近上界，它具有明确的数学定义：若存在正实数 $c$ 和实数 $n_{0}$，使得对于所有的 $n > n_{0}$，均有 $T(n) \leq c \cdot f(n)$，则可认为 $f(n)$ 给出了 $T(n)$ 的一个渐进上界，记为 $T(n) = O(f(n))$。
+
+例如$T(n) = 3 + 2n$，一定存在正实数$c$和实数$n_{0}$使得在$n > n_{0}$区间上，$3 + 2n \leq c \cdot n$，所以$f(n) = n$其实就是$f(n) = 3 + 2n$的一个渐进上界，记为$T(n) = O(n)$。
+
+计算渐进上界就是寻找一个函数$f(n)$，使得当$n$趋于无穷大时，$T(n)$ 和 $f(n)$ 处于相同的增长级别，仅相差一个常数系数$c$。
+
+> 例：
+>
+> <img src="https://gitee.com/triabin/img_bed/raw/master/2026/01/12/190f1d28155cdb7bf72092581fc4b23d-image-20260112215220833.png" alt="image-20260112215220833" style="zoom:80%;" />
+>
+> <div style="clear: both;"></div>
+>
+> 如图，坐标系中，当$n > n_{0}$ 时，始终有 $c \cdot f(n) \geq T(n)$，此时可以认为 $f(n)$ 是 $T(n)$ 的一个渐进上界，记为 $T(n) = O(f(n))$。
+
+**推算方法**：总体分为两步，首先统计操作数量，然后判断渐进上界。
+
+* 第一步，统计操作数量，逐行从上到下统计即可，由于 $c \cdot f(n)$ 中的常数系数c可以取任意大小，因此操作数量 $T(n)$ 中的各种系数、常数项都可以忽略，因此有以下简化技巧：
+
+  ① 忽略 $T(n)$ 中的常数，因为它们都与n无关，所以对时间复杂度不产生影响。
+
+  ② 省略所有系数。例如，循环 $2n$ 次、$5n+1$ 次等，都可以简化记为n次，因为n前面的系数对时间复杂度没有影响。
+
+  ③ 循环嵌套时使用乘法。总操作数量等于外层循环和内层循环操作数量之积，每一层循环依然可以分别套用`①`和`②`中的技巧。
+
+* 第二步，判断渐进上界，时间复杂度由 $T(n)$ 中最高阶的项来决定。因为在n趋于无穷大时，最高阶的项将发挥主导作用，其他的项影响都可以忽略。
+
+  以下为不同操作数量对应的时间复杂度：
+
+  | 操作数量$T(n)$       | 时间复杂度$O(f(n))$ |
+  | -------------------- | ------------------- |
+  | 100000               | $O(1)$              |
+  | $3n+2$               | $O(n)$              |
+  | $2n^2+3n+2$          | $O(n^2)$            |
+  | $n^3+10000n^2$       | $O(n^3)$            |
+  | $2^n+10000n^{10000}$ | $O(2^n)$            |
+
+> 例举：给定以下函数，推断其时间复杂度。
+>
+> ```java
+> void algorithm(int n) {
+>     int a = 1; // 1
+>     a = a + 1; // 1
+>     // 5n+1
+>     for (int i = 0; i < 5 * n + 1; i++) {
+>         System.out.println(0);
+>     }
+>     // 2n(n+1)
+>     for (int i = 0; i < 2 * n; i++) {
+>         for (int j = 0; j < n + 1; j++) {
+>             System.out.println(0);
+>         }
+>     }
+> }
+> ```
+>
+> ① 统计操作数量
+> $$
+> \begin{aligned}
+> T(n) &= 1 + 1 + (5n + 1) + 2n(n + 1) & \text{统计操作数量}\\
+>  &= 2n^2 + 7n + 3 \\
+> T(n) &= 2n^2 + 7n & \text{忽略常数} \\
+> T(n) &= n^2 + n & \text{省略所有系数}
+> \end{aligned}
+> $$
+> ② 判断渐进上界
+> $$
+> \begin{aligned}
+> T(n) &= n^2 + n & \text{最高项为n平方} \\
+> T(n) &= O(n^2) & \text{复杂度为}O(n^2)
+> \end{aligned}
+> $$
+
+**常见的复杂度类型**：设输入数据大小为n，常见的时间复杂度类型如下图所示（按照从低到高的顺序排列）。
+
+<img src="https://gitee.com/triabin/img_bed/raw/master/2026/01/12/57215b1b62ca846236cf2c804394b3d5-image-20260112224757386.png" alt="image-20260112224757386" style="zoom:80%;" />
+
+<div style="clear: both;"></div>
+
+$$
+\begin{aligned}
+O(1) < O(logn) < O(n) < O(n \cdot logn) < O(n^2) < O(2^n) < O(n!) \\
+常数阶 < 对数阶 < 线性阶 < 线性对数阶 < 平方阶 < 指数阶 < 阶乘阶
+\end{aligned}
+$$
+
+:::warning 说明
+
+① 由于对数可以在不影响复杂度的前提下换底（数学关系：$O(log_mn) = O(\frac{log_kn}{log_km}) = O(log_kn)$），所以通常会直接省略底数，直接将对数阶记为 $O(logn)$。 
+
+② 时间复杂度只代表了算法的一种增长趋势，并不表示算法的实际运算次数函数，例如二分法法查找数据的复杂度为对数阶，但是要查找的数据可以第一次比较就找到了，也有可能最后一次比较才找到，只是如果多次运行，取其平均值接近对数阶而已，因此算法的复杂度还有最差、最佳、平均复杂度三个指标。
+
+:::
+
+#### 空间复杂度
+
+空间复杂度的推算方法与时间复杂度大致相同，只需将统计对象从“操作数量”转为“使用空间大小”。
+
+而与时间复杂度不同的是，我们通常只关注最差空间复杂度。这是因为内存空间是一项硬性要求，我们必须确保在所有输入数据下都有足够的内存空间预留。
+
+**常见类型**：设输入数据大小为n，常见的空间复杂度类型如下图所示（按照从低到高的顺序排列）。
+
+![image-20260112230604480](https://gitee.com/triabin/img_bed/raw/master/2026/01/12/df56706818d76aacc234c0b8a1b29eea-image-20260112230604480.png)
+
+<div style="clear: both;"></div>
+
+$$
+\begin{aligned}
+O(1) < O(logn) < O(n) < O(n^2) < O(2^n) \\
+常数阶 < 对数阶 < 线性阶 < 平方阶 < 指数阶
+\end{aligned}
+$$
+
+
+**权衡时间与空间**：理想情况下，我们希望算法的时间复杂度和空间复杂度都能达到最优，然而在实际情况中，同时优化时间复杂度和空间复杂度通常非常困难。**降低时间复杂度通常需要以提升空间复杂度为代价，反之亦然。** 我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”，反之则称为“以时间换空间”。选择哪种思路取决于我们更看重哪个方面。**在大多数情况下（尤其现如今硬件成本更低的市场情况），时间比空间更宝贵，因此“以空间换时间”通常是更常用的策略。**当然，在数据量很大的情况下，控制空间复杂度也非常重要。
+
+#### 迭代与递归
+
+在算法中，重复执行某个任务是很常见的，它与复杂度息息相关，从前面时间和空间复杂度的计算来看，主要计算的就是重复执行的地方，其余步骤均算作常数阶，所以必须要掌握编程中常见的用于重复执行某个任务的基本控制结构——迭代、递归。
+
+迭代其实在之前学习循环控制语句的时候已经使用过了，至于递归则是一种特殊的循环，本质是在方法体中调用本方法，这是一个非常非常重要的编程思想，不管是遍历不知结构的JSON对象还是前端中页面结构的Node节点，都非常实用。
+
+关于迭代（iteration），它是一种重复执行某个任务的控制结构，在迭代中，程序会在满足一定的条件下重复执行某段代码，直到这个条件不再满足。详见[3.3 循环结构](#33-循环结构)，这一节主要介绍递归。
+
+**递归**（recursion）是一种算法策略，通过函数调用自身来解决问题，它分为两个阶段：
+
+* 递，程序不断深入地调用自身，通常传入更小或更简化的参数，直到达到**终止条件**。
+* 归，触发终止条件后，程序从最深层的递归函数开始逐层返回，汇聚每一层的结果。
+
+递归代码主要包含三个元素：
+
+* 终止条件：用于决定什么时候由“递”转“归”。
+* 递归调用：对应“递”，函数调用自身，通常输入更小或更简化的参数。
+* 返回结果：对应“归”，将当前递归层级的结果返回至上一层。
+
+例，计算`1+2+3+...+n`：
+
+```java
+int recur(int n) {
+    // 终止条件
+    if (n == 1) {
+        return 1;
+    }
+    // 递：递归调用
+    int res = recur(n - 1);
+    // 归：返回结果
+    return n + res;
+}
+```
+
+从方法体来看，方法一直调用自己，每次在方法体内调用自己的时候都传入更小的参数`n-1`，直到`n = 1`，触发终止条件，开始一层一层的返回计算结果。当然这个求和方法也可以使用迭代来达成相同的效果，但是它们却是代表了两种完全不同的思考和解决问题的范式。
+
+```java
+// 使用迭代改写上述求和方法
+int iterSum(int n) {
+    int sum = 0;
+    for (int i = 0; i <= n; i++) {
+        sum += i;
+    }
+    return sum;
+}
+```
+
+**迭代与求和的区别**：
+
+* 解决问题的思路上，迭代是”自下而上“地解决问题，从最基础的步骤开始，然后不断重复累加这些步骤，直到任务完成，例如上述求和方法，不断地从0累加到n，得到求和结果；递归则是“自上而下”地解决问题，将原问题分解为更小的子问题，这些子问题和原问题具有相同的形式，接下来将子问题分解为更小的子问题，直到基本情况时停止（基本情况的解是已知的），例如上述的递归求和，求`0~n`的和可以分解为求`n + (0 ~ n-1)`的和，`0~n-1`的和又可以分解为求`(n-1) + (0 ~ n-2)`的和，如此不断重复，直到求`0~1`的和为1，开始逐层返回计算结果。
+* 内存上，递归通常比迭代更加耗费内存空间，因为递归会不断调用自身，在触及终止条件之前，所有的方法都在栈空间中不断堆积，而跌的所占用的内存通常在第一次循环结束时就已经确定并且不会再在迭代体内增加，因此在使用递归时明确终止条件非常非常重要，否则容易栈溢出。因为递归调用方法的额开销也导致了递归通常比迭代的时间效率更低，所以一般能用迭代就尽量用迭代，递归多用于一些注重子问题分析的情景，例如树、图、分治、回溯等，代码结构简洁清晰。
+
+::: info Tips
+
+关于递归的使用，目前主要用在遍历一些不确定深度的数据结构上，例如给定一个JSON对象，你不确定它有哪些属性，属性是JSONObject还是JSONArray还是别的数据类型，但是对于JSONObject和JSONArray又需要同样的处理方式，这时候既不知道这个对象“有多深”，又需要确保整个对象的每个字段都需要遍历到，就很适合使用递归而不是迭代了。
+
+:::
+
+### 11.2 查找算法
+
+基本查找：本质其实就是暴力查找，即按照顺序逐步遍历所有元素（没什么好说的），时间复杂度为$O(n)$。
+
+二分/折半查找：是对有序的线性数据进行的查找，每次查找都将查找范围缩小一半，直到找到目标值或查找范围为空，时间复杂度为$O(logn)$。以下为一般步骤（以从小到大的有序数组为例）：
+
+* 定义`left`和`right`表示查找范围的左右边界，起始值分别为0和数组长度-1；
+* 计算$mid = \frac{left + right}{2}$，将索引为`mid`的元素与目标值进行比较；
+* 如果相等，则找到目标值，搜索结束；
+* 如果小于目标值，则代表目标值在`mid`右侧，将`left`设为`mid + 1`，继续上述操作；
+* 如果大于目标值，则代表目标值在`mid`左侧，将`right`设为`mid - 1`，继续上述操作；
+* 如果`left`已经大于`right`（`left = right`的时候也要继续查找），还未找到目标值，则代表查找值不在数组中，搜索结束。
+
+```java
+// 二分法查找代码演示
+public int binarySearch(int[] arr, int target) {
+        int left = 0, right = arr.length - 1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (arr[mid] == target) {
+                return mid;
+            } else if (arr[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
+    }
+```
+
+二分查找法的局限性：
+
+* 数据必须是有序的，如果元数据是无需的，将其排序后再查找只能确定目标值是否存在，而找不到它在原数据中的位置；
+* 如果有重复元素，二分法找到的也不一定是第一个匹配的元素，有可能找到后面的元素。
+
+插值查找：对于那些取值分布比较均匀的有序数组，在使用二分查找的时候中间值可以不用每次都取$mid = \frac{left + right}{2}$，而是可以通过目标值`key`和数组最大最小值进行初步估计，从而快速缩小查找范围，插值公式为：
+$$
+mid = min + \frac{key - arr[min]}{arr[max] - arr[min]} \cdot (max - min)
+$$
+
+
+> 注意：如果数据分布均匀，通常情况下，插值查找的时间复杂度能达到 $O(loglogn)$，但是如果在取值分布不均匀的数据中使用，插值查找效率可能会低于二分查找，并且插值查找最差时间复杂度为$O(n)$，即每次插值都没提前命中目标，直到遍历完整个数组。
+
+斐波那契查找：对于二分法查找中的这个`mid`（查找点）的取值，除了插值，还有一种稳定的取值方法，取黄金分割点来分割查找范围，即 $mid = min + 黄金分割点左边边长度 - 1$。
+
+二分法、插值法核斐波那契法比较：
+
+|      特性      |       二分法查找（Binary Search）        |              插值查找法（Interpolation Search）              |        斐波那契查找（Fibonacci Search）        |
+| :------------: | :--------------------------------------: | :----------------------------------------------------------: | :--------------------------------------------: |
+|    核心原理    |     总是从待查找范围的正中间开始比较     |   根据目标值在查找范围内的相对位置，按比例预测其可能所在点   |  利用斐波那契数列（黄金分割比）来分割查找范围  |
+|   查找点公式   |     $mid = \frac {left + right}{2}$      | $mid = min + \frac{key - arr[min]}{arr[max] - arr[min]} \cdot (max - min)$ | $mid = left + F(k-1) - 1$ （F为斐波那契数列）  |
+| 平均时间复杂度 |                $O(logn)$                 |                如果数据均匀分布：$O(loglogn)$                |                   $O(logn)$                    |
+| 最坏时间复杂度 |                $O(logn)$                 |                            $O(n)$                            |                   $O(logn)$                    |
+|  数据分布要求  |           不敏感，只要有序即可           |          高度敏感，要求数据均匀分布才能达到最佳性能          |              不敏感，只要有序即可              |
+|      优点      |       稳定性强，通用性强，易于实现       |             在数据量大且分布均匀时，平均性能出色             | 分割操作只涉及加减法，在某些环境下效率可能更高 |
+|      缺点      | 查找点选择固定，在均匀数据中可能不是最快 |             护具分布不均时性能可能远低于二分查找             |      实现相对复杂，需要预处理斐波那契数列      |
+
+分块查找：在实际的数据中，完全无序和完全有序的数据都比较少见，并且一些数据需要**多次查找**，于是就为此设计分块查找算法。将数据分为多块（block），每一个块中的数据是无序的，但是块与块之间是有序的，这样之后每次查找某个元素的时候先确定它在哪一个块，然后在到指定块中挨个查找即可。具体实现：
+
+* 一般分为 `数字个数开根号` 个块，例如，16个数字分为4块左右。
+
+* 为块设计一个对象来记录块信息：
+
+  ```java
+  class Block {
+      private int startIndex;
+      private int endIndex;
+      private int max;
+      // ...
+  }
+  ```
+
+* 分块并存储块就相当于建立了索引表，然后将索引表和目标值以及目标数组传入并查找即可
+
+> 说明：虽然分块查找单次搜索的时间复杂度很差（肯定超过了$O(n)$），并且实现也比较复杂（分块和查找），但是如果对同一数据进行多次查找，那么总体的时间复杂度是要远高于 $O(n)$ 的，因为分块操作实际上只需要分一次，之后可以反复使用。
+>
+> 基于分块查找的这种思想，之后还演化出了哈希查找，这里就不详述了。
+
 ### 11.3 排序算法
 
-### 11.4 字符串匹配算法
+详见[十大排序算法（Java实现） ](../common/十大经典排序算法)
 
-### 11.5 常见算法的API-Arrays
+### 11.4 常见算法的API-Arrays
+
+`java.util.Arrays`类为JDK为数组专门设计的一个工具类，因此该类无法创建对象，主要提供一些静态方法对数组进行操作。（Java提供的工具类一般都是叫做`Xxxs`，以`s`结尾，例如集合的工具类`java.util.Collections`，而不是`XxxUtils`，当然，这并不绝对）
+
+常用方法：
+
+|                            方法名                            |           说明           |
+| :----------------------------------------------------------: | :----------------------: |
+|            `public static String toString(数组)`             |  把数组拼接成一个字符串  |
+|      `public static int binarySearch(数组, 目标元素值)`      |      二分法查找元素      |
+|       `public static int[] copyOf(原数组, 新数组长度)`       |         拷贝数组         |
+| `public static int[] copyOfRange(原数组, 起始索引, 结束索引)` |   拷贝数组（指定范围）   |
+|            `public static void fill(数组, 元素)`             |         填充数组         |
+|               `public static void sort(数组)`                | 按照默认方式进行数组排序 |
+|          `public static void sort(数组, 排序规则)`           |    按照指定的规则排序    |
+
+使用说明：
+
+* `public static String toString(数组)`，没什么好说的，只是为各种数据类型重载了该方法，引用数据类型则是调用其自身`toString`方法。
+
+* `public static int binarySearch(数组, 目标元素值)`，对于数组的要求不仅仅是有序，还要求是升序。另外，如果目标元素存在，则返回对应索引，不存在，则返回 `-目标元素插入点-1`，目标元素插入点即是如果数组中存在该元素，该元素应该放置的位置（升序），而之所以要用负的插入点再减1，是因为如果插入点为0，返回一个`-0`就有问题，于是就将其减1。
+
+* `public static int[] copyOf(原数组, 新数组长度)`，底层调用的是`System.arraycopy`，如果新数组长度小于老数组长度，将会按照顺序部分拷贝，如果大于老数组长度，多于位置元素将使用默认初始化值。
+
+* `public static int[] copyOfRange(原数组, 起始索引, 结束索引)`，拷贝的范围为`[from, to)`，包头不包尾，包左不包右。
+
+* `public static void fill(数组, 元素)`，将数组中的所有元素覆盖填充为指定的元素值。
+
+* `public static void sort(数组)`，默认情况下，给基本数据类型进行升序排序，底层使用的是快速排序。
+
+* `public static void sort(数组, 排序规则)`，只能给引用数据类型的数组进行排序，基本数据类型使用包装类。排序规则是一个`Comparator`接口，底层利用插入排序和二分查找法进行排序，默认把0索引的数据当做是有序的序列，1索引以后部分认为是无序的序列。操作步骤：
+
+  ① 遍历无序序列（1索引以后的部分）中的每一个元素（假设为A），对每一个元素进行插入排序处理；
+
+  ② 将A元素往有序序列中进行插入，在插入的时候，利用二分查找确定A元素插入点；
+
+  ③ 将A元素与插入点的元素进行比较，比较规则就是`Comparator`接口中的`int compare(T o1, T o2)`方法（该方法方法体由我们自定义，参数`o1`为A，参数`o2`为有序序列中的元素）；
+
+  ④ 如果返回负数，则A继续跟插入点前面的数据进行比较； 如果返回正数，则A继续跟插入点后面的数据进行比较；如果返回0，也拿着A跟后面的数据进行比较，直到能确定A的最终位置为止。评判标准是：负数表示当前要插入的元素是小的，放在前面，正数表示当前要插入的元素是大的，放在后面，为0表示当前要插入的元素等于当前元素，要放在后面（所以返回0时才要继续往后比较）。
+
+  **简单记忆:** `o1-o2`为升序，`o2-o1`为降序。
+
+:::warning 注意
+
+`Arrays`中有一个方法使用非常广泛——`public static <T> List<T> asList(T... a)`，作用是将数组转为`List`，但是一定一定要注意，该方法方法体虽然是`return new ArrayList<>(a);`，但是这里的`ArrayList`不是`java.util.ArrayList`，而是`Arrays`内部自己定义的一个私有静态类，这个类的集合对象不能被修改，因此如果有类似的需求，请务必写成`List<Xxx> list = new ArrayList<>(Arrays.asList(...));`这样的形式（使用还挺广泛的）。
+
+:::
 
 ## 12、Stream流
 
