@@ -3049,58 +3049,13 @@ public class StudentSeloution {
 >
 > 注意：数组的类型需要跟流中的类型保持一致。
 
-## 8、API&字符串
-
-面向对象其实就学两部分，如何使用别人写好的东西？自己如何设计一个类？
-
-### 8.1 API
-
-API：Application Programming Interface，即应用程序编程接口。简单理解就是别人已经写好的东西，我们不需要自己编写，直接使用即可。例如前文中使用的`Random`对象，就是Java中已经编写好的一个工具类。
-
-JavaAPI：指的就是JDK中提供的各种功能的Java类。这些类将底层的功能实现逻辑封装了起来，我们不需要关心这些类是如何实现的，只需要学习使用这些类即可。
-
-Java帮助文档使用：在Oracle官网，有完整的接口文档，将这些接口文档下载下来，然后打包成了`.CHM`文件，就可以离线进行文档的传递了。该文档中，有JDK全部的类以及类的详细说明文档，如果需要查询某个类，直接搜索类名或者到相应的包下查找即可。
-
-![image-20251225173013380](https://gitee.com/triabin/img_bed/raw/master/2025/12/25/110192666ed55e2c04d1cbd432330307-image-20251225173013380.png)
-
-<div style="clear: both;"></div>
-
-说明：`java.lang`包中存放的是Java的基础类，因此在使用这个包下的类的时候，不需要写`import`导包语句。
-
-一般使用步骤：
-* 打开API文档
-* 点击显示，并找到索引下面的输入
-* 在输入框中输入类名并点击显示
-* 查看类所在包
-* 查看类的描述
-* 查看构造方法
-* 查看成员方法
-
-例如查看之前生成随机数所用的`java.util.Random`类：
-
-![image-20251226134113331](https://gitee.com/triabin/img_bed/raw/master/2025/12/26/5aea4428e973b4924787460ffeaa55ce-image-20251226134113331.png)
-
-<div style="clear: both;"></div>
-
-:::warning 注意
-
-① `.CHM`文件在Windows系统中可以直接打开，并正常显示；
-
-② 在macOS中可以去AppStore免费下载`CHM Viewer`，用它打开，但是如果文档中有中文，有可能会遇到乱码，此时需要在软件顶部`工具栏-文本编码`中选择`Unicode (UTF-8)`（每次打开都需要选择一次）；
-
-③ JDK各个版本几乎都比较通用，所以国内使用比较广的就是JDK1.8的中文版本，因为这个版本的中文翻译做得相对详尽（虽然也是机翻，但是够看了😅），真正遇到有差异的工具类时再去官网找对应版本的文档即可（一般几乎遇不到这种情况）；
-
-④ 目前比较流行的中文版本是JDK1.8的一个帮助文档，其他版本大同小异，有需要可取Oracle官网下载，例如[JDK21](https://www.oracle.com/java/technologies/javase-jdk21-doc-downloads.html)，[JDK8中文版本](https://www.123865.com/s/VBJ0Td-0qni)。
-
-:::
-
-### 8.2 字符串
+## 8、字符串
 
 字符串，在Java中可以通过双引号字面量直接获取到字符串对象，对于字符串的操作，前文运算符中一节中已经介绍过拼接，此外，字符串的其他常用的操作还有比较、替换、截取、查找、切割、检索、加密、打乱内容、大小写转换等。
 
 字符串在开发中有着极其广泛的应用，尤其在C端，可以说这是最接近C端直接输入和现实的东西，为了方便对字符串的操作，Java中提供了`java.lang.String`、`java.lang.StringBuilder`、`java.lang.StringBuffer`、`java.util.StringJoiner`、`java.util.regex.Pattern`、`java.util.regex.Matcher`等类对方便对字符串进行操作。
 
-#### String
+### 8.1 String
 
 概述：`java.lang.String`类代表字符串，Java程序中的所有字符串文字（例如"abc"）都为此类对象。
 
@@ -3230,7 +3185,7 @@ public class StringDemo {
 * 判空：`isEmpty()`
 * 其余方法则在使用到的时候再查即可
 
-#### StringBuilder
+### 8.2 StringBuilder
 
 String的缺陷：
 
@@ -3265,7 +3220,7 @@ public class StringDemo {
 
 > 说明：Java底层对`StringBuilder`、`StringBuffer`等类做了特殊处理，在使用`println`方法打印时，不需要另转为`String`，可以直接打印。
 
-#### StringJoiner
+### 8.3 StringJoiner
 
 ```java
 public class StringDemo {
@@ -3318,7 +3273,7 @@ public class StringDemo {
 * `public int length()`
 * `public String toString()`
 
-#### 字符串原理
+### 8.4 字符串原理
 
 回顾：
 
@@ -3419,9 +3374,119 @@ public class StringDemo {
 > }
 > ```
 
+### 8.5 字符串格式化
+
+需求1：打印0\~24，不足2位数的数字（0\~9），需要在前面补0。
+
+需求2：设计一个方法，传入一个`double`型的数，要求返回保留两位小数后的原数字字符串。
+
+对于以上这些需求，都可以快速使用`String`中的静态方法`public static String format(String format, Object... args)`快速实现，该方法是`String`类中用来创建格式化的字符串以及连接多个字符串对象的API，它的使用涉及到编程中格式化的一个重要概念——占位符。
+
+对于以上`需求1`题解核心为`System.out.printf("%02d%n", num)`，`需求2`题解核心为`String.format("%.2f", num)`，这当中的`%02d`、`%n`以及`%.2f`就是占位符。
+
+**占位符说明:** 最多会有5个部分（不包含`%`），且顺序固定，格式为`%[argument_index$][flags][width][.precision]type`（方括号括起来的部分表示可选参数）。
+
+* `%`：占位符起始标志，如果不想作为起始表示（普通字符串），可以在使用另一个百分号为它转义，`%%`。
+
+* `argument_index$`：`argument_index`为参数索引数字，用来指定传入的参数，从1开始；`$`为固定标志`。
+
+  举例：`String.format("%1$s %2$s", "Hello", "World");  // "Hello World"`
+
+* `flags`：标志位，例如千位分隔符标志为逗号`,`，`("%,d", 1000000) => 1,000,000`。
+
+  | 标志字符  | 说明           | 示例                | 结果                       |
+  | --------- | -------------- | ------------------- | -------------------------- |
+  | `-`       | 左对齐         | `("%-10s", "left")` | "left      "               |
+  | `+`       | 总是显示正负号 | `("%+d", -100)`     | "-100"                     |
+  | `0`       | 用0填充        | `("%010d", 123)`    | "0000000123"               |
+  | `,`       | 分组分隔符     | `("%,d", 1000000)`  | "1,000,000"                |
+  | `(`       | 负数用括号括起 | `("%(d", -100)`     | "(100)"                    |
+  | ` `(空格) | 正数前加空格   | `("% d", 100)`      | " 100"                     |
+  | `#`       | 添加格式说明   | `("%#x", 255)`      | "0xff"（十六进制前缀`0x`） |
+
+* `width`：宽度控制，如果实际参数小于`width`，默认会使用空格在前面填充直到宽度为`width`，如果是整数也可以指定用0填充；如果实际参数大于`witdh`则以实际宽度为准。
+
+  使用样例：`String.format("%5s", "hi");    // "   hi"（右对齐）`、`String.format("%-5s", "hi");   // "hi   "（左对齐）`
+
+* `.precision`，浮点类型精度，前面的`.`为固定搭配，`precision`为指定要保留的小数位数。
+
+  ```java
+  // 浮点数：小数位数
+  String.format("%.2f", 3.14159);  // "3.14"（四舍五入）
+  String.format("%.0f", 3.6);      // "4"
+  
+  // 字符串：最大字符数
+  String.format("%.3s", "hello");  // "hel"
+  String.format("%5.3s", "hello"); // "  hel"（宽度5，最多3字符）
+  
+  // 整数：不适用（会报错）
+  // String.format("%.2d", 100);  // 错误！
+  ```
+
+* `type`：类型标识。
+
+  | 类型字符(包括`%`) | 说明                        | 示例               | 结果         |
+  | ----------------- | --------------------------- | ------------------ | ------------ |
+  | `%s`              | 字符串                      | `("%s", "Hello")`  | Hello        |
+  | `%d`              | 十进制整数                  | `("%d", 100)`      | 100          |
+  | `%f`              | 浮点数                      | `("%f", 3.14159f)` | 3.14159f     |
+  | `%c`              | 字符                        | `("%c", 'A')`      | A            |
+  | `%C`              | 字符转大写                  | `("%C", 'a')`      | A            |
+  | `%b`              | 布尔值                      | `("%b", true)`     | true         |
+  | `%x`              | 十六进制（小写）            | `("%x", 255)`      | ff           |
+  | `%X`              | 十六进制（大写）            | `("%X", 255)`      | FF           |
+  | `%o`              | 八进制整数                  | `("%o", 8)`        | 10           |
+  | `%e`              | 科学计数法（小写）          | `("%e", 1000.0)`   | 1.000000e+03 |
+  | `%E`              | 科学计数法（大写）          | `("%E", 1000.0)`   | 1.000000E+03 |
+  | `%g`              | 根据值选择 %f 或 %e（小写） |                    |              |
+  | `%G`              | 根据值选择 %f 或 %E（大写） |                    |              |
+  | `%a`              | 十六进制浮点数              |                    |              |
+  | `%n`              | 平台相关的换行符            |                    |              |
+  | `%%`              | 百分号本身                  |                    |              |
+
 ## 9、常用API
 
-Java写好的各种功能的Java类，不需要刻意记忆，只需要记得类名和类的作用即可，需要的时候再通过API文档去查询即可。
+API：Application Programming Interface，即应用程序编程接口。简单理解就是别人已经写好的东西，我们不需要自己编写，直接使用即可。例如前文中使用的`Random`对象，就是Java中已经编写好的一个工具类。
+
+JavaAPI：指的就是JDK中提供的各种功能的Java类。这些类将底层的功能实现逻辑封装了起来，我们不需要关心这些类是如何实现的，只需要学习使用这些类即可。
+
+Java帮助文档使用：在Oracle官网，有完整的接口文档，将这些接口文档下载下来，然后打包成了`.CHM`文件，就可以离线进行文档的传递了。该文档中，有JDK全部的类以及类的详细说明文档，如果需要查询某个类，直接搜索类名或者到相应的包下查找即可。
+
+![image-20251225173013380](https://gitee.com/triabin/img_bed/raw/master/2025/12/25/110192666ed55e2c04d1cbd432330307-image-20251225173013380.png)
+
+<div style="clear: both;"></div>
+
+说明：`java.lang`包中存放的是Java的基础类，因此在使用这个包下的类的时候，不需要写`import`导包语句。
+
+一般使用步骤：
+
+* 打开API文档
+* 点击显示，并找到索引下面的输入
+* 在输入框中输入类名并点击显示
+* 查看类所在包
+* 查看类的描述
+* 查看构造方法
+* 查看成员方法
+
+例如查看之前生成随机数所用的`java.util.Random`类：
+
+![image-20251226134113331](https://gitee.com/triabin/img_bed/raw/master/2025/12/26/5aea4428e973b4924787460ffeaa55ce-image-20251226134113331.png)
+
+<div style="clear: both;"></div>
+
+:::warning 注意
+
+① `.CHM`文件在Windows系统中可以直接打开，并正常显示；
+
+② 在macOS中可以去AppStore免费下载`CHM Viewer`，用它打开，但是如果文档中有中文，有可能会遇到乱码，此时需要在软件顶部`工具栏-文本编码`中选择`Unicode (UTF-8)`（每次打开都需要选择一次）；
+
+③ JDK各个版本几乎都比较通用，所以国内使用比较广的就是JDK1.8的中文版本，因为这个版本的中文翻译做得相对详尽（虽然也是机翻，但是够看了😅），真正遇到有差异的工具类时再去官网找对应版本的文档即可（一般几乎遇不到这种情况）；
+
+④ 目前比较流行的中文版本是JDK1.8的一个帮助文档，其他版本大同小异，有需要可取Oracle官网下载，例如[JDK21](https://www.oracle.com/java/technologies/javase-jdk21-doc-downloads.html)，[JDK8中文版本](https://www.123865.com/s/VBJ0Td-0qni)。
+
+:::
+
+Java写好的各种功能的Java类，不需要刻意记忆，只需要记得类名和类的作用，需要的时候再通过API文档去查询即可。
 
 ### 9.1 Math
 
@@ -4170,6 +4235,94 @@ JDK8新增了10个时间相关的类，可以分为四个种类，时间日期�
 | `public static String toOctalString(int i)`  |              得到八进制               |
 |  `public static String toHexString(int i)`   |             得到十六进制              |
 |    `public static int parseInt(String s)`    | 将字符串类型的整数转为`int`类型的整数 |
+
+### 9.9 Optional
+
+`java.util.Optional`类，是JDK8引入的一个容器类，主要用来优雅的处理可能为`null`的值，避免空指针异常。它的核心思想是明确表示“值可能不存在”，即值是可选的（optional），强制调用者显式处理空值情况。
+
+另一方面，其实这个容器类也是JDK8引入函数式编程思想实际应用的一个延伸。
+
+`Optional`类的结构其实很简单，只有一个用来存储值的成员变量`private final T value;`以及一个用来表示空容器的私私有常量`private static final Optional<?> EMPTY = new Optional<>(null);`。其中，`T`为泛型，表示所存储值的类型。从修饰`value`的`final`关键字来看，`Optional`创建后就无法改变（`value`指向的内存地址）。
+
+它的构造函数是私有的，不能直接创建类，而是通过它提供的几个静态方法来获取类：
+
+|                        方法                         |                           说明                           |
+| :-------------------------------------------------: | :------------------------------------------------------: |
+|       `public static<T> Optional<T> empty()`        |                获取一个空的`Optional`对象                |
+|     `public static <T> Optional<T> of(T value)`     | 获取一个存储值为`value`的`Optional`对象，`value`不可为空 |
+| `public static <T> Optional<T> ofNullable(T value)` |   获取一个存储值为`value`的`Optional`对象，`value`可空   |
+
+使用说明：
+
+* `public static Optional<T> empty()`，泛型可以在创建的时候手动指定，主要用在返回`Optional`对象的方法中，方便对方法的返回值进行统一处理。
+* `public static <T> Optional<T> of(T value)`，需要在确保传入的`value`不为空的情况下使用，如果为空，则抛出空指针异常`NullPointerException`，谨慎使用。
+* `public static <T> Optional<T> ofNullable(T value)`，较为常用。
+
+方法详解：
+
+|                           方法名称                           |                             说明                             |
+| :----------------------------------------------------------: | :----------------------------------------------------------: |
+|                       `public T get()`                       |     获取`value`，为空则抛出异常`NoSuchElementException`      |
+|                 `public boolean isPresent()`                 |        判不空，`value`为空返回`false`，否则返回`true`        |
+|                  `public boolean isEmpty()`                  |         判空，`value`为空返回`true`，否则返回`false`         |
+|     `public void ifPresent(Consumer<? super T> action)`      |           如果`value`不为空则消费者接口消费`value`           |
+| `public void ifPresentOrElse(Consumer<? super T> action, Runnable emptyAction)` | 如果`value`不为空则消费者接口消费`value`，否则运行`Runnable`接口提供线程中的任务 |
+| `public Optional<T> filter(Predicate<? super T> predicate)`  |   通过断言接口过滤自身，满足条件返回自身，不满足返回空容器   |
+| `public <U> Optional<U> map(Function<? super T, ? extends U> mapper)` |                  通过函数接口转换`value`值                   |
+| `public <U> Optional<U> flatMap(Function<? super T, ? extends Optional<? extends U>> mapper)` | 通过函数接口转换`value`，并且能解掉返回结果一层`Optional`嵌套 |
+| `public Optional<T> or(Supplier<? extends Optional<? extends T>> supplier)` | **JDK9新增**，将生产者接口返回的`Optional`对象和自身进行短路或，自身值不为空烦护以自身，为空则返回生产者接口返回的`Optional`对象 |
+|                 `public Stream<T> stream()`                  |             **JDK9新增**，通过`value`创建流对象              |
+|                  `public T orElse(T other)`                  |         `value`不为空则返回`value`，否则返回`other`          |
+|     `public T orElseGet(Supplier<? extends T> supplier)`     |    `value`不为空则返回`value`，否则返回生产者接口返回的值    |
+|                   `public T orElseThrow()`                   | `value`为不为空返回`value`，否则抛出异常`NoSuchElementException` |
+| `public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X` |   `value`不为空返回`value`，否则抛出生产者接口提返回的异常   |
+|             `public boolean equals(Object obj)`              |                比较`value`与`obj`的值是否相等                |
+
+使用说明：
+
+* `public T get()`，几乎不怎么用，创建`Optional`就是因为不确定值是否为空，调用这个方法相当于确定值不为空，因为为空调用这个方法就会报错。
+* `public void ifPresentOrElse(Consumer<? super T> action, Runnable emptyAction)`，关于`Runnable`接口，后期学习多线程知识的时候再详细介绍，这里只需要知道它提供的代码会异步运行即可，即有可能`main`方法运行完了，`Runnable`中的代码还在运行。
+* `public <U> Optional<U> map(Function<? super T, ? extends U> mapper)`，这个使用较为广泛，一般是将`value`转为另一个类对象。此外，`flatMap`方法很少使用，了解即可。
+* `public Stream<T> stream()`，关于`Stream`流对象，后续章节再详细介绍，`Optional`中其实也极少使用这个方法。
+* `public boolean equals(Object obj)`，底层其实是调用的`Objects`中的`equals`方法。
+
+以上已经介绍了`Optional`类对象的获取方法以及其所有的特性方法，单单只是查看这些可能看不出`Optional`的作用或者说其便利性，`Optional`的便利性需要到具体的代码场景中，再结合链式调用、Lambda表达式和方法引用才能切身体会到。
+
+案例：`User`类中有`Address`类型的属性`address`，`Address`中有`String`属性`city`，现在编写一个方法通过`User`类对象获取`city`字段值。
+
+```java
+public class OptionalDemo {
+    // 1. 传统的判空写法
+    public static String getCityPreNull(User user) {
+        if (user != null) {
+            Address address = user.getAddress();
+            if (address != null) {
+                return address.getCity();
+            }
+        }
+        return null;
+    }
+    // 2. Optional写法
+    public static String getCity(User user) {
+        return Optional.ofNullable(user)
+                .map(User::getAddress)
+                .map(User.Address::getCity)
+                .orElse(null);
+    }
+}
+```
+
+使用注意事项：
+
+* 不要滥用`Optional`，尽量只在返回值可能为`null`时才使用
+
+* 避免嵌套，`Optional<Optional<T>>`这样的代码只会使得代码逻辑变得复杂
+
+* 不要调用 `get()`，它将使`Optional`的思想失去意义
+
+* 链式调用时虽然可以一行写完，但是为了代码可读性和观赏性，每调用一个方法最好就换一次行，这样既能使代码结构清晰提高可读性，又方便代码调试时打断点，并且代码编辑器还能为你标明每一个方法的返回值类型，三全其美：
+
+  <img src="https://gitee.com/triabin/img_bed/raw/master/2026/01/24/d6ec44ad3b310c0d7f63eaf86c1a1b35-image-20260124202035943.png" alt="image-20260124202035943" align="left"/>
 
 ## 10、常见算法
 
@@ -5812,7 +5965,7 @@ public class CollDemo {
         // 如果集合长度≤数组长度，则直接使用，数组超出部分为默认初始化值
         // Map.Entry[] entriesArr = entries.toArray(new Map.Entry[0]);
         // 获取不可变集合
-        // Map immMap = Map.ofEntries(entriesArr);
+        // Map immutableMap = Map.ofEntries(entriesArr);
         // 以上步骤简写为
         Map<Object, Object> immutableMap = Map.ofEntries(map.entrySet().toArray(new Map.Entry[0]));
         
@@ -5824,7 +5977,290 @@ public class CollDemo {
 
 ## 12、Stream流
 
+需求：创建集合添加元素（张无忌、周芷若、赵敏、张强、张三丰），把所有以“张”开头的元素存储到新集合中，把“张”开头且长度为3的元素再存储到新集合中，遍历打印最终结果。
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public calss StreamDemo {
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>();
+
+        list.add("张无忌");
+        list.add("周芷若");
+        list.add("赵敏");
+        list.add("张强");
+        list.add("张三丰");
+
+        // for循环写法
+        List<String> list1 = new ArrayList<>(list.size());
+        for (String name : list) {
+            if (name.startsWith("张")) {
+                list1.add(name);
+            }
+        }
+        List<String> list2 = new ArrayList<>(list1.size());
+        for (String name : list1) {
+            if (name.length() == 3) {
+                list2.add(name);
+            }
+        }
+        for (String name : list2) {
+            System.out.println(name);
+        }
+        
+        // Stream流写法：
+        list.stream().filter(name -> name.startsWith("张"))
+                .filter(name -> name.length() == 3)
+                .forEach(System.out::println);
+    }
+}
+```
+
+以上就是流的一种基本用法。
+
+流的思想：这里的流可以理解为“流水线（Pipline）”，例如开头的案例中，就是通过集合的`stream()`方法获取到一个流对象之后，对这条“流水线”上的产品（元素）进行一系列过滤、打印等操作。
+
+`java.util.stream.Stream`接口规定了流的思想在Java中的应用实现（JDK8加入）。
+
+流的作用：结合Lambda表达式、方法引用等，简化集合和数组的操作。
+
+`Stream`流的使用步骤：
+
+* 先得到一条`Stream`流（流水线），并把数据放上去
+* 使用中间方法对流水线上的数据进行操作，例如过滤、转换等。中间方法：方法调用完毕之后还可以调用其他方法（调用的方法返回流，可以链式调用）
+* 使用终结方法对流水线上的数据进行操作。终结方法：最后一步，调用完毕后不能调用其他方法（流水线上的数据被消费/收集）
+
+获取流水线：
+
+| 获取方式     | 方法名                                          | 说明                       |
+| ------------ | ----------------------------------------------- | -------------------------- |
+| 单列集合     | `default Stream<E> stream()`                    | `Collection`中的默认方法   |
+| 双列集合     | 无                                              | 无法直接使用`stream`流     |
+| 数组         | `public static <T> Stream<T> stream(T[] array)` | `Arrays`工具类中的静态方法 |
+| 一堆零散数据 | `public static<T> Stream<T> of(T... values)`    | `Stream`接口中的静态方法   |
+
+使用说明：
+
+* 双列集合，一般使用`entrySet()`方法先获取`Entry`的集合，再直接获取`Stream`流。
+* `public static<T> Stream<T> of(T... values)`，从可变参数的特性来看，数组的流也可以使用这个方法获取，但是如果数组是基本数据类型，它不会给数组所有元素整体装箱，而是将数组对象本身作为可变参数的一个参数，导致流中只有一个元素，这个元素的值为数组的地址。所以保险起见，数组流的获取一律使用`Arrays`中的`stream()`方法。
+
+常见中间方法：
+
+|                        名称                        |                  说明                  |
+| :------------------------------------------------: | :------------------------------------: |
+| `Stream<T> filter(Predicate<? super T> predicate)` |                  过滤                  |
+|          `Stream<T> limit(long maxSize)`           |             获取前几个元素             |
+|              `Stream<T> skip(long n)`              |            跳过前`n`个元素             |
+|               `Stream<T> distinct()`               | 元素去重，依赖`hashCode`和`equals`方法 |
+| `static <T> Stream<T> concat(Stream a, Stream b)`  |           合并`a`和`b`两个流           |
+|       `Stream<R> map(Function<T, R mapper)`        |           转换流中的数据类型           |
+
+使用说明：
+
+* `Stream<T> filter(Predicate<? super T> predicate)`，断言接口中的`test`方法返回`true`的值留下。
+* `Stream<T> distinct()`，底层使用`HashSet`去重，所以需要注意`hashCode`和`equals`方法的重写。
+* `static <T> Stream<T> concat(Stream a, Stream b)`，返回结果中的泛型`T`最好是`a`和`b`的共同父类或者三者是同一个类型。
+
+注意：
+
+* 中间方法返回的`Stream`流，原来的`Stream`只能使用一次，重复使用将报错。所以建议使用链式编程，并且不需要用变量接收流对象，如果最终有返回数据，只需要接收最终返回数据即可。
+* 修改`Stream`流中的数据，不会影响原来集合或者数组中的数据。
+
+常见终结方法：
+
+|              名称               |            说明            |
+| :-----------------------------: | :------------------------: |
+| `void forEach(Comsumer action)` |            遍历            |
+|         `long count()`          |            统计            |
+|           `toArray()`           | 收集流中的数据，放到数组中 |
+| `collect(Collector collector)`  | 收集流中的数据，放到集合中 |
+
+使用说明：
+
+* `toArray()`，空参则返回一个`Object`类型数组，如果需要返回指定数据类型的数组，则需要传入一个创建指定类型数组的`IntFunction`接口，通过其源码得知传入参数`value`作为数组长度，所以可以直接使用Lambda表达式固定写法（以`String`数组为例）`String[] arr = list.stream().toArray(value -> new String[value])`，使用方法引用进一步简化：`String[] arr = list.stream().toArray(String[]::new)`。
+
+* `collect(Collector collector)`，基本使用如下：
+
+  ```java
+  public class CollectorDemo {
+      public static void main(String[] args) {
+          List<String> list = new ArrayList<>();
+          Collections.addAll(list,
+                  "张无忌-男-15", "周芷若-女-14", "赵敏-女-13", "张强-男-20", "张三丰-男-100", "张翠山-男-40",
+                  "张良-男-35", "王二麻子-男-37", "谢广坤-男-41");
+  
+          // 需求1：将所有男性收集到List集合中
+          List<String> maleList = list.stream()
+                  .filter(str -> "男".equals(str.split("-")[1]))
+                  .collect(Collectors.toList());
+          System.out.println(maleList);
+  
+          // 需求2：将所有男性收集到Set集合中
+          Set<String> maleSet = list.stream()
+                  .filter(str -> "男".equals(str.split("-")[1]))
+                  .collect(Collectors.toSet());
+          System.out.println(maleSet);
+  
+          // 需求3：以名字为键，原字符串为值将所有男性收集到Map集合中
+          Map<String, String> maleMap = list.stream()
+                  .filter(str -> "男".equals(str.split("-")[1]))
+                  .collect(Collectors.toMap(
+                          str -> str.split("-")[0], // 键的生成规则，传入流水线中的元素
+                          str -> str) // 值的生成规则，传入流水线中的元素
+                  );
+          System.out.println(maleMap);
+      }
+  }
+  ```
+
+  注意：对于`toMap`的使用，键不能重复，一旦重复就会报错。当然，如果就是会出现键重复的状况，也有对应的重载方法去处理这种情况，你可以使用第三个参数去规定重复键数据的合并规则，这种情况使用较少，一般真正需要用到的时候再去了解即可。
+
 ## 13、异常
+
+异常，就是代表程序出现的问题，其实前面的章节中已经多次出现了异常这个概念，常见的空指针异常`NullPointerException`、内存溢出异常`OOM => OutputOfMemoryException`等。
+
+### 13.1 异常的体系结构
+
+程序运行过程中出现异常是很正常的事，例如你无法保证你的代码一定运行在内存充足的机器上，也无法确保你的代码读取的文件一定存在。所以对于异常的学习是为了学习当异常出现的时候如何处理异常，而不是让程序不出现异常，那不现实。
+
+JDK中已经定义很多很多异常，这些异常组成了异常的继承体系，Java中定义的异常主要就是`RuntimeException`的子类：
+
+![image-20260125234808423](https://gitee.com/triabin/img_bed/raw/master/2026/01/25/b6c2e1d643e7351dccc62ddc2c70bf90-image-20260125234808423.png)
+
+<div style="clear: both;"></div>
+
+区别：
+
+* `Error`：代表系统级别的错误，属于严重问题，系统一旦出现问题，sun公司会把这些错误封装成`Error`对象。`Error`是给sun公司自己用的，不是给程序员用的，因此不需要去管它。
+* `Exception`：叫做异常（口语环境中也叫做“报错”），代表程序可能出现的问题，程序通常会用`Exception`以及它的子类来封装程序出现的问题。
+  * `RuntimeException`：它和它的子类都叫运行时异常，编译阶段不会出现异常提醒，只有在代码运行的时候才会出现异常，例如数组索引越界`ArrayIndexOutOfBoundsException`。
+  * 编译时异常：编译阶段就会出现的异常。（没有继承于`RuntimeException`，直接继承于`Exception`）
+
+### 13.2 编译时异常与运行时异常
+
+编译时异常在编译阶段就必须手动处理，否则代码报错，而运行时异常在编译阶段不需要处理，是代码运行时出现的异常。
+
+编译时异常举例：之前学习时间格式化时`SimpleDateFormat`类中的`parse`方法抛出的就是编译时异常。
+
+在编译阶段，JVM不会运行代码，只会检查是否有语法错误或者做一些性能优化，例如数组索引越界异常，只有代码真正运行到那一行才能确定数组的长度以及访问数组额索引是否越界。JDK之所以设定编译时异常主要作用是用来提醒程序员检查本地信息。
+
+从JDK的API文档中可以看到JDK定义的所有编译时异常（所有已知的除了`RuntimeException`之外的直接子类）：
+
+AclNotFoundException，ActivationException，AlreadyBoundException，ApplicationException，AWTException，BackingStoreException，BadAttributeValueExpException，BadBinaryOpValueExpException，BadLocationException，BadStringOperationException，BrokenBarrierException，CertificateException，CloneNotSupportedException，DataFormatException，DatatypeConfigurationException，DestroyFailedException，ExecutionException，ExpandVetoException，FontFormatException，GeneralSecurityException，GSSException，IllegalClassFormatException，InterruptedException，IntrospectionException，InvalidApplicationException，InvalidMidiDataException，InvalidPreferencesFormatException，InvalidTargetObjectTypeException，IOException，JAXBException，JMException，KeySelectorException，LambdaConversionException，LastOwnerException，LineUnavailableException，MarshalException，MidiUnavailableException，MimeTypeParseException，MimeTypeParseException，NamingException，NoninvertibleTransformException，NotBoundException，NotOwnerException，ParseException，ParserConfigurationException，PrinterException，PrintException，PrivilegedActionException，PropertyVetoException，ReflectiveOperationException，RefreshFailedException，RemarshalException，SAXException，ScriptException，ServerNotActiveException，SOAPException，SQLException，TimeoutException，TooManyListenersException，TransformerException，TransformException，UnmodifiableClassException，UnsupportedAudioFileException，UnsupportedCallbackException，UnsupportedFlavorException，UnsupportedLookAndFeelException，URIReferenceException，URISyntaxException，UserException，XAException，XMLParseException，XMLSignatureException，XMLStreamException，XPathException。
+
+运行时异常（`RuntimeException`直接子类）：
+
+AnnotationTypeMismatchException，ArithmeticException，ArrayStoreException，BufferOverflowException，BufferUnderflowException，CannotRedoException，CannotUndoException，ClassCastException，CMMException，CompletionException，ConcurrentModificationException，DataBindingException，DateTimeException，DOMException，EmptyStackException，EnumConstantNotPresentException，EventException，FileSystemAlreadyExistsException，FileSystemNotFoundException，IllegalArgumentException，IllegalMonitorStateException，IllegalPathStateException，IllegalStateException，IllformedLocaleException，ImagingOpException，IncompleteAnnotationException，IndexOutOfBoundsException，JMRuntimeException，LSException，MalformedParameterizedTypeException，MalformedParametersException，MirroredTypesException，MissingResourceException，NegativeArraySizeException，NoSuchElementException，NoSuchMechanismException，NullPointerException，ProfileDataException，ProviderException，ProviderNotFoundException，RasterFormatException，RejectedExecutionException，SecurityException，SystemException，TypeConstraintException，TypeNotPresentException，UncheckedIOException，UndeclaredThrowableException，UnknownEntityException，UnmodifiableSetException，UnsupportedOperationException，WebServiceException，WrongMethodTypeException。
+
+异常的作用：
+
+* 异常是用来查询BUG的关键参考信息
+
+  运行以下代码：
+
+  ```java
+  package com.triabin.ideasy_server;
+  
+  public class ExceptionDemo {
+      public static void main(Strig[] args) {
+          String[] arr = new String[3];
+          String str = arr[0].substring(1);
+          System.out.println(str);
+      }
+  }
+  ```
+
+  出现报错：
+
+  ```shell
+  Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.substring(int)" because "arr[0]" is null
+  	at com.triabin.ideasy_server.IdeasyServerApplicationTest.main(IdeasyServerApplicationTest.java:6)
+  ```
+
+  报错信息详解：
+
+  * 第一行：名字为`main`的线程中出现空指针异常，异常信息为无法运行方法`String.substring(int)`，因为`args[0]`为空。
+  * 第二行：出现异常的地方在`com.triabin.ideasy_server.IdeasyServerApplicationTest`类的`main`方法中，具体位置为`IdeasyServerApplicationTest.java`文件的第6行。
+
+  > 在IDEA中，点击`IdeasyServerApplicationTest.java:6`就会直接跳转到该Java文件中的第6行。
+
+* 异常可以作为方法内部的一种特殊返回值，以便通知调用者底层的执行情况
+
+  前面章节中举例的，如何给`Student`类的年龄属性进行范围限制的解决方案中没有具体实施方案，其实为了避免“给了错误数据却正常运行下去”这种情况发生，可以在`setter`方法中抛出一个异常即可阻断代码的运行：
+
+  ```java
+  public void setAge(int age) {
+      if (age < 18 || age > 40) {
+          throw new IllegalArgumentException("Age must between 18 and 40, but " + age + "not in this range.");
+      }
+      this.age = age;
+  }
+  ```
+
+  如上，在方法体中，可以使用`throw`关键字抛出一个异常，异常本身也是一个类，所以需要使用`new`关键字新建，每个异常类一般都至少会有一个类似`message`属性，用来存放异常信息，该属性可以调用有参构造传入，也可以使用默认的。（`IllegalArgumentException`是`RuntimeException`的一个直接子类）
+
+  如果调用的方法抛出了一场，对于这个抛出的异常可以自己捕获处理（如何捕获看后续），也可以将它打印到控制台上。（注意：如果抛出的异常不处理，那么当前线程将直接终止）
+
+### 13.3 异常的处理方式
+
+`Threable`的成员方法：
+
+|            方法名称             |               说明                |
+| :-----------------------------: | :-------------------------------: |
+|  `public String getMessage()`   | 返回此`Throwable`的详细消息字符串 |
+|   `public String toString()`    |      返回此可抛出的简短描述       |
+| `public void printStackTrace()` |   把异常的错误信息输出在控制台    |
+
+使用说明：
+
+* `public String getMessage()`，获取的一般是报错信息，例如前文`new IllegalArgumentException("Age must between 18 and 40, but " + age + "not in this range.");`中构造方法传入的参数，还有`Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.substring(int)" because "arr[0]" is null`冒号后面的内容。
+* `public String toString()`，返回值包含了错误类型和错误提示信息，例如`Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.substring(int)" because "arr[0]" is null`。
+* `public void printStackTrace()`，打印的结果和JVM默认处理时打印的内容一致（见下文），但是不会结束程序。
+
+Java中处理异常的方式主要分为三种，即JVM默认处理方式、自己处理（捕获异常）和抛出异常（交给调用者处理）。
+
+**JVM默认处理方式:** 把异常的名称，异常原因及异常出现的位置等信息输出在控制台（红色字体），程序执行停止，下面的代码不会再执行。
+
+**自己处理（捕获异常）:** 格式如下：
+
+```java
+try {
+    可能出现异常的代码;
+} catch (异常类名 变量名) {
+    异常的处理代码;
+}
+```
+
+异常捕获的目的是为了让程序在出现异常时按照设想的方式执行下去。
+
+使用说明：
+
+* `catch`语句可以有多条，当`try{}`中的代码出现异常时，会将出现的这个异常与`catch`中的异常从上到下逐条比较，如果`catch`括号中的异常类型可以接收，就表示该异常被捕获，执行对应`catch`中的代码。但是需要注意前面的`catch`语句中捕获的异常类型必须小于后面的`cahtch`语句中的异常类型，否则就会出现死码（直接编译时报错），即逻辑上后面的`catch`永远无法捕获到异常，因为会被前面的`catch`“拦截”。
+* 当`catch`中的代码执行完毕，会继续执行`try...catch`体系下面的其他代码。
+* 如果`try`中没有遇到问题，代码将正常运行，`catch`中的代码不会执行。
+* 如果`try`中可能会遇到多个问题，那么`try`中的代码会执行到第一次实际遇到问题地方跳出开始执行捕获到异常的`catch`中的代码，这里就需要注意确保后面的`catch`能捕获到所有的异常，如果遇到不同的异常有不通的处理方式，那么就需要多个`catch`，并且如果异常类型之间有继承关系，需要确保按照从小到大的顺序放置`catch`语句。如果有多重异常的处理方案相同，可以使用`|`将多个异常类型连接起来（JDK7新增），例如`catch (ArrayIndexOutOfBoundsException | ArithmeticException e) { ... }`。一般如果想要捕获所有异常，会直接使用`catch (Exception e) { ... }`，我见过捕获得最大的是在一个不愿意停止的线程中，直接使用`catch (Throwable t) { ... }`。
+* 如果`try`中抛出的异常没有被捕获（后面的`catch`中的异常类型无法接受抛出的异常），那么程序就跟没有`try...catch`语句时一样，异常按照JVM的默认处理方式进行处理。
+* 如果`try`中遇到了问题，那么`try`中遇到问题以下的代码都不会再执行。
+
+**抛出异常（交给调用者处理）:** 主要涉及到两个关键字，`throws`和`throw`。
+
+* `throws`写在方法处，表示声明一个异常，告诉调用者，使用本方法可能会有哪些异常，格式为`public void method() throws 异常类名1, 异常类名2...`，抛出的如果是编译时异常，必须要写，如果是运行时异常则可以不写。
+* `throw`写在方法体中，用于手动抛出异常，结束方法。手动抛出异常对象，交给调用者，后续代码不再执行，例`throw new NullPointerException()`。
+
+### 13.4 自定义异常
+
+当遇到Java中给出的异常类无法很好的描述遇到的问题时，或者在某些需要全局捕获特殊异常的需求，就可以考虑自定义异常。
+
+从JDK的默认异常类来看，定义异常需要以下几步：
+
+* 定义异常类，需要见名知意，命名规范为`异常描述+Exception结尾`
+* 写继承关系，如果是运行异常，就继承`java.lang.RuntimeException`，如果是编译时异常，就继承`java.lang.Exception`
+* 空参构造，设置默认`message`
+* 带参构造，手动传入`message`
+
+意义：为了让控制台的报错信息更加见名知意。
 
 ## 14、File
 
