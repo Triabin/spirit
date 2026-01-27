@@ -2736,6 +2736,164 @@ public interface Swim {
 
 使用场景：当方法的参数是接口或者类时，以几口为例，可以传递这个接口的实现类对象，如果实现类只要使用一次，就可以使用匿名内部类简化代码。
 
+### 6.15 枚举类
+
+前面已经学会了如何定义常量，在开发过程中，如果我想要用`int`来定义一些颜色常量，例如`public static final int RED = 0;`，同理将绿色定义为`1`，蓝色定义为`2`，然后定义一个方法去接收参数`int color`，从而打印颜色。但是如果别人使用我定义的这个方法时，只是单纯的调用方法可能不知道参数具体要传什么参数，并且就算传递了一个错误的参数（未定义过的颜色），只要是`int`型，都能编译通过，这给开发带来极大的不便以及隐患，枚举类就是用来解决这类问题，并给传统常量提供对象的优势，以便提供更安全、更强大的类型定义。
+
+枚举是一种特殊的类，定义格式为`权限修饰符 enum 枚举类名 { 枚举项1, 枚举项2...; 其他成员; }`，本质就是先定义一个最终类，不允许创建和继承该类（构造方法私有）的同时再在这个类的开头直接定义一系列类的常量来代表不同的该类对象。
+
+推导设计过程：
+
+```java
+// 对于本节开头的颜色常量问题，如果使用传统的类按照上述枚举类的思想来解决，可以编写以下类：
+
+/**
+ * 类描述：枚举类设计思路演示
+ *
+ * @author Triabin
+ * @date 2021-01-27 23:33:13
+ */
+public final class Color {
+    
+    public static final Color RED = new Color(0, "红色");
+    public static final Color GREEN = new Color(1, "绿色");
+    public static final Color BLUE = new Color(2, "蓝色");
+    
+    private int code;
+    private String desc;
+
+    private Color(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
+
+    public Color setCode(int code) {
+        this.code = code;
+        return this;
+    }
+
+    public Color setDesc(String desc) {
+        this.desc = desc;
+        return this;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void print() {
+        if (this.code == 0) {
+            System.out.println("u001B[31m" + this.desc + "u001B[0m");
+        } else if (this.code == 1) {
+            System.out.println("u001B[32m" + this.desc + "u001B[0m");
+        } else if (this.code == 2) {
+            System.out.println("u001B[34m" + this.desc + "u001B[0m");
+        } else {
+            System.out.println("未知的颜色代码: " + this.code);
+        }
+    }
+}
+
+```
+
+因为是设计常量，所以其实类中的很多东西是可以确定下来的，于是便有了以下优化：
+
+* 因为算是一种特殊的类，所以`final class`直接用`enum`代替。
+
+* 开头定义常量的语句`public static final Color RED = new Color(0, "红色");`，其中，``public static final Color`、` = new Color`这两部分是可以确定下来的，所以直接省略，并且多个常量之间用逗号隔开，以`;`作为结束标志。如果调用的是空参构造，整个括号也可以省略。
+* 因为构造方法必定是私有的，所以构造方法前面的`private`修饰符可以省略。
+
+经过设计优化后，枚举类确定了最终形态：
+
+```java
+/**
+ * 类描述：枚举类设计思路演示
+ *
+ * @author Triabin
+ * @date 2021-01-27 23:33:13
+ */
+public enum Color {
+
+    RED(0, "红色"),
+    GREEN(1, "绿色"),
+    BLUE(2, "蓝色");
+
+    private int code;
+    private String desc;
+
+    Color(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
+
+    public Color setCode(int code) {
+        this.code = code;
+        return this;
+    }
+
+    public Color setDesc(String desc) {
+        this.desc = desc;
+        return this;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void print() {
+        if (this.code == 0) {
+            System.out.println("u001B[31m" + this.desc + "u001B[0m");
+        } else if (this.code == 1) {
+            System.out.println("u001B[32m" + this.desc + "u001B[0m");
+        } else if (this.code == 2) {
+            System.out.println("u001B[34m" + this.desc + "u001B[0m");
+        } else {
+            System.out.println("未知的颜色代码: " + this.code);
+        }
+    }
+}
+```
+
+枚举类的特点：
+
+* 枚举类第一行只能用以创建所有枚举类对象常量。
+* 枚举类的构造器都是私有的（不管写没写），因此枚举类对外不能创建对象。
+* 枚举都是`final`类，不可以被继承。
+* 枚举类中，从第二行开始，可以定义类的其他成员。
+* 编译器为枚举类新增了几个方法，并且枚举类都是继承`java.lang.Enum`类的，从`enum`类也会继承到一些方法。
+
+从反编译结果来看，反编译后的代码与上面的最初设计思路中的类基本相同，就是一个`final class`类，并且都继承于`java.lang.Enum<Color>`类。
+
+`Enum`类只要有两个成员变量，`name`和`ordinal`，前者为枚举类常量的名字，后者为枚举类常量在枚举成员中的索引（从0开始）。此外，还有几个常用方法用来操作枚举类：
+
+|        方法名称        |       说明        |
+| :--------------------: | :---------------: |
+| `public int ordinal()` | 返回`ordinal`的值 |
+| `public String name()` |  返回`name`的值   |
+
+这两个方法在编程过程中算是用得比较多的，除了`Enum`类中的这两个方法，编译器在编译Java代码时，如果遇到枚举类，还会给它自动生成两个静态方法（假设`T`为具体的枚举类型）：
+
+|                方法名称                |                说明                 |
+| :------------------------------------: | :---------------------------------: |
+| `public static T valueOf(String name)` |   根据枚举类型常量名获取枚举类型    |
+|      `public static T[] values()`      | 返回枚举类型数组，以`ordinal`为索引 |
+
+这两个方法在开发过程中应用也非常广泛。
+
+枚举使用注意事项：
+
+* 避免使用`ordinal`和`name`作为成员变量。
+* 枚举类不能继承其他类，但是可以实现接口。
+* 如果枚举类中的成员变量不想被修改，就是使用`final`关键字修饰。
+
 ## 7、Lambda表达式和方法引用
 
 ### 7.1 Lambda表达式
@@ -3822,7 +3980,7 @@ public class BigDecimalDemo {
 
 方法使用说明：
 * `public static BigDecimal valueOf(double val)`，由于传入的不是`long`型数据，即使数值范围在`[0, 10]`，也不会直接返回缓存中的对象，而是先将其转为`String`型，再调用`public BigDecimal(String val)`构造方法。
-* `public BigDecimal divide(BigDecimal divisor, int scale, int roundingMode)`，在JDK9已经标记为过时，因为考虑到舍入模式不应该定义在`java.math.BigDecimal`类中，于是将其单独定义为一个枚举类`java.math.RoundingMode`（枚举类为一种特殊的类，现在可以暂时理解为它的对象无法手动创建并且都是常量），并重新定义一个舍入模式为枚举对象的方法来完成同样的功能，方法为`public BigDecimal divide(BigDecimal divisor, int scale, RoundingMode roundingMode)`，而关于`RoundingMode`中，也定义了几种舍入模式，常用的还是四舍五入`HALF_UP`。
+* `public BigDecimal divide(BigDecimal divisor, int scale, int roundingMode)`，在JDK9已经标记为过时，因为考虑到舍入模式不应该定义在`java.math.BigDecimal`类中，于是将其单独定义为一个枚举类`java.math.RoundingMode`，并重新定义一个舍入模式为枚举对象的方法来完成同样的功能，方法为`public BigDecimal divide(BigDecimal divisor, int scale, RoundingMode roundingMode)`，而关于`RoundingMode`中，也定义了几种舍入模式，常用的还是四舍五入`HALF_UP`。
 
 `java.math.RoundingMode`枚举常量：
 
@@ -6032,7 +6190,7 @@ public calss StreamDemo {
 * 使用中间方法对流水线上的数据进行操作，例如过滤、转换等。中间方法：方法调用完毕之后还可以调用其他方法（调用的方法返回流，可以链式调用）
 * 使用终结方法对流水线上的数据进行操作。终结方法：最后一步，调用完毕后不能调用其他方法（流水线上的数据被消费/收集）
 
-获取流水线：
+### 12.1 获取流水线：
 
 | 获取方式     | 方法名                                          | 说明                       |
 | ------------ | ----------------------------------------------- | -------------------------- |
@@ -6046,7 +6204,7 @@ public calss StreamDemo {
 * 双列集合，一般使用`entrySet()`方法先获取`Entry`的集合，再直接获取`Stream`流。
 * `public static<T> Stream<T> of(T... values)`，从可变参数的特性来看，数组的流也可以使用这个方法获取，但是如果数组是基本数据类型，它不会给数组所有元素整体装箱，而是将数组对象本身作为可变参数的一个参数，导致流中只有一个元素，这个元素的值为数组的地址。所以保险起见，数组流的获取一律使用`Arrays`中的`stream()`方法。
 
-常见中间方法：
+### 12.2 常见中间方法：
 
 |                        名称                        |                  说明                  |
 | :------------------------------------------------: | :------------------------------------: |
@@ -6068,7 +6226,7 @@ public calss StreamDemo {
 * 中间方法返回的`Stream`流，原来的`Stream`只能使用一次，重复使用将报错。所以建议使用链式编程，并且不需要用变量接收流对象，如果最终有返回数据，只需要接收最终返回数据即可。
 * 修改`Stream`流中的数据，不会影响原来集合或者数组中的数据。
 
-常见终结方法：
+### 12.3 常见终结方法
 
 |              名称               |            说明            |
 | :-----------------------------: | :------------------------: |
@@ -6264,7 +6422,93 @@ try {
 
 ## 14、File
 
+在开发过程中，将内存中的数据保存到文件中，或者将文件中的数据读取到内存中是非常常见的需求，读取或写入文件时传输数据的方式叫做IO流。在JDK中，设计了一个`java.io.File`类来实现文件相关的功能。
+
+### 14.1 路径
+
+文件路径是计算机中用来定位文件或文件夹位置的字符串，可以理解为文件的“地址”，可以分为绝对路径和相对路径。
+
+* 绝对路径：从文件系统根目录开始的完整路径（例如Windows的`C:\`和Unix的`/`），它是**唯一且固定的**，不会随着当前位置改变。
+* 相对路径：相对于当前工作目录的路径，利用符号`.`表示当前目录，`..`表示上一级目录，**相对路径的结果不固定**，会随着当前位置变化。
+
+`File`类对象就表示一个路径，可以文件路径，也可以是文件夹路径。甚至这个路径可以是存在的，也可以是不存在的。
+
+> 注意：Java中，文件路径分隔符`\`需要因为是特殊字符，所以需要用`\`转义，所以在Java字符串中的文件分隔符一般写成`\\`。
+
+### 14.2 `File`类的使用
+
+#### 构造方法
+
+|                  方法名称                  |                         说明                         |
+| :----------------------------------------: | :--------------------------------------------------: |
+|       `public File(String pathname)`       |               根据文件路径创建文件对象               |
+| `public File(String parent, String child)` |  根据父路径名字字符串和子路径名字字符串创建文件对象  |
+|  `public File(File parent, String child)`  | 根据父路径对应文件对象和子路径名字字符串创建文件对象 |
+
+父路径：全称为父级路径，当前文件（夹）的上一级路径。
+
+子路径：当前文件夹的下一级文件路径。
+
+#### 常见成员方法
+
+**判断、获取方法**：
+
+|             方法名称              |                         说明                          |
+| :-------------------------------: | :---------------------------------------------------: |
+|  `public boolean isDirectory()`   |         判断此路径名表示的`File`是否为文件夹          |
+|     `public boolean isFile()`     |          判断此路径名表示的`File`是否为文件           |
+|     `public boolean exists()`     |           判断此路径名表示的`File`是否存在            |
+|      `public long length()`       |          返回文件的大小（单位：字节`Byte`）           |
+| `public String getAbsolutePath()` |                  返回文件的绝对路径                   |
+|     `public String getPath()`     | 返回定义文件时使用的路径（与`getAbsolutePath()`区分） |
+|     `public String getName()`     |                返回文件的名称，带后缀                 |
+|   `public long lastModified()`    |           返回文件的最后修改时间戳（毫秒）            |
+
+**创建、删除方法**：
+
+|             方法名称             |        说明        |
+| :------------------------------: | :----------------: |
+| `public boolean createNewFile()` | 创建一个新的空文件 |
+|     `public boolean mkdir()`     |   创建单极文件夹   |
+|    `public boolean mkdirs()`     |   创建多级文件夹   |
+|    `public boolean delete()`     | 删除文件、空文件夹 |
+
+使用说明：
+
+* `public boolean createNewFile()`，创建一个新的空文件，如果当前路径表示的文件是不存在的，则创建成功后返回`true`，如果存在，则创建失败，返回`false`。如果父级路径不存在，那么方法返回`IOException`。
+
+  > 说明
+  >
+  > ① 注意区分无后缀文件和文件夹区别，文件的后缀名只是文件打开方式的一种引导，与文件内容无关。
+  >
+  > ② 由于该方法的特性，所以一般会配合`exists()`方法先判断其父路径以及自身是否存在再决定是否运行该方法。
+
+* `public boolean mkdir()`，`mkdir` => make directory，需要注意文件路径在操作系统中一般都是唯一的，如果在路径中已经创建了名为`xxx`的文件，那么在当前路径下无法再创建名为`xxx`的文件夹。只能创建单级文件夹，不能创建多级文件夹，路径中，如果有一个父路径不存在，将创建失败。
+
+* `public boolean mkdirs()`，创建多级文件夹（包括单级），底层会调用单级，所以以后创建单级文件夹的方法基本不用。
+
+* `public boolean delete()`，该方法默认只能删除文件和空文件夹，并且需要注意，调用该方法删除文件（夹）会直接删除，不会触发底层系统的诸如回收站之类的系统功能。
+
+**获取遍历方法**：
+
+|                     方法名称                     |                       说明                       |
+| :----------------------------------------------: | :----------------------------------------------: |
+|           `public File[] listFiles()`            | 获取当前路径下所有子文件（路径）对应的`File`对象 |
+|        `public static File[] listRoots()`        |   列出可用的文件系统根目录（例如`C:\`、`D:\`）   |
+|             `public String[] list()`             |       获取当前路径下所有文件（夹）绝对路径       |
+|  `public String[] list(FilenameFilter filter)`   |   利用文件名过滤器获取当前路径下文件（夹）路径   |
+|   `public File[] listFiles(FileFilter filter)`   |    利用文件名过滤器就获取当前路径下文件（夹）    |
+| `public File[] listFiles(FilenameFilter filter)` |     利用文件名过滤器获取当前路径下文件（夹）     |
+
+使用说明：
+
+* `public File[] listFiles()`，当调用者路径不存在或者路径是文件或者路径需要权限才能访问时，返回`null`；当调用者路径是一个空文件夹时，返回长度为0的数组；返回的文件列表中包含隐藏文件。（需要掌握，其余方法了解即可）
+* `public String[] list(FilenameFilter filter)`，`FilenameFilter`也是一个断言接口，接收两个参数，第一个参数为父级路劲`File`，第二个参数为子级路径`String`。
+* `public File[] listFiles(FileFilter filter)`，`FileFilter`也是一个断言接口，接收一个参数，为文件对象。
+
 ## 15、IO流
+
+IO流：存储和读取数据的解决方案。
 
 ## 16、多线程&JUC
 
