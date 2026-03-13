@@ -412,7 +412,7 @@ public class Demo {
 |   13   |                  `?:`                   |
 |   14   | `=`、`+=`、`-=`、`*=`、`/=`、`%=`、`&=` |
 
-以上为Java中运算符的优先级，但是一般除了`<<`、`>>`、`>>>等涉及到CPU直接移位运算的符号外，其余时候皆直接使用小括号确定优先级。
+以上为Java中运算符的优先级，但是一般除了`<<`、`>>`、`>>>`等涉及到CPU直接移位运算的符号外，其余时候皆直接使用小括号确定优先级。
 
 ## 3、流程控制语句
 
@@ -6051,6 +6051,52 @@ public class MapDemo {
   }
   ```
 
+#### Properties
+
+配置文件：是一种代码数据或者配置参数持久化存储的方式，一般都是手动控制的一些参数，代码中常见的配置文件有很多种，包括XML、ini、YAML和properties等。
+
+`properties`配置文件：后缀名为`.properties`，文件中数据以键值对的形式存储，一行一条数据，左边为键，右边为值，中间用`=`号隔开，处于格式要求，一般等号前后会有一个空格。
+
+Java为了方便从`properties`配置文件中读取或者写出数据，专门设计了一个类`java.util.Properties`（继承关系见章节开头），`Properties`是一个双列集合，拥有`Map`所有的特点。它还设计了一些特有的方法，可以把集合中的数据，按照键值对的形式写到配置文件中，也可以把配置文件中的数据读取到集合中来。
+
+说明：`Properties`没有设计泛型，所以可以往其中添加任意类型数据，但是一般只会往里面添加字符串类型的数据（因为要往文件中读写并且需要人眼能看懂）。
+
+基本使用演示：
+
+```java
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Properties;
+
+public class PropertiesDemo {
+    public static void main(String[] args) {
+        try (FileOutputStream fos = new FileOutputStream("config.properties");
+             FileInputStream fis = new FileInputStream("config.properties")) {
+            // 1. 创建Properties集合，读取配置文件数据
+            Properties props = new Properties();
+            props.load(fis);
+
+            // 2. 添加/修改数据
+            props.setProperty("prop1", "value1");
+            props.setProperty("prop2", "value2");
+            props.setProperty("prop3", "value3");
+
+            // 3. 将集合中的数据以键值对的形式写入到本地文件中
+            props.store(fos, "Properties配置文件读写演示"); // 第二个参数为注释内容，会以单行注释的形式写入到文件首行
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+最终`config.properties`文件效果：
+
+<img src="https://gitee.com/triabin/img_bed/raw/master/2026/03/13/829e7c844f711e6068c87d3118e7474f-image-20260313174937879.png" alt="image-20260313174937879" align="left"/>
+
+<div style="clear: both;"></div>
+
+说明：关于`try-with-resources`语句的使用以及文件输入输出流相关知识，见后续章节[15、IO流](# 15、IO流)，这里只需要知道它们分别用来安全读取和写出配置文件内容即可。
 
 ### 11.7 集合工具类Collections
 
@@ -6508,7 +6554,1404 @@ try {
 
 ## 15、IO流
 
-IO流：存储和读取数据的解决方案。
+IO流：`I: Input，输入；O: Output，输出`，存储和读取数据的解决方案，可以读写文件或网络中的数据。
+
+涉及到IO流，就必须要说明一下内存的特性了，程序运行时所需的数据都是存在内存里面的（栈内存、堆内存……），但是内存有一个特点，就是它的数据当内存被释放或者断电，内存中的数据都会直接丢失，所以要想将内存中的数据存储下来，就需要用到IO流将内存中的数据写入到文件中，这种将内存中的数据存储到文件中的过程被称为——持久化。
+
+**IO流的分类：**按流的方向可以分为输入流（读取），输出流（写出）；按操作文件类型可以分为字节流（可以操作所有文件，包括文本、图片、音频、视频）和字符流（只能操作文本）。
+
+### 15.1 IO流体系
+
+![image-20260128143543186](https://gitee.com/triabin/img_bed/raw/master/2026/01/28/32fc579e2488d87083ec4e5e939edddf-image-20260128143543186.png)
+
+<div style="clear: both;"></div>
+
+以上结构中的`java.io.InputStream`、`java.io.OutputStream`等都只是接口，具体的使用在它们的实现类中，关于字节流实现类的命名一般都是`作用对象 + 实现接口`的格式，例如对象字节输入流`ObjectInputStream`、带有缓冲区的字节输入流`BufferedInputStream`，输出流同理。
+
+![image-20260128151234806](https://gitee.com/triabin/img_bed/raw/master/2026/01/28/434037edc5bc90d38e866733c84bb0ca-image-20260128151234806.png)
+
+<div style="clear: both;"></div>
+
+### 15.2 字节流
+
+#### 字节输出流的基本使用（以`FileOutputStream`为例）
+
+`java.io.FileOutputStream`文件字节输出流可以把程序中的数据写入到本地文件中，使用步骤：
+
+* 创建字节输出流对象：`OutputStream os = new FileOutputStream("/Users/dawnlee/Desktop/demo.txt");`
+
+  ① 参数是字符串表示的路径或者`File`对象都可以。
+
+  ② 如果文件不存在会创建一个新文件，但是要保证父级路径存在。
+
+  ③ 如果文件已存在且内容不为空，则会清空文件内容再写入，除非调用构造方法的时候传入第二个参数`boolean append`为`true`（意为追加，默认`false`）。
+
+* 写数据：`os.write(97);`
+
+  `write()`方法的参数是整数，但是实际上写到本地文件中的是整数在ASCII上对应的字符。
+
+* 释放资源：`os.close();`
+
+  每次使用完流之后都要释放资源，主要是解除资源的占用，如果不解除，则其他文件无法修改文件。
+
+最终结果：`demo.txt`中写入了字母`a`（ASCII为97）。
+
+`FileOutputStream`关于以上三个步骤的原理解析：创建输出流对象实际上就是在程序（内存）和文件之间建立了一个单向的通道（内存到文件），这个过程也可以叫做程序获取了文件的句柄。写入则是程序将数据从内存写入到文件的过程。最终的释放资源则是销毁之前建立的通道的过程（不销毁的话，别的程序无法建立输出流，输入流不影响，也就是不影响读取，但是影响修改）。
+
+`FileOutputStream`写数据的三种方式：
+
+|                   方法名称                   |             说明             |
+| :------------------------------------------: | :--------------------------: |
+|             `void write(int b)`              |      一次写一个字节数据      |
+|          `void write(byte[] bytes)`          |    一次写一个字节数组数据    |
+| `void write(byte[] bytes, int off, int len)` | 一次洗衣歌字节数组的部分数据 |
+
+* `void write(byte[] bytes, int off, int len)`，`off`为数组起始索引，`len`为从起始索引开始的长度。
+
+**换行和追加**：
+
+* 换行
+
+  ```java
+  import java.io.FileOutputStream;
+  import java.io.OutputStream;
+  import java.io.IOException;
+  
+  public class IODemo {
+      public static void main(String[] args) throws IOException {
+          OutputStream os = new FileOutputStream("/Users/dawnlee/Desktop/demo.txt");
+          os.write("first line".getBytes());
+          os.write("\r\n".getBytes());
+          os.write("second line".getBytes());
+          os.close();
+      }
+  }
+  ```
+
+  关于换行符，在不同操作系统中是不一样的：
+
+  ​	Windows：`\r\n`，起源于上古DOS系统，换行为先回车（到达行首），然后再一定到下一行行首
+
+  ​	Linux：`\n`
+
+  ​	Mac：`\r`
+
+  在Windows系统中，Java对回车换行进行了优化，虽然完整换行是`\r\n`，但是只要写其中一个`\r`或`\n`，Java也可以实现换行，Java底层会对它进行补全，但是不建议省略。
+
+* 追加：每次重新创建输出流都会清空文件内容，但是如果是想要续写（追加到文件后面），则可以传入`FileOutputStream`构造方法的第二参数，`append`为`true`即可。
+
+#### `try..catch`语句扩展
+
+事实上，`try...catch`最完整的写法应该是`try(closeable-resource){}catch(异常){}fainally{}`，其中，`closeable-resource`、`catch`和`finally`都是可以省略的，但是不能同时省略，且`finally`必须在`catch`之后。
+
+**finally:** 意为“最终的”，就是无论`try`和`catch`中的代码是否运行，它都一定会执行（除非JVM退出），主要用来关闭资源（例如文件输入输出流、释放锁等）。
+
+程序在运行过程中，在已经占用某个资源的情况下如果发生异常，后续代码都不会再继续执行（例如上一节换行代码中的`write`处如果抛出异常，此时文件输出流尚未释放），那么它占有的资源始终得不到释放，这将会极大的影响资源的后续使用，所以设计了`finally`这一机制来处理这种情况。
+
+上一节**换行写入**代码可利用`finally`优化为：
+
+```java
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+
+public class IODemo {
+    public static void main(String[] args) {
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream("/Users/dawnlee/Desktop/demo.txt");
+            os.write("first line".getBytes());
+            os.write("\r\n".getBytes());
+            os.write("second line".getBytes());
+        } catch(IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+```
+
+关于`finally`的执行时间问题（与`return`语句相比）：
+
+① `try`代码块中带有`return`
+
+```java
+public class FinallyDemo {
+    public static void main(String[] args) {
+        System.out.println(show()); // 执行finally模块	returnTry
+    }
+    private static String show() {
+        try {
+            return "returnTry";
+        } finally {
+            System.out.print("执行finally模块\t");
+        }
+    }
+}
+```
+
+② `try`和`catch`中都带有`return`
+
+```java
+public class FinallyDemo {
+    public static void main(String[] args) {
+        System.out.println(show()); // 执行finally模块	returnCatch
+    }
+    private static String show() {
+        try {
+            int a = 8 / 0;
+            return "returnTry";
+        } catch (Exception e) {
+            return "returnCatch";
+        } finally {
+            System.out.print("执行finally模块\t");
+        }
+    }
+}
+```
+
+③ `finally`中带有`return`
+
+```java
+public class FinallyDemo {
+    public static void main(String[] args) {
+        System.out.println(show()); // 执行finally模块	returnFinally
+    }
+    private static String show() {
+        try {
+            int a = 8 / 0;
+            return "returnTry";
+        } catch (Exception e) {
+            return "returnCatch";
+        } finally {
+            System.out.print("执行finally模块\t");
+            return "returnFinally";
+        }
+    }
+}
+```
+
+④ `finally`改变返回值
+
+```java
+public class FinallyDemo {
+    public static void main(String[] args) {
+        System.out.println("返回后的对象：" + show());
+        // 返回前的对象：{ mAddr: Demo@1768305536, code: 0, desc: 名 }
+		// 返回后的对象：{ mAddr: Demo@1768305536, code: 1, desc: 名 }
+        // 可以看到，对象属性变了，但是内存地址始终没变
+    }
+
+    private static Demo show() {
+        Demo demo = new Demo(0, "名");
+        try {
+            return demo;
+        } finally {
+            System.out.println("返回前的对象：" + demo);
+            demo.code = 1;
+        }
+    }
+
+    static class Demo {
+        int code;
+        String desc;
+
+        public Demo(int code, String desc) {
+            this.code = code;
+            this.desc = desc;
+        }
+
+        @Override
+        public String toString() {
+            String addr = this.getClass().getSimpleName() + "@" + super.hashCode();
+            return String.format("{ mAddr: %s, code: %d, desc: %s }", addr, this.code, this.desc);
+        }
+    }
+}
+```
+
+总结：
+
+* 当`try`代码块和`catch`代码块中有`return`语句时，`finally`仍然会被执行。
+* 执行`try`代码块或`catch`代码块中的`return`语句之前，都会先执行`finally`语句。
+* 无论在`finally`代码块中是否修改返回值，返回值都不会改变，仍然是执行`finally`代码块之前的值（引用自改除外，这里指的是局部变量的值）。
+* `finally`代码块中的`return`语句一定会执行。
+
+**`try(closeable-resource)`**：JDK7新增，正式名称为`try-with-resources`，作用是自动关闭资源，使用方式为将实现了`java.lang.AutoCloseable`接口（`java.io.Closeable`接口继承了`AutoCloseable`接口）的资源放在其中进行定义（多个资源之间用`;`分隔，最后一个`;`可以省略），那么资源在使用完成后就会自动关闭，效果与将关闭资源的代码写在`finally`中相同。
+
+利用`try-with-resources`可以将**换行写入**代码进一步简化：
+
+```java
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
+public class IODemo {
+    public static void main(String[] args) {
+        try (OutputStream os = new FileOutputStream("/Users/dawnlee/Desktop/demo.txt")) {
+            os.write("first line".getBytes());
+            os.write("\r\n".getBytes());
+            os.write("second line".getBytes());
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+由于创建资源对象的语句如果写在括号里，会影响代码的阅读性，JDK9又改为可以在外面获取资源，括号中只需要放变量即可。
+
+#### 字节输入流的使用（以`FileInputStream`为例）
+
+`java.io.FileInputStream`可把本地文件中的数据读取到程序（内存）中来，使用步骤：
+
+* 创建字节输入流对象，`InputStream is = new FileInputStream("/Users/dawnlee/Desktop/demo.txt")`
+
+  如果文件不存在，直接报错。
+
+* 读取数据，`int read = is.read();`
+
+  ① 每调用一次只会读取一个字节，读出来的是数据在ASCII上对应的数字。
+
+  ② 读取到文件末尾，再运行此方法则返回`-1`。
+
+* 释放资源，`is.close();`
+
+```java
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+public class IODemo {
+    public static void main(String[] args) {
+        // 其中，demo.txt文件中的内容为之前写入的“first line\r\nsecond line”
+        try (InputStream is = new FileInputStream("/Users/dawnlee/Desktop/demo.txt")) {
+            int read = is.read();
+            System.out.println(new String(new byte[] { (byte) read })); // f
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+**FileInputStream循环读取:** 根据`read()`方法特性，可以将上述代码优化为读取全部内容的方法。
+
+```java
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+public class IODemo {
+    public static void main(String[] args) {
+        try (InputStream is = new FileInputStream("/Users/dawnlee/Desktop/demo.txt")) {
+            int read;
+            while ((read = is.read()) != -1) {
+                System.out.print(new String(new byte[] { (byte) read }));
+            }
+            System.out.println();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+注意事项：千万不要在循环体中再次调用`read`方法，这会使指针多次后移致使读取到错误数据。
+
+> 练习题：文件拷贝，在`MyFileUtils`类中，编写一个方法`cpoy(String srcPath, String targetPath)`用来复制文件。
+>
+> ```java
+> public class MyFileUtils {
+>     public static boolean copy(String srcPath, String targetPath) {
+>         if (srcPath == null || targetPath == null || srcPath.isEmpty() || targetPath.isEmpty()) {
+>             throw new IllegalArgumentException("路径参数不能为空");
+>         }
+>         long startTime = System.currentTimeMillis();
+>         InputStream is = new FileInputStream(srcPath);
+>         OutputStream os = new FileOutputStream(targetPath);
+>         try (is; os) {
+>             int b;
+>             while ((b = is.read()) != -1) {
+>                 os.write(b);
+>             }
+>         }
+>         System.out.printf("拷贝文件[%s]到[%s]耗时：%d毫秒%n", srcPath, targetPath, (System.currentTimeMillis() - startTime));
+>         return true;
+>     }
+> }
+> ```
+>
+> 关于占用多个资源的情况下，如果是手动关闭资源，需要遵循**先开的流后关闭**的原则。
+
+**文件拷贝弊端:** 以上练习题解决方案最终表现效果非常差，一个3MB左右的文件拷贝居然花了近10秒，更大的文件简直无法接受。
+
+原因分析：代码逻辑中，每次只读取一个字节，并且没读取一个自己就立刻写入文件，那么一个3MB的文件，就需要循环`3 * 1024 * 1024`次，这就是拷贝缓慢的元婴。
+
+解决：一次读取多个字节再写入多个字节，涉及到`public int read(byte[] buffer)`方法，该每次读取都会读取一个字节数组的数据，并且每次读取都会尽可能地把数组装满，返回值为本次读取到的字节数，当没有读取到字节的时候返回`-1`。
+
+注意事项：如果读取到最后一组，并且最后一组的数据没有将数组装满，那么超出部分的数组元素不会被新的元素覆盖，这会导致数据错误，为了解决这个问题，就需要利用方法返回的读取到的字节数`len`来取每次读取的字节数组的前`len`位出来使用，避免错误数据。
+
+有了这些技术知识储备后，再来改写`copy`方法：
+
+```java
+public class MyFileUtils {
+    public static boolean copy(String srcPath, String targetPath) throws IOException {
+        if (srcPath == null || targetPath == null || srcPath.isEmpty() || targetPath.isEmpty()) {
+            throw new IllegalArgumentException("路径参数不能为空");
+        }
+        long startTime = System.currentTimeMillis();
+        InputStream is = new FileInputStream(srcPath);
+        OutputStream os = new FileOutputStream(targetPath);
+        try (is; os) {
+            int len;
+            byte[] bytes = new byte[5 * 1024 * 1024]; // 一次拷贝5MB
+            while ((len = is.read(bytes)) != -1) {
+                os.write(bytes, 0, len);
+            }
+        }
+        System.out.printf("拷贝文件[%s]到[%s]耗时：%d毫秒%n", srcPath, targetPath, (System.currentTimeMillis() - startTime));
+        return true;
+    }
+}
+```
+
+改进后改方法拷贝一个3MB左右的文件只需要40毫秒左右。
+
+以上方法只能拷贝单个文件，如果需要拷贝文件夹，需要对方法进行一些修改：
+
+```java
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class MyFileUtils {
+    /**
+     * 方法描述：复制文件
+     * @param src {@link File} 要复制的文件
+     * @param dest {@link File} 复制目标位置
+     * @throws IOException 文件操作异常
+     */
+    public static void copy(File src, File dest) throws IOException {
+        File parentFile = dest.getParentFile();
+        if (dest.exists()) {
+            // 如果目标文件已存在，则放弃拷贝
+            throw new IOException("File already exists: " + dest);
+        } else {
+            // 确保目标路径父路径存在
+            if (!parentFile.exists() && !parentFile.mkdirs()) {
+                throw new IOException("Could not create directory: " + parentFile);
+            }
+        }
+        if (src.isFile()) {
+            // 如果是文件，则直接将文件内容写入目标路径
+            try (FileInputStream is = new FileInputStream(src);
+                 FileOutputStream os = new FileOutputStream(dest)) {
+                byte[] buffer = new byte[5 * 1024 * 1024]; // 缓冲区，设定为5MB
+                int len;
+                while ((len = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, len);
+                }
+            }
+        } else  {
+            if (!dest.exists() && !dest.mkdirs()) {
+                throw new IOException("Could not create directory: " + dest);
+            }
+            if (!dest.isDirectory()) {
+                throw new IOException("Not a directory: " + dest);
+            }
+            File[] files = src.listFiles();
+            if (files == null || files.length == 0) {
+                return;
+            }
+            for (File file : files) {
+                copy(file, new File(dest, file.getName()));
+            }
+        }
+    }
+}
+```
+
+### 15.3 字符集
+
+在[计算机中的数据存储](../common/计算机中的数据存储)中提到过，计算机中所有数据都是以二进制的形式存储的。在计算机的基础存储单元中，一个比特位能表示0和1两种状态，但是单独的一个比特位能表示的内容有限，所以一般来说，会将8个比特位作为一个存储单元，为1字节，8个比特位不同的状态排列组合即可表示丰富的内容，字节是计算机最小的存储单元。
+
+上一章节中，关于文件的读写内容都只涉及到英文字符的读写，因为英文字符在ASCII码表中都有唯一对应的数字，因此英文字符的存储实际上只需要一个字节就够了，而汉字一类的字符在ASCII码表中找不到对应的数字，并且非英文字符又有不同的编码标准，不同的编码标准导致存储字符耗费的字节数不同，因此如果按照读取英文字节的方式去读取非英文字符得到单个字节后，又将这些单个字节按照英文字符的方式去创建字符串（`new String(byte[] bytes)`未指定编码方式，就会默认编码方式去解码字节），这样解码出来的结果肯定与原文对不上。
+
+将**字符集**中查询到的字符对应的数字按照一定的规则进行计算转为真实的实际能存储在计算机中二进制数据的过程称为编码，将计算机中存储的二进制数据按照一定的规则转为**字符集**中存在的字符对应的数字的过程叫做解码，这个规则由**字符集**决定，要编/解码为哪一个字符集，就按照哪一个字符集的规则进行编/解码。
+
+#### ASCII
+
+目前最简单的字符集就是[ASCII码表](https://www.asciitable.com/)，它规定了西欧国家包括大写字母、小写字母、数字、特殊字符在内的所有字符共计128个（`0~127`），每个数字都对应了一个字符，而一个字节能表示的范围为`-128~127`，这也是英文字符一个字节就能表示的原因。
+
+ASCII的编码规则很简单，查询到字符对应的数字后，将其转为补码（因为全都是正数，所以这一步省略），然后从前面补0，补足8位即可，解码规则反过来即可，直接转为十进制。
+
+####  字符集的发展
+
+**GB2312**：1981年5月1日发布的中华人民共和国国家标准信息交换用汉字编码字符集，收录了7445个图形字符，其中包括6763个汉字，都是简体字。（`GB => 国标`）
+
+**BIG5**：台湾地区繁体中文标准字符集，共收录13053个中文字，1984年实施。
+
+**GBK**：2000年3月17日发布，收录21003个汉字，包含国家标准GB13000-1中全部中日韩汉字和BIG5编码中的所有汉字。（`GBK => 国标扩`）
+
+Windows系统语言为简体中文时默认使用的就是GBK字符集，但是系统显示的是ANSI，但是由于即使是GBK标准，也有多个版本，包括中文的GB2312和BIG5、韩文的EUC-KR、日文Shift-JS，于是微软给这些字符集统一命名为ANSI。
+
+**Unicode**：随着世界各地各个国家的发展，计算机普及全球，以上这些字符集仍不能满足需求，于是美国国家标准协会又推出了Unicode字符集，致力于将全世界各种语言的每个字符定义一个唯一的编码，以满足跨平台、跨语言的文本信息转换，称之为国际标准字符集，外号“万国码”。
+
+#### GBK
+
+ASCII字符存储规则：GBK字符集完全兼容ASCII，所以ASCII中的字符在GBK字符集中对应的数字与ASCII中的一致，只需要使用一个字节就可以存储。
+
+非ASCII字符存储规则：汉字如果只用一个字节存储，只能存储$2^8=256$个汉字，远远不够，所以在GBK编码中，非英文字符使用两个字符存储，前8位为高位字节，后面8位为低位字节，高位字节二进制一定以1开头，转成十进制后是一个负数。
+
+之所以非英文字符高位以1开头，主要是为了与ASCII码表中的字符区分，ASCII码表中的字符都是应为取值范围为`0~127`，全是正数，所以不会有负数，如此就能与非英文字符区分开来。
+
+解码过程：读取过程，如果遇到负数，则取两个字节再解码，否则就一个字节一个字节地解码。
+
+#### Unicode
+
+> 名字含义：Unicode，即统一编码
+>
+> 研发方：统一码联盟（也叫Unicode组织）
+>
+> 总部位置：美国加州
+>
+> 研发时间：1990年
+>
+> 发布时间：1994年发布1.0版本，期间不断添加新的文字，目前已经发布了10多个版本（截止2025年）
+>
+> 联盟组成：世界各地主要的电脑制造商、软件开发商、数据库开发商、政府部门、研究机构、国际机构以及个人
+
+编码规则演变：字符集同样兼容ASCII，在字符集中查到字符对应的数字后，一开始是打算使用UTF-16编码方式进行编码（`UTF => Unicode Transfor Format`，即Unicode转码格式），即不管什么字符，都转为使用16个比特位表示，甚至还提出过用UTF-32，这样使得ASCII中的字符明明只要一个字节就可以表示，但是同样需要花费2个字节甚至4个字节，多次磋商后，最终觉使用变长的编码方式UTF-8，该编码方式占用1~4个字节。
+
+UTF-8字节占用标准：
+
+* 1个字节：ASCII
+* 2个字节：拉丁文、希腊文、西里尔字母、亚美尼亚语、希伯来文、阿拉伯文、叙利亚文
+* 3个字节：中日韩文字、东南亚文字、中东文字
+* 4个字节：其他语言
+
+UTF-8编码规则：
+
+* 1个字节字符，直接前面补0补齐8位即可
+* 2个字节字符，第一个字节以`110`开头，第二个字节以`10`开头
+* 3个字节字符：第一个字节以`1110`开头，其余字节都以`10`开头
+* 4个字节字符：第一个字节以`11110`开头，其余字节以`10`开头
+
+举例：“汉”字编码为Unicode字符集：
+
+* 在Unicode字符集中的找到字符`汉`对应的数字标识为27721
+* 将27721转为二进制得到 01101100 01001001
+* 汉字是3个字节，将得到的二进制依次填入`1110xxxx 10xxxxxx 10xxxxxx`中的`x`处即可的到编码结果为`11100110 10110001 10001001`
+
+乱码产生的原因：
+
+* 读取数据时，单个字符未读取到完整的编码字节，例如前文中的`is.read()`方法，一次只读取一个字节，而不同字符集中的字符不一定都用一个字节表示。
+* 编解码方式不统一，常见编解码不统一谬误如下：
+  |  名称  |            示例            |                         特点                         |                         产生原因                          |
+  | :----: | :------------------------: | :--------------------------------------------------: | :-------------------------------------------------------: |
+  | 古文码 |    涓崕浜烘皯鍏卞拰鍥�    |           大都为不认识的古文，并夹杂日韩文           |              以GBK的方式读取UTF-8编码的中文               |
+  | 口字码 |         �л����񹲺͹�          |                  大部分字符为小方块                  |              以UTF-8的方式读取GBK编码的中文               |
+  | 符号码 |       ä¸­åäººæ°å±åå½       |                 大部分字符为各种符号                 |            以ISO8859-1方式读取UTF-8编码的中文             |
+  | 拼音码 |       ÖÐ»ªÈËÃñ¹²ºÍ¹ú       |      大部分字符为头顶带有各种类似声调符号的字幕      |             以ISO8859-1方式读取GBK编码的中文              |
+  | 问句码 |      中华人民共和��?       | 字符长度为偶数时正确，长度为奇数时最后的字符变为问号 | 以GBK方式读取UTF-8编码的中文，然后又用UTF-8的格式再次读取 |
+  | 锟拷码 | 锟叫伙拷锟斤拷锟今共和癸拷 |     全中文字符，且大部分字符为“锟斤拷”这几个字符     |  以UTF-8方式读取GBK编码的中文，然后又用GBK的格式再次读取  |
+
+避免产生乱码：
+
+* 不要用字节流读取文本文件
+* 编解码时使用同一个字符集
+
+#### Java中的编解码代码实现
+
+Java中的编码方法：
+
+|              `String`类中的方法              |          说明          |
+| :------------------------------------------: | :--------------------: |
+|          `public byte[] getBytes()`          | 使用默认字符集进行编码 |
+| `public byte[] getBytes(String charsetName)` | 使用指定字符集进行编码 |
+
+使用说明：`public byte[] getBytes()`，IDEA使用UTF-8编码，Eclipse使用GBK编码。
+
+Java中的解码方法：
+
+|            `String`类中的方法             |          说明          |
+| :---------------------------------------: | :--------------------: |
+|          `String(byte[] bytes)`           | 使用默认字符集进行编码 |
+| `String(bytes bytes, String charsetName)` | 使用指定字符集进行编码 |
+
+### 15.4 字符流
+
+前文提到过，产生乱码的主要原因是编解码方式不统一和未读取到完整编码字节，前者主要是在编解码的时候人为控制确保使用同一种字符集即可，而后者的解决方案则是避免使用字节流读取文本文件，那么就需要另一种用方式来读取文本文件内容，于是便设计了字符流。
+
+字符流其实本质就是带着字符集的规则来读取字节，所以其底层原理还是字节流的读取。`字符流 = 字节流 + 字符集`
+
+特点：
+
+* 输入流：读取时默认一次只读取一个字节，如果遇到多个字节才能表示的字符（通过字符集查询），则一次读取多个字节。
+* 输出流：与字节流一样，底层会将数据按照指定的字符集编码，转为字节再写到文件中。
+
+**使用场景:** 对**纯文本**文件进行读写操作。
+
+![image-20260301174949768](https://gitee.com/triabin/img_bed/raw/master/2026/03/01/a13590ac4ee93e72ddb35c61ad0f0b7a-image-20260301174949768.png)
+
+<div style="clear: both;"></div>
+
+命名规则与字节流相同，最后一个单词不变，根据字符流的作用对象不同改变前面的单词即可，例如文件输入字符流`FileReader`、缓冲区输入字符流`BufferedReader`、带有行号的字符输入流`LineNumberReader`等。
+
+#### 字符输入流的使用（以`FileReader`为例）
+
+字符输入流的使用同样分为三个步骤，分别是创建字符输入流对象、读取数据和释放资源。
+
+* 创建字符输入流对象
+
+  |               构造方法               |            说明            |
+  | :----------------------------------: | :------------------------: |
+  |    `public FileReader(File file)`    | 创建字符输入流关联本地文件 |
+  | `public FileReader(String pathname)` | 创建字符输入流关联本地文件 |
+
+  使用说明：
+
+  * 读取文件不存在，直接报错。
+  * 如果传入的是路径字符串，底层同样是创建`File`对象然后再调用通过文件对象创建字符输入流的构造函数。
+
+* 读取数据
+
+  |             成员方法             |              说明              |
+  | :------------------------------: | :----------------------------: |
+  |       `public int read()`        |   读取数据，读到末尾，返回-1   |
+  | `public int read(char[] buffer)` | 读取多个数据，读到末尾，返回-1 |
+
+  使用说明：
+
+  * `public int read()`：按字节进行读取，遇到多字节的字符，一次读取多个字节，读取后解码，这里的解码是一个获取字节在字符集上的数字的过程，获取到该数字后将其转为十进制并返回。
+  * `public int read(char[] buffer)`：与字节流中一样，返回值也是表示当前读到了几个数据，如果读到文件末尾了，返回-1。并且由于要将数据存入`char`数组，所以它还需要将解码后得到的十进制数强转为`char`。
+
+* 释放资源
+
+  |       成员方法       |       说明       |
+  | :------------------: | :--------------: |
+  | `public int close()` | 释放资源（关流） |
+
+代码演示：
+
+```java
+import java.io.FileReader;
+import java.io.Reader;
+
+public class ReaderDemo {
+    public static void main(String[] args) {
+        // 1. 创建字符输入流对象
+        try (Reader reader = new FileReader("demo.txt")) {
+            // 2. 读取数据 read()，字符流底层也是字节流，默认也是一个字节一个字节的读取
+            // 如果遇到中文，GBK编码一次读取2个字节，UTF-8一次读取3个字节
+            int ch;
+            while ((ch = reader.read()) != -1) {
+                // 由于read()方法返回的是字符在指定编码上的十进制数字，所以要想看到具体的字符内容，还需要将其强转为char类型
+                System.out.print((char) ch);
+            }
+            // 3. 释放资源，由于使用了try-with-resources语句，这步省略
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+`read(char[] buffer)`演示：
+
+```java
+import java.io.FileReader;
+import java.io.Reader;
+
+public class ReaderDemo {
+    public static void main(String[] args) {
+        // 1. 创建字符输入流对象
+        try (Reader reader = new FileReader("demo.txt")) {
+            // 2. 读取数据
+            char[] buffer = new char[2];
+            int len;
+            while ((len = reader.read(buffer)) != -1) {
+                // 把数组中的数据变成字符串再打印
+                System.out.print(new String(buffer, 0, len));
+            }
+            // 3. 释放资源，由于使用了try-with-resources语句，这步省略
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+#### 字符输出流的使用（以`FileWriter`为例）
+
+字符输出流的使用分为三步，创建字符输出流对象、写数据和释放资源。
+
+* 创建字符输出流对象
+
+  |                       构造方法                       |                     说明                     |
+  | :--------------------------------------------------: | :------------------------------------------: |
+  |           `public FilterWriter(File file)`           |          创建字符输出流关联本地文件          |
+  |         `public FileWriter(String pathname)`         |          创建字符输出流关联本地文件          |
+  |    `public FileWriter(File file, boolean append)`    | 创建字符输出流关联本地文件，追加模式（可选） |
+  | `public FileWriter(String pathname, boolean append)` | 创建字符输出流关联本地文件，追加模式（可选） |
+
+  使用说明：
+
+  * 参数是字符串表示的路径或者`File`对象都可以。
+  * 如果文件不存在会创建一个新的文件，但是要保证父级路径是存在的。
+  * 如果文件已经存在，则会清空文件再写入，如果不想清空则使用追加模式。
+
+* 写数据
+
+  |                  成员方法                   |           说明           |
+  | :-----------------------------------------: | :----------------------: |
+  |             `void write(int c)`             |       写出一个字符       |
+  |          `void write(String str)`           |      写出一个字符串      |
+  | `void write(String str, int off, int len)`  | 写出一个字符串的指定部分 |
+  |          `void write(char[] cbuf)`          |     写出一个字符数组     |
+  | `void write(char[] cbuf, int off, int len)` |  写出字符数组的指定部分  |
+  
+  使用说明：`write`方法的参数是整数的时候，实际上写到本地文件中的是整数在字符集上对应的字符。
+  
+* 关闭资源
+
+#### 字符流原理解析*
+
+**字符输入流:** 与字节输入流一样，创建字符输入流对象的过程相当于是在文件（或其他资源）与内存之间创建了一个流向内存的单向通道，但是与字节输入流不同的是，字符输入流还会创建一个长度为8192的字节数组（即8KB）作为缓冲区。当读取数据的时候，会先去缓冲区中读取，如果缓冲区中没有数据，就通过流对象获取数据装到缓冲区中，每次都尽可能装满缓冲区，如果文件中也没有数据了，则直接返回-1；如果缓冲区中有数据，则直接从缓冲区中读取数据，每次读取多少个字节取决于编码字符集。
+
+![image-20260302105731071](https://gitee.com/triabin/img_bed/raw/master/2026/03/02/f0c7da29d6b3e1ebfedbd63c678b2de3-image-20260302105731071.png)
+
+<div style="clear: both;"></div>
+
+假设创建的字符输入流对象为`fr`，则上图中代码执行解析如下：
+
+* 第一行，定义临时存放读取结果的变量`ch`；
+* 第二行，读取字符流中的数据，此时会先去缓冲区的数组中查找要读取的数据，发现缓冲区数组为空，然后会尽可能的将缓冲区中长度为8192的字节数组装满，因为只有UTF-8编码的两个字符“a”和“我”，分别占用1个字节和3个字节，全部的4个字节都会被读取并存储到缓冲区中，然后读取到第一个字节的值，将其解码后转为十进制（a，对应97）赋值给变量`ch`；
+* 第三行，将97强转为字符（`a`）并打印到控制台；
+* 第四行，再次运行`read()`方法，还是直接去缓冲区中查看数据，发现缓冲区中有数据，由于第二个字符是中文，根据UTF-8编码规则，于是这次直接读取3个字符，将其解码后转为十进制赋值给`ch`；
+* 第五行，将此时的`ch`强转为字符（`我`）并打印到控制台；
+* 第六行，再次运行`read()`方法，此时缓冲区中的数据已经全部被读取，于是重新去文件中读取数据以期尽可能填满缓冲区，发现文件中的数据也已经全部被读取过，代表已经没有数据了，于是直接返回-1赋值给`ch`；
+* 第七行，将此时的`ch`强转为字符并打印到控制台。
+
+说明：如果数据超出了缓冲区，则重新读入缓冲区的时候，从数组开头开始一个字节一个字节的覆盖过去。
+
+**字符输出流:** 同理，字符输出流也只是多出了一个缓冲区的概念。写入数据时所有的数据都是写入到缓冲区中，缓冲区的长度同样也是8192，当**缓冲区被装满**、**执行`flush()`方法进行刷新操作**或者**释放资源**的时候，缓冲区中的数据会被真正写入到流的目的地中。
+
+|       成员方法        |                说明                |
+| :-------------------: | :--------------------------------: |
+| `public void flush()` | 将缓冲区中的数据刷新到流的目的地中 |
+| `public void close()` |          释放资源（关流）          |
+
+使用说明：运行`flush()`方法刷新后，流还没有关闭，还可以继续写出数据，而`close()`方法则不行。
+
+![image-20260302113330157](https://gitee.com/triabin/img_bed/raw/master/2026/03/02/301f53379c3bf07bcba61821eb681ecd-image-20260302113330157.png)
+
+<div style="clear: both;"></div>
+
+### 15.5 高级流
+
+从流的继承结构中可知，字节流和字符流的应用都是根据需求来实现四个基本接口（字节流的`InputStream`和`OutputStream`，字符流的`Reader`和`Writer`），根据流的作用在接口名前面添加对应名词即可。这些直接实现这四个接口从而实现对应功能的流被称为基本流（`FileInputStream`、`FileOutputStream`、`Reader`、`Writer`等），而为了使基本流更加好用从而对基本流进一步封装的流则称为高级流，高级流增加的特性名称放在基本流的前面，例如为了提高文件流的读写效率而增加缓冲区的高级流“缓冲流”命名为`BufferedFileInputStream`、`BufferedFileOutputStream`、`BufferedFileReader`、`BufferedFileWriter`。（说明：由于字符流的基本流本身就有缓冲区的机制，因此对应的缓冲流对其效率提升有限，但是封装的高级流中有其他好用的方法）
+
+![image-20260302115613143](https://gitee.com/triabin/img_bed/raw/master/2026/03/02/480b67963656f18fde972f0b335873df-image-20260302115613143.png)
+
+<div style="clear: both;"></div>
+
+高级流除了上面提到的缓冲流外，还有许多其他的高级流，例如转换流、序列化流、打印流和压缩流等。
+
+#### 缓冲流
+
+![image-20260302115842680](https://gitee.com/triabin/img_bed/raw/master/2026/03/02/d2426c0ce5bd597ec09cb40b787e3fdc-image-20260302115842680.png)
+
+<div style="clear: both;"></div>
+
+**字节缓冲流:** 底层自带了长度为8192的缓冲区提高性能。
+
+|                    构造方法                    |                       说明                       |
+| :--------------------------------------------: | :----------------------------------------------: |
+|  `public BufferedInputStream(InputStream is)`  | 把基本输入流包装成高级输入流，提高读取数据的性能 |
+| `public BufferedOutputStream(OutputStream os)` | 把基本输出流包装成高级输出流，提高写出数据的性能 |
+
+使用说明：
+
+* 构造函数除了必须得输入/输出流对象意外，还可以传入一个数字来控制缓冲区的大小，不过不常用，Java默认设计的这个缓冲区大小已经相对很合理了。
+* 对于传入缓冲流对象中的基本流，当调用缓冲流的`close`方法的时候，它会将传入的基本流一起关闭（相对比较反直觉，但是这么设计的目的可能是为了帮你做更多的事情吧）。
+
+应用1：一次读写一个字节
+
+```java
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+public class BufferedStreamDemo {
+    public static void main(String[] args) {
+        // 1. 创建缓冲流对象
+        try (InputStream is = new BufferedInputStream(new FileInputStream("demo.txt"));
+             OutputStream os = new BufferedOutputStream(new FileOutputStream("copy.txt"))) {
+            // 2. 循环读取并写到目的地（一次读写一个字节）
+            int b;
+            while ((b = is.read()) != -1) {
+                os.write(b);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // 3. 释放资源（try-with-resources自动关闭）
+    }
+}
+```
+
+应用2：一次读写一个字节数组
+
+```java
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+public class BufferedStreamDemo {
+    public static void main(String[] args) {
+        // 1. 创建缓冲流对象
+        try (InputStream is = new BufferedInputStream(new FileInputStream("demo.txt"));
+             OutputStream os = new BufferedOutputStream(new FileOutputStream("copy.txt"))) {
+            // 2. 循环读取并写到目的地（一次读写一个字节数组）
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                os.write(buffer, 0, len);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // 3. 释放资源（try-with-resources自动关闭）
+    }
+}
+```
+
+字节缓冲流提高效率的原理（以文件相关流为例）：原理基本与字符流的缓冲原理相同，缓冲输入流利用基本输入流去读取数据存入到自身的缓冲区中，尽可能存满缓冲区，后续在内存中使用数据时优先去缓冲区中寻找，找不到才会再次利用基本输入流去读取数据。缓冲输出流亦然，写出的数据也是先存入自身缓冲区中，当缓冲区满或者调用`flush()`方法亦或者调用`close()`方法时才会将缓冲区中数据真正写入到文件中。大致结构如下图。
+
+![image-20260303105955429](https://gitee.com/triabin/img_bed/raw/master/2026/03/03/9dd61fbe4828af9e2bb7c81e9f0beb76-image-20260303105955429.png)
+
+<div style="clear: both;"></div>
+
+**字符缓冲流:** 底层自带了长度为8192的缓冲区提高性能。因为字符的基本流已经自带了同样长度的缓冲区，所以提高的性能有限。
+
+|             构造方法              |        说明        |
+| :-------------------------------: | :----------------: |
+| `public BufferedReader(Reader r)` | 把基本流变成高级流 |
+| `public BufferedWriter(Writer w)` | 把基本流变成高级流 |
+
+字符缓冲流特有方法（这也是及时缓冲区性能提升不明显但是字符缓冲流也更加常用的原因）：
+
+|     字符输入流特有方法     |                     说明                     |
+| :------------------------: | :------------------------------------------: |
+| `public String readLine()` | 读取一行数据，如果没有数据可读，则返回`null` |
+|     字符输出流特有方法     |                     说明                     |
+|  `public void newLine()`   |                 跨平台的换行                 |
+
+使用说明：
+
+* `public String readLine()`，该方法在读取的时候一次读取一整行，遇到回车换行即结束，因此它不会将回车换行符读取到内存中。
+
+* `public void newLine()`，由于字符串中的换行在不同平台的差异（Mac`\r`、Linux`\n`、Windows`\r\n`），编写代码的时候不好写出过于复杂的代码去适配（实际开发中要么直接使用`\n`，要么使用`\r\n`），所以正好可以使用这一方法让Java底层自己去适配。
+
+```java
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+
+public class BufferedStreamDemo {
+    public static void main(String[] args) {
+        // 1. 创建缓冲流对象
+        try (BufferedReader reader = new BufferedReader(new FileReader("demo.txt"));
+             BufferedWriter writer = new BufferedWriter(new FileWriter("copy.txt"))) {
+            // 2.按行读取数据并写出到字符输出流，换行使用newLine方法
+            String line;
+            while ((line = reader.readLine()) != null) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // 3. 关闭资源（try-with-resources自动关闭）
+    }
+}
+```
+
+#### 转换流
+
+![image-20260303134155762](https://gitee.com/triabin/img_bed/raw/master/2026/03/03/ce3a80357b0ec707d5da1fe1225b8a3a-image-20260303134155762.png)
+
+<div style="clear: both;"></div>
+
+转换流属于字符流的高级流，它是字符流和字节流之间的桥梁，用来转换字节流和字符流。用它，可以指定字符集对数据进行读写（JDK11淘汰），此外，字节流可以通过使用字符流中的方法。
+
+![image-20260303134519469](https://gitee.com/triabin/img_bed/raw/master/2026/03/03/570bef32e30a19e19e598807a8b7c0a0-image-20260303134519469.png)
+
+<div style="clear: both;"></div>
+
+通过案例演示其应用：
+
+```java
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+
+public static CvtStreamDemo {
+    /**
+     * 利用转换流按照指定字符编码读取（了解）
+     */
+    public static void main(String[] args) {
+        // 1. 创建转换流并指定字符编码
+        // try (InputStreamReader isr = new InputStreamReader(new FileInputStream("gbk_demo.txt"), "GBK")) {
+        //     // 2. 读取数据
+        //     int ch;
+        //     while ((ch = isr.read()) != -1) {
+        //         System.out.print((char) ch);
+        //     }
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
+        // 3. 释放资源（try-with-resources自动关闭）
+
+        /* 以上方案在JDK11已被淘汰，以下是替代方案 */
+        try (Reader reader = new FileReader("gbk_demo.txt", Charset.forName("GBK"))) {
+            int ch;
+            while ((ch = reader.read()) != -1) {
+                System.out.print((char) ch);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+
+public static CvtStreamDemo {
+    /**
+     * 利用转换流按照指定字符编码写出（了解）
+     */
+    public static void main(String[] args) {
+        // 1. 创建转换输出流对象并指定字符集编码
+        // try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream("demo.txt"), "GBK")) {
+        //     // 2. 写出数据
+        //     osw.write("转换输出流指定字符集编码输出演示demo文件内容");
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
+        // 3. 释放资源，使用了try-with-resources语句，这一步省略
+
+        /* 以上方案在JDK11已被淘汰，以下是替代方案 */
+        try (Writer writer = new FileWriter("demo.txt", Charset.forName("GBK"))) {
+            writer.write("转换输出流指定字符集编码输出演示demo文件内容");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+public class CvtStreamDemo {
+    /**
+     * 需求：利用字节流读取文件中的数据，每次读取一整行，而且不能出现乱码
+     */
+    public static void main(String[] args) {
+        try (InputStream is = new FileInputStream("demo.txt");
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8); // 解决字节流读取多字节编码字符容易出现乱码问题
+             BufferedReader br = new BufferedReader(isr)) { // 解决无法使用字符流的读取整行方法问题
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+#### 序列化流
+
+![image-20260306145448906](https://gitee.com/triabin/img_bed/raw/master/2026/03/06/e0a223d8323b524bbd3ccf8ddc312238-image-20260306145448906.png)
+
+<div style="clear: both;"></div>
+
+**序列化流**属于字节流的高级流，也叫做**对象操作输出流**，作用是将Java中的对象写入到本地文件中，由于是字节流，并非的内容也主要是内存数据，因此文件内容是看不懂的，因此也就无法手动修改（注意与JSON序列化区分）。
+
+|                   构造方法                    |         说明         |
+| :-------------------------------------------: | :------------------: |
+| `public ObjectOutputStream(OutputStream out)` | 把基本流包装成高级流 |
+
+|                  成员方法                   |              说明              |
+| :-----------------------------------------: | :----------------------------: |
+| `public final void writeObject(Object obj)` | 把对象序列化（写出）到文件中去 |
+
+使用说明：直接使用对象输出流将普通对象保存到文件时会出现`NotSerializableException`异常，必须要实现了`java.io.Serializable`接口的对象才能被序列化和反序列化。`Serializable`接口和前面的`Clonable`接口一样，是一个标记型接口，没有需要被实现的抽象接口，只是标记一下这是一个可被序列化的接口。
+
+**反序列化流**与序列化流作用相反，作用是将序列化流写入文件的对象读取到内存中，也叫**对象操作输入流**。
+
+|                  构造方法                   |        说明        |
+| :-----------------------------------------: | :----------------: |
+| `public ObjectInputStream(InputStream out)` | 把基本流变成高级流 |
+
+|           成员方法           |                    说明                    |
+| :--------------------------: | :----------------------------------------: |
+| `public Object readObject()` | 把序列化到本地文件中的对象，读取到程序中来 |
+
+使用说明：注意，读取方法返回的类型为`Object`类型，如果需要原来类型，需要进行强转。
+
+注意事项：
+
+* 序列号问题，如果数据被序列化后，在反序列化之前，对象对应的类成员变量有修改，那么反序列化的时候将会报错`xxx.xxx.Xxx; local class incompatible: stream classdesc serialVersionUID = xxxx, local class serialVersionUID = xxx`。这里会展示这个类在序列化时候的序列化版本号和当前序列化版本号。
+
+  **原因**：当一个类实现了`Serializable`接口的时候，JVM会根据这个类的所有内容进行计算得到一个`long`类型的序列号，当序列化的时候会将这个序列号一并序列化，反序列化的时候会对比这个序列号，如果不一致就会报错。
+
+  **解决**：固定版本号，在定义可序列化的类的时候，手动指定序列号。格式：`private static final long serialVersionUID = 序列化版本号L;`，对于序列号具体的值，可以手动指定，但是开发过程中不会使用这种方式，一般都是代码编辑器来生成。IDEA生成`serialVersionUID`设置，进入`设置`，直接在设置中搜索`serialVersionUID`，然后勾选两个选项`Transient field is not initialized on deserialization`和`Serializable class without 'serialVersionUID'`，勾选这两个选项后，如果一个类实现了`Serializable`接口并且类中没有定义序列化版本号，那么编辑器将会告警，此时将鼠标悬浮到类名上或者光标移动到类名上后按下`Alt + Enter`，都会出现创建`serialVersionUID`的选项，直接点击即可。
+
+  **说明**：如果在序列化后新增了字段，反序列化的时候该字段将使用对应数据类型的默认值或者指定的默认值。在实际开发过程中，几乎所有的实现了`Serializable`接口的类都要定义`serialVersionUID`。
+
+* 对于不想序列化的字段，可以只使用前文中提到过的`transient`关键字修饰（瞬态关键字）。
+
+* 序列化后的文件不能被修改（肉眼也看不懂），一旦修改，反序列化必定失败。
+
+> **说明**
+>
+> 实际使用中，遇到无法及时处理的数据时，序列化数据就是其中一种缓解数据的处理方案，例如，在提供接口服务的项目中，如果接口遇到流量高峰，瞬间接收了很多数据，这时候一般是利用消息队列/Redis等现将数据接收避免接口拥堵，确保接口的负载能力，当消息队列/Redis对应的服务器到达容量上限的时候，可能会考虑本地内存中存储这部分数据（直接在Java项目中使用Java的队列或者其他合适的数据结构存储这些数据），然后另一边程序端重消息队列/Redis或者本地内存中取出数据进行处理。但是，服务器处理（消费）这些数据的速度总有比不上消息传入速度的时候，上述这些存储数据的方式利用的都是内存，空间总是有限，因此一般还会再加一层保险措施，那就是本地序列化，当消息队列/Redis以及本地内存都存满的时候，会开始将数据进行本地序列化，存储数据的硬件从内存改为硬盘，存储空间大得多（一般来说）。当过了流量高峰，服务器压力下来以后再将本地存储的对象文件反序列化成内存中的对象，继续处理，当然这中间注意处理完成后删除序列化文件。
+>
+> 如此，引入序列化和反序列化之后，自然增加了文件IO，牺牲了速度对象数据传输的速度，但是至少尽可能确保了消息的完整性和接口性能，并且兼容了没有消息队列/Redis服务器的客户。
+>
+> （以上只是我在工作过程中遇到的序列化与反序列化流的具体使用，另外，具体使用的时候因为一般都是一次写入多个对象，因此在编写工具方法的时候会直接在文件中写入`ArrayList`类对象，避免读取对象的时候不知道要执行多少次`readObject()`方法）
+
+```java
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Collection;
+
+public class MyFileUtils {
+    
+    public static void main(String[] args) {
+        // 应用举例：
+        
+        // 序列化文件路径：序列化文件一般用“.ser”结尾，此外，为了避免名字冲突，会在文件名中加入时间戳
+        String path = String.format("%s%s_%d.ser", "/Users/dawnlee/Desktop/", Student.class.getSimpleName(), System.currentTimeMillis());
+        // 要序列化的数据，Student类就学号和姓名两个字段
+        List<Student> students = new ArrayList<>(3);
+        students.add(new Student("001", "张三"));
+        students.add(new Student("002", "李言"));
+        students.add(new Student("003", "张嫣"));
+        // 序列化
+        try {
+            MyFileUtils.serialize(students, path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // 反序列化
+        try  {
+            // 关于这里的类型转换，利用ArrayList是无法带着泛型的，利用List<Student>接收会出现告警，但是不影响使用
+            List<Student> res = MyFileUtils.deserialize(path, ArrayList.class);
+            System.out.println(res); // [Student{id='001', name='张三'}, Student{id='002', name='李言'}, Student{id='003', name='张嫣'}]
+            // 成功反序列化并且反序列化后删除了序列化文件
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 方法描述：将要序列化的对象序列化到指定文件中
+     * @param objs {@link Collection} 要序列化的对象集合
+     * @param path {@link String} 序列化文件路径
+     * @return {@code boolean} 序列化结果
+     * @throws IOException 文件操作异常
+     */
+    public static <T> boolean serialize(Collection<T> objs, String path) throws IOException {
+        File file = new File(path);
+        if (!file.exists()) {
+            // 不存在则创建文件
+            File parentFile = file.getParentFile();
+            if (!parentFile.exists() && !parentFile.mkdirs()) {
+                throw new IOException("Cannot create directory: " + parentFile.getAbsolutePath());
+            }
+        } else if (file.isDirectory()) {
+            throw new IOException("File '" + path + "' exists but is a directory");
+        }
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
+        oos.writeObject(objs);
+        oos.close();
+        return true;
+    }
+
+    /**
+     * 方法描述：返序列化对象到内存中并删除序列化文件
+     * @param path {@link String} 序列化文件路径
+     * @param clazz {@link Class} 反序列化后的对象类型，例`ArrayList.class`
+     * @return {@link T} 反序列化类型
+     * @throws IOException 文件操作异常
+     * @throws ClassNotFoundException 类型转化异常
+     */
+    public static <T> T deserialize(String path, Class<T> clazz) throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
+        Object o = ois.readObject();
+        ois.close();
+        try {
+            File file = new File(path);
+            file.delete();
+        } catch (Exception e) {
+            System.err.printf("序列化文件【%s】删除失败，错误信息：%s%n", path, e.getMessage());
+        }
+        return clazz.cast(o);
+    }
+}
+```
+
+#### 打印流
+
+![image-20260309162427961](https://gitee.com/triabin/img_bed/raw/master/2026/03/09/2399341b0801c3815aae82df11079fc7-image-20260309162427961.png)
+
+<div style="clear: both;"></div>
+
+**打印流**只有输出流，没有输入流，一般是指`java.io.PrintStream`和`java.io.PrintWriter`两个类，分别表示字节打印流和字符打印流。
+
+* 打印流只操作文件目的地，不操作数据源（只能写不能读的原因）
+* 特有的写出方法可以实现数据的**原样**写出，例如打印的是`97`或`true`，那么文件中也是`97`或`true`
+* 特有的写出方法，可以实现自动刷新、自动换行（`打印一次数据 = 写出 + 换行 + 刷新`）
+
+**字节打印流**：
+
+|                           构造方法                           |             说明             |
+| :----------------------------------------------------------: | :--------------------------: |
+|        `public PrintStream(OutputStream/File/String)`        | 关联字节输出流/文件/文件路径 |
+|    `public PrintStream(String fileName, Charset charset)`    |         指定字符编码         |
+|  `public PrintStream(OutputStream out, boolean autoFlush)`   |           自动刷新           |
+| `public PrintStream(OutputStream out, boolean autoFlush, String coding)` |    指定字符编码且自动刷新    |
+
+使用说明：字节打印流底层没有缓冲区，因此不管开不开自动刷新，每次都是直接写到文件目的地。
+
+|                      成员方法                       |                    说明                    |
+| :-------------------------------------------------: | :----------------------------------------: |
+|             `public void write(int b)`              | 常规方法：规则与之前一样，将制定的字节写出 |
+|            `public void println(Xxx xx)`            | 特有方法：打印任意数据，自动刷新，自动换行 |
+|             `public void print(Xxx xx)`             |       特有方法：打印任意数据，不换行       |
+| `public void printf(String format, Object... args)` |   特有方法：带有占位符的打印语句，不换行   |
+
+使用说明：关于`public void printf(String format, Object... args)`中的`format`，见前文[8.5 字符串格式化](#8.5 字符串格式化)，与`System.out.printf`也一样。
+
+字节打印流使用样例：
+
+```java
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+
+public class PrintStreamDemo {
+    public static void main(String[] args) {
+        // 1. 创建字节打印流对象
+        try (PrintStream ps = new PrintStream(new FileOutputStream("demo.txt"), true, StandardCharsets.UTF_8)) {
+            // 2. 写出数据
+            ps.println(97); // 文件中写出 97，而不是之前的字母a，并且换行（写出 + 自动刷新 + 自动换行）
+            ps.print(true); // 文件中写出 true，并且自动刷新，不换行
+            ps.println(); // 文件中换行并且自动刷新
+            ps.printf("%s爱上了%s", "阿珍", "阿强"); // 文件中写出格式化字符串结果并刷新
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // 3. 释放资源，由于使用了try-with-resources语句，可以省略ps.close()
+    }
+}
+```
+
+
+
+**字符打印流:** 字符打印流于字节打印流类似，只不过字符打印流底层多了一个缓冲区，因此其自动刷新的参数有了作用。
+
+|                           构造方法                           |             说明             |
+| :----------------------------------------------------------: | :--------------------------: |
+|           `public PrintWriter(Writer/File/String)`           | 关联字符输出流/文件/文件路径 |
+|    `public PrintWriter(String fileName, Charset charset)`    |         指定字符编码         |
+|      `public PrintWriter(Writer w, boolean autoFlush)`       |           自动刷新           |
+| `public PrintWriter(OutputStream out, boolean autoFlush, Charset charset)` |    指定字符编码且自动刷新    |
+
+|                      成员方法                       |                    说明                    |
+| :-------------------------------------------------: | :----------------------------------------: |
+|             `public void write(int b)`              | 常规方法：规则与之前一样，将制定的字节写出 |
+|            `public void println(Xxx xx)`            | 特有方法：打印任意数据，自动刷新，自动换行 |
+|             `public void print(Xxx xx)`             |       特有方法：打印任意数据，不换行       |
+| `public void printf(String format, Object... args)` |   特有方法：带有占位符的打印语句，不换行   |
+
+使用说明：可以看得出来，字符打印流的构造方法和成员方法基本一致，因此没有什么需要特别说明的，唯一的区别就是如果字符打印流需要手动开启自动刷新，因此自动刷新的参数有效。
+
+字符打印流使用样例：
+
+```java
+public class PrintWriterDemo {
+    public static void main(String[] args) {
+        // 1. 创建字符打印流对象
+        try (PrintWriter pw = new PrintWriter(new FileWriter("demo.txt", StandardCharsets.UTF_8), true)) {
+            // 2. 写出数据，是否自动刷新看pw是否指定了autoFlush
+            pw.println(97); // 文件中写出 97，自动换行
+            pw.print(true); // 文件中写出 true
+            pw.println(); // 文件中换行
+            pw.printf("%s爱上了%s", "阿珍", "阿强"); // 文件中写出格式化字符串结果
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // 3. 释放资源，由于使用了try-with-resources语句，可以省略ps.close()
+    }
+}
+```
+
+> 打印流应用场景：系统中的标准输出流，`System.out`，这个`out`就是`PrintStream`对象，这个打印流在JVM启动的时候创建，默认指向控制台，在Java中称为系统标准输出流。这个流在JVM中是唯一的，JVM启动期间不能关闭（不要手欠调用`System.out.close()`）。
+
+#### 解压缩流/压缩流
+
+![image-20260311175406562](https://gitee.com/triabin/img_bed/raw/master/2026/03/11/0d6b101f5bf2d28fb5b88a279783406f-image-20260311175406562.png)
+
+<div style="clear: both;"></div>
+
+解压过程本质上是将文件中的数据读取到内存中的过程，因此解压缩流是输入流，而压缩过程本质又是将内存中的数据写出到文件中，因此压缩流式输出流。
+
+解压过程（以`.zip`为例）：压缩包中的每一个文件都是一个`ZipEntry`对象，加压过程就是将每一个`ZipEntry`内容按照层级拷贝到本地另一个文件夹中的过程。
+
+> 说明：Java只支持`zip`格式的压缩包，对于`rar`、`7z`等格式，需要使用第三方实现的库（例如`Apache Commons Compress`），`.jar`文件本质是一种特殊的`zip`格式，可以使用`ZIP API`处理，JDK8增加了对`ZIP64`的支持。
+
+解压文件样例：
+
+```java
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+public class MyFileUtils {
+    /**
+     * 方法描述：解压zip压缩包到指定路径
+     * @param zipFile {@link File} 压缩包文件
+     * @param destDir {@link File} 解压目标路径
+     * @throws IOException 文件操作异常
+     */
+    public static void unzip(File zipFile, File destDir) throws IOException {
+        long startTime = System.currentTimeMillis();
+        System.out.printf("开始将【%s】解压到【%s】%n",
+                          zipFile.getAbsolutePath(),
+                          destDir.getAbsolutePath());
+        if (!destDir.exists() && !destDir.mkdirs()) {
+            throw new IOException("Cannot create directory: " + destDir.getAbsolutePath());
+        }
+        try  (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                File dest = new File(destDir, entry.toString());
+                if (entry.isDirectory() && !dest.exists()) {
+                    // 文件夹的处理方案：直接按照层级创建文件夹即可
+                    dest.mkdirs();
+                } else {
+                    // 文件的处理方案：将文件写入到目标路径
+                    try (OutputStream os = new FileOutputStream(dest)) {
+                        byte[] buffer = new byte[2 * 1024 * 1024]; // 2MB缓冲区
+                        int len;
+                        while ((len = zis.read(buffer)) != -1) {
+                            os.write(buffer, 0, len);
+                        }
+                    } finally {
+                        // 关闭当前entry，表示压缩包中的一个文件处理结束
+                        zis.closeEntry();
+                    }
+                }
+            }
+        }
+        System.out.printf("【%s】解压到【%s】完成，耗时：%d毫秒%n",
+                          zipFile.getAbsolutePath(),
+                          destDir.getAbsolutePath(),
+                          System.currentTimeMillis() - startTime);
+    }
+}
+```
+
+压缩过程（以`.zip`为例）：压缩的本质就是把每一个文件（或文件夹）看成是一个`ZipEntry`对象放到压缩包中。
+
+压缩文件样例：
+
+```java
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+public class MyFileUtils {
+    /**
+     * 方法描述：将文件（夹）压缩到指定文件
+     *
+     * @param file    {@link File} 要压缩的文件
+     * @param zipFile {@link File} 压缩到的文件
+     * @throws IOException 文件操作异常
+     */
+    public static void zip(File file, File zipFile) throws IOException {
+        long startTime = System.currentTimeMillis();
+        System.out.printf("开始将【%s】压缩到【%s】%n",
+                          file.getAbsolutePath(),
+                          zipFile.getAbsolutePath());
+        if (!file.exists()) {
+            throw new IllegalArgumentException("Not exists: " + file.getAbsolutePath());
+        }
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
+            toZip(file, zos, file.getName());
+        }
+        System.out.printf("【%s】压缩到【%s】完成，耗时：%d毫秒%n",
+                          file.getAbsolutePath(),
+                          zipFile.getAbsolutePath(),
+                          System.currentTimeMillis() - startTime);
+    }
+
+    /**
+     * 方法描述：将文件（夹）压缩到同级文件夹下
+     *
+     * @param file {@link File} 要压缩的文件
+     * @throws IOException 文件操作异常
+     */
+    public static void zip(File file) throws IOException {
+        String name = file.getName();
+        String zipName = file.isDirectory() ? name : name.substring(0, name.lastIndexOf('.'));
+        zip(file, new File(file.getParentFile(), zipName + ".zip"));
+    }
+
+    /**
+     * 方法描述：获取文件（夹）下的每一个文件，将其变成ZipEntry对象，放入压缩包中
+     *
+     * @param file {@link File} 要压缩的文件（夹）
+     * @param zos  {@link ZipOutputStream} 压缩文件输出流
+     * @param name {@link String} 压缩包内部的父级路径
+     */
+    private static void toZip(File file, ZipOutputStream zos, String name) throws IOException {
+        if (file.isFile()) {
+            fileToZipEntry(file, zos, name);
+            return;
+        }
+        File[] files = file.listFiles();
+        for (File f : files) {
+            if (f.isFile()) {
+                // 如果是文件，将其变成ZipEntry对象，放入压缩包中
+                fileToZipEntry(f, zos, name + File.separator + f.getName());
+            } else {
+                // 如果是文件夹则修改压缩包内部父级路径后递归
+                toZip(f, zos, name + File.separator + f.getName());
+            }
+        }
+    }
+
+    /**
+     * 方法描述：工具方法，将指定文件中的数据写入到{@link ZipEntry}中
+     *
+     * @param file      {@link File} 要写入的文件
+     * @param zos       {@link ZipOutputStream} 压缩包文件输出流
+     * @param entryName {@link String} ZipEntry的名字
+     * @throws IOException 文件操作异常
+     */
+    private static void fileToZipEntry(File file, ZipOutputStream zos, String entryName) throws IOException {
+        ZipEntry entry = new ZipEntry(entryName);
+        zos.putNextEntry(entry);
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[2 * 1024 * 1024];
+            int len;
+            while ((len = fis.read(buffer)) != -1) {
+                zos.write(buffer, 0, len);
+            }
+        }
+        zos.closeEntry();
+    }
+}
+```
+
+#### commons-io
+
+`commons-io`，Apache Commons IO，是一个apache开源基金组织提供的一组有关IO操作的开源工具包，旨在提高项目中IO流的开发效率。
+
+> Apache开源基金组织：专门为支持开源项目而办的一个非营利性组织，成立于1999年，总部在美国马里兰州。这个组织有非常非常多的项目广泛应用于世界各地各行各业。例如Java的web应用服务器Tomcat、Java项目管理工具Maven、Java安全框架Shiro、分布式框架Dubbo、消息中间件ActiveMQ和RocketMQ、大数据中间件Kafka、分布式作为配置中心的Zookeeper、大数据分析平台Apache Pig、大数据开发的三大框架（Hadoop、Spark、Flink）、分布式搜索Lucene（已被es替代，Elasticsearch）、Commons工具包等（本节commons-io就来自这个工具包集）。
+>
+> Commons中有非常多类型的工具包，`StringUtils`字符串工具类、`NumberUtils`数字工具类、`ArrayUtils`数组工具类、`DateUtils`日期工具类、`StopWatch`秒表工具类、`ClassUtils`反射工具类、`SystemUtils`系统工具类、`MapUtils`集合工具类、`Beanutils`Bean工具类等。
+
+**在项目中使用第三方代码步骤（未使用Maven的情况下）**：首先需要明确，第三方代码会被打包成一个`.jar`后缀的文件，称之为“jar包”。以后使用Maven管理包后，直接配置好后它会自动下载并管理，不用手动去复制，以下为手动引用第三方包地步骤。
+
+* 在项目中创建一个文件夹`lib`
+* 将jar包复制到`lib`文件夹
+* 右键点击jar包，选择`Add as Library`，然后确认
+* 之后就可以在类中直接导包使用了
+
+> `commons-io`的jar包官网下载地址：[https://commons.apache.org/proper/commons-io/download_io.cgi](https://commons.apache.org/proper/commons-io/download_io.cgi)，注意下载`Binaries`下的已打包文件，`Source`下为源码。下载后解压，选取其中的`commons-io-版本号.jar`复制到项目中即可。
+
+**`commons-io`常见方法**: 这些方法大多较为常见，并且基本上都算得上是见名知意，通过前几章的学习，也基本大概能想象到底层代码如何编写，它的目的主要就是为了免去这些极为繁琐代码的反复书写。
+
+|               `FileUtils`类（文件/文件夹相关）               |           说明           |
+| :----------------------------------------------------------: | :----------------------: |
+|  `public static void copyFile(File srcFile, File destFile)`  |         复制文件         |
+| `public static void copyDirectory(File srcDir, File destDir)` |        复制文件夹        |
+| `public static void copyDirectoryToDirectory(File srcDir, File destDir)` |        复制文件夹        |
+|     `public static void deleteDirectory(File directory)`     |        删除文件夹        |
+|     `public static void cleanDirectory(File directory)`      |        清空文件夹        |
+| `public static String readFileToString(File file, Charset encoding)` | 读取文件中的数据为字符串 |
+| `public static void write(File file, CharSequence data, String encoding)` |         写出数据         |
+
+|                    `IOUtils`类（流相关）                     |    说明    |
+| :----------------------------------------------------------: | :--------: |
+| `public static int copy(InputStream input, OutputStream output)` |  复制文件  |
+| `public static int copyLarge(Reader reader, Writer writer)`  | 复制大文件 |
+|       `public static String readLines(Reader reader)`        |  读取数据  |
+| `public static void write(String data, OutputStream output)` |  写出数据  |
+
+#### hutool
+
+`hutool`是国内的程序员写的一个综合工具包，应用十分广泛。`hu`是作者致敬前公司名，`tool`则是工具，外号“糊涂包”。它包含了`DateUtils`日期时间工具类、`TimeInterval`计时器工具类、`StrUtil`字符串工具类、`HexUtil`十六进制工具类、`HashUtil`哈希算法类、`ObjectUtil`对象工具类、`ReflectUtil`反射工具类、`TypeUtil`泛型类型工具类、`PageUtil`分页工具类、`NumberUtil`数字工具类、`IO`IO工具类等。
+
+以下为IO相关工具类例举说明：
+
+|       相关类        |              说明               |
+| :-----------------: | :-----------------------------: |
+|      `IoUtil`       |          流操作工具类           |
+|     `FileUtil`      |     文件读写和操作的工具类      |
+|   `FileTypeUtil`    |       文件类型判断工具类        |
+|   `WatchMonitor`    |         目录、文件监听          |
+| `ClassPathResource` | 针对`ClassPath`中资源的访问封装 |
+|    `FileReader`     |          封装文件读取           |
+|    `FileWriter`     |          封装文件写入           |
+
+官网：[https://hutool.cn/](https://hutool.cn/)，在上面可以方便查看文档，如果不是在Maven项目或者Gradle项目中使用，需要手动引入的情况，可以去其下载地址选取对应所需版本下载：[https://repo1.maven.org/maven2/cn/hutool/hutool-all/](https://repo1.maven.org/maven2/cn/hutool/hutool-all/)。
+
+> `commons-io`也好，`hutool`也罢，它们的方法都是及其海量的，全部记住不现实，所以需要在想到相关功能的时候可以考虑先去里面找找对应的类和方法即可，需要学会查询文档。
 
 ## 16、多线程&JUC
 
