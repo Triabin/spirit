@@ -25,7 +25,7 @@ CSS样式设置的width和height值具体包含哪些内容主要有以下几种
 
 * `offsetWidth/offsetHeight`（read-only）：`offsetSize = content + padding + border + scroll-bar`。
 * `clientWidth/clientHeight`（read-only）：`offsetSize = content + padding`。
-* `scrollWidth/scrollHeight`（read-only）：`offsetSize = content`，包含溢出的尺寸。
+* `scrollWidth/scrollHeight`（read-only）：`offsetSize = content + padding`，包含溢出的尺寸。
 * `DOMRect.width/height`（read-only）：获取到的是边框的尺寸（长和宽，不是粗细），包含滚动条。
 * `window.innerWidth/innerHeight`（read-only）：可视窗口的宽高，包含滚动条。
 
