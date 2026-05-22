@@ -19,6 +19,7 @@ const sidebar: DefaultTheme.Sidebar = {
     {text: '开源协议', link: '/coding/common/开源协议'},
     {text: '常用命令', link: '/coding/common/常用命令'},
     {text: '计算机中的数据存储', link: '/coding/common/计算机中的数据存储'},
+    {text: '软件编译CPU架构命名', link: '/coding/common/软件编译CPU架构命名'},
     {
       text: '编程散记与通用技术',
       link: '/coding/common/important/',
