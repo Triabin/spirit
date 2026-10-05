@@ -1,3 +1,5 @@
+import { DefaultTheme } from 'vitepress';
+
 /**
  * 函数功能：指定字符串点击下载成为指定文件
  * @param content {string} 要生成文件内容
@@ -77,4 +79,13 @@ export function openUrl(url: string, target: string = '_blank') {
     target = '_self';
   }
   window.open(url, target);
+}
+
+export function getCardEntries(sidebar: DefaultTheme.Sidebar, parentPath: string): DefaultTheme.SidebarItem[] {
+  if (!sidebar) return [];
+  const entries = Object.entries(sidebar);
+  const targetEntries = entries.find(([key, _]) => key === parentPath);
+  if (!targetEntries) return [];
+  const [, targets] = targetEntries;
+  return targets || [];
 }

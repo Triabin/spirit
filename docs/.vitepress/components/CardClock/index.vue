@@ -1,6 +1,6 @@
 <!-- 卡片时钟组件 -->
 <template>
-  <div class="card-clock">
+  <div class="card-clock" @click="cardClick">
     <FlipCard v-for="(value, index) in values"
               :key="index"
               :size="40"
@@ -26,6 +26,12 @@ const updateValues = () => {
   timer = requestAnimationFrame(updateValues);
 }
 
+const cardClick = () => window.open(
+    'https://biaozhunshijian.bmcx.com/',
+    '_blank',
+    'width=400,height=400,left=800,top=400'
+);
+
 onMounted(() => updateValues());
 onUnmounted(() => timer && cancelAnimationFrame(timer));
 </script>
@@ -37,7 +43,7 @@ onUnmounted(() => timer && cancelAnimationFrame(timer));
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: default;
+  cursor: pointer;
   gap: 4px;
 }
 </style>
