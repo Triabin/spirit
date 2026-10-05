@@ -1,8 +1,13 @@
 ---
 title: 重要技术栈*
-index: false
-dir:
-  order: 1
+layout: page
+aside: false
+sidebar: false
+footer: false
 ---
 
-<Catalog hideHeading></Catalog>
+<script lang="ts" setup>
+import Important from '@/views/coding/common/Important.vue';
+</script>
+
+<Important/>

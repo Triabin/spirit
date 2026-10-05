@@ -16,5 +16,6 @@ import sidebar from '@/config/sidebar';
 import CustomCards from '@/components/CustomCards.vue';
 import { getCardEntries } from '@/common/utils.ts';
 
-const cards = getCardEntries(sidebar, '/coding/common') || [];
+const cards = getCardEntries(sidebar, '/coding/common')
+    .map(item => ({ text: item.text, link: item.link }));
 </script>

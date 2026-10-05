@@ -18,13 +18,12 @@
 </template>
 <script lang="ts" setup>
 import MainLayout from '@/layout/MainLayout.vue';
-import { DefaultTheme } from 'vitepress';
 import { openUrl } from '@/common/utils';
 
 const props = defineProps<{
   title: string,
-  customBlock?: { type: 'info' | 'warning' | 'success' | 'error', title: string, content: string },
-  cards: DefaultTheme.SidebarItem[]
+  customBlock?: { type: 'info' | 'tip' | 'warning' | 'danger', title: string, content: string },
+  cards: { text?: string, link?: string }[]
 }>();
 </script>
 <style lang="css" scoped>
@@ -32,7 +31,7 @@ h1 {
   font-size: 32px;
   font-weight: bold;
   margin-top: 30px;
-  margin-bottom: 20px;
+  margin-bottom: 2em;
 }
 
 .cards {
