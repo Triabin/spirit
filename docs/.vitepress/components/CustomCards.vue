@@ -2,9 +2,20 @@
 <template>
   <MainLayout>
     <h1>{{ props.title }}</h1>
-    <div v-if="props.customBlock" class="custom-block" :class="[props.customBlock.type]">
-      <p class="custom-block-title">{{ props.customBlock.title }}</p>
-      <p v-for="(text, index) in props.customBlock.content.split('\n')" :key="index">{{ text }}</p>
+    <div v-if="slots['info']" class="custom-block info">
+      <slot name="info"/>
+      <!-- 样例 -->
+      <!-- <p class="custom-block-title">标题</p> -->
+      <!-- <p>……</p> -->
+    </div>
+    <div v-if="slots['tip']" class="custom-block tip">
+      <slot name="tip"/>
+    </div>
+    <div v-if="slots['warning']" class="custom-block warning">
+      <slot name="warning"/>
+    </div>
+    <div v-if="slots['danger']" class="custom-block danger">
+      <slot name="danger"/>
     </div>
     <div class="cards">
       <div v-for="(item, index) in props.cards"
@@ -19,12 +30,13 @@
 <script lang="ts" setup>
 import MainLayout from '@/layout/MainLayout.vue';
 import { openUrl } from '@/common/utils';
+import { useSlots } from 'vue';
 
 const props = defineProps<{
   title: string,
-  customBlock?: { type: 'info' | 'tip' | 'warning' | 'danger', title: string, content: string },
   cards: { text?: string, link?: string }[]
 }>();
+const slots = useSlots();
 </script>
 <style lang="css" scoped>
 h1 {

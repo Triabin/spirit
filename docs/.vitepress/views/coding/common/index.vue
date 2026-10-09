@@ -1,15 +1,12 @@
 <!-- 编程通用技术页面组件 -->
 <template>
-  <CustomCards
-      ref="cardsRef"
-      title="编程通用技术"
-      :cards="cards"
-      :custom-block="{
-        type: 'info',
-        title: '说明',
-        content: '无论学习使用哪一种编程语言，这些计算机/工程化知识都需要掌握或者了解。\n' +
-            '了解程度至少达到思考问题解决方案时可以为自己提供一个思路并且需要使用时知道如何搜索的地步。'
-      }"/>
+  <CustomCards title="编程通用技术" :cards="cards">
+    <template #info>
+      <p class="custom-block-title">说明</p>
+      <p>无论学习使用哪一种编程语言，这些计算机/工程化知识都需要掌握或者了解。</p>
+      <p>了解程度至少达到思考问题解决方案时可以为自己提供一个思路并且需要使用时知道如何搜索的地步。</p>
+    </template>
+  </CustomCards>
 </template>
 <script lang="ts" setup>
 import sidebar from '@/config/sidebar';

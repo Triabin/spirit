@@ -10,9 +10,13 @@ tags:
 
 参考：[不要小看一个Redis！马士兵最新Redis从入门到精通全套教程开源：3天带你走向实战，让你掌握Redis面试所有核心知识！](https://www.bilibili.com/video/BV1PKDsYCEh2)
 
-**![](/images/image-20250609174708864.png)**
+![image-20250609174708864](https://gitee.com/triabin/img_bed/raw/master/2026/10/08/b8454b4a93c7f74742236672b2f17ddb-image-20250609174708864.png)
 
-**![image-20250611170606583](/images/image-20250611170606583.png)**
+<div style="clear: both;"></div>
+
+![image-20250611170606583](https://gitee.com/triabin/img_bed/raw/master/2026/10/08/99db166ea50c7f1e55ca26a5011c0a20-image-20250611170606583.png)
+
+<div style="clear: both;"></div>
 
 ## 1、安装配置文件常用配置与常用全局命令
 
@@ -513,7 +517,9 @@ getbit uv-2025 8
 
 1970年，布隆提出了一种布隆过滤算法，用来判断一个元素是否在一个集合中，这种算法由一个二进制数组和一个哈希算法组成：
 
-**![image-20250612172910](/images/image-20250612172910.png)**
+![image-20250612172910](https://gitee.com/triabin/img_bed/raw/master/2026/10/08/8d209048aa5ac9a088a826d3c34cce2f-image-20250612172910.png)
+
+<div style="clear: both;"></div>
 
 由于哈希冲突问题，布隆过滤器判断存在的数据不一定存在，但是判断不存在的数据一定不存在。
 
@@ -521,11 +527,15 @@ getbit uv-2025 8
 
 场景：一个用户查询接口，当用户注册后，用户存入数据库并更新Redis缓存，后续查询该用户ID时，直接从缓存中返回数据，如果缓存中没有数据则查询数据库并更新缓存。假设黑客获悉了这个接口的缓存机制，并且试探出用户ID为1~999，然后黑客就可以不断请求＞999的ID查询，从而使得服务器每次都请求数据库，造成**缓存击穿**，从而占满数据库服务资源。
 
-**![image-20250612175233619](/images/image-20250612175233619.png)**
+![image-20250612175233619](https://gitee.com/triabin/img_bed/raw/master/2026/10/08/3a8ac016455afa73c8516b171488ee88-image-20250612175233619.png)
+
+<div style="clear: both;"></div>
 
 为了解决这个问题，可以在每次启动服务时查询数据库用户ID，然后根据ID创建一个布隆过滤器，并写缓存，同时每次用户注册时更新布隆过滤器和缓存，每次请求该接口时先通过布隆过滤器判断用户ID是否存在，如果不存在直接返回响应结果，否则再去查询缓存进而查询数据库。这样即可解决缓存击穿问题，并且由于布隆过滤器运算迅速，占用内存较小，对服务器不会造成比较大的负担。
 
-**![image-20250612175719420](/images/image-20250612175719420.png)**
+![image-20250612175719420](https://gitee.com/triabin/img_bed/raw/master/2026/10/08/7e9953687157859d56e9800508acb775-image-20250612175719420.png)
+
+<div style="clear: both;"></div>
 
 ### Java手写布隆过滤器
 
@@ -787,7 +797,9 @@ HyperLogLog不属于一种数据结构，本质上只是字符串，只是由于
 
 * 伯努利试验
 
-  **![image-20250613065046436](/images/image-20250613065046436.png)**
+  ![image-20250613065046436](https://gitee.com/triabin/img_bed/raw/master/2026/10/08/94fc97205914cd5c500c8177a1fd4cc8-image-20250613065046436.png)
+
+  <div style="clear: both;"></div>
 
   $n=2^K$
 
@@ -1387,7 +1399,9 @@ geohash key member [member ...]
 
     Redis主从复制原理：
 
-    **![image-20250620070322263.png](/images/image-20250620070322263.png)**
+    ![image-20250620070322263](https://gitee.com/triabin/img_bed/raw/master/2026/10/08/717ae30b7998c98f45204d379bf1692e-image-20250620070322263.png)
+
+    <div style="clear: both;"></div>
 
     数据写入时，主节点会直接放回写入结果，对于写入请求来说已经写入完成，但是数据同步到从节点是异步的，此时才开始同步，在这个过程中，如果主节点宕机，则造成数据丢失，但是客户端得到的结果却是写入成功。
 

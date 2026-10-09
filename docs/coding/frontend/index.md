@@ -1,13 +1,13 @@
 ---
 title: 前端
-icon: icon-park:web-page
-index: false
-dir:
-  order: 5
+layout: page
+aside: false
+sidebar: false
+footer: false
 ---
 
-关于HTML、CSS、JavaScript许多文档，可以直接访问[MDN](https://developer.mozilla.org/en-US/)进行查询。
+<script lang="ts" setup>
+import Frontend from '@/views/coding/Frontend.vue';
+</script>
 
-## 目录
-
-<Catalog hideHeading></Catalog>
+<Frontend/>

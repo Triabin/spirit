@@ -1,6 +1,13 @@
 ---
+layout: page
 title: Java随记
-order: 1
+aside: false
+sidebar: false
+footer: false
 ---
 
-<Catalog hideHeading></Catalog>
+<script lang="ts" setup>
+import RandomNotes from '@/views/coding/java/RandomNotes.vue';
+</script>
+
+<RandomNotes/>

@@ -114,8 +114,8 @@ const inputMsgRef = ref<any>();
 let lrcLines: Array<string> | undefined;
 let lrcIDTagEndLine = -1;
 let lrcStartTime = -1;
-watch(lyricContent, (value, oldValue) => debounce(() => initData(value)));
-watch(timeOffset, (value, oldValue) => debounce(() => {
+watch(lyricContent, (value, _) => debounce(() => initData(value)));
+watch(timeOffset, () => debounce(() => {
   paramMsgRef.value.showMsg();
   oprMsgRef.value.showMsg();
   completedLyric.value = '';

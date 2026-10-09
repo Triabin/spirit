@@ -27,7 +27,8 @@ const sidebar: DefaultTheme.Sidebar = {
         {text: 'Redis', link: '/coding/common/important/Redis'},
         {text: 'SQL与数据库', link: '/coding/common/important/SQL与数据库'},
         {text: '数据结构与算法', link: '/coding/common/important/数据结构与算法'},
-        {text: '23种设计模式', link: '/coding/common/important/23种设计模式'}
+        {text: '23种设计模式', link: '/coding/common/important/23种设计模式'},
+        {text: 'VibeCoding', link: '/coding/common/important/VibeCoding'},
       ]
     },
   ],

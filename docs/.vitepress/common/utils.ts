@@ -10,7 +10,7 @@ import { DefaultTheme } from 'vitepress';
 export const clickDownload = (
   content: string,
   mimeType: string,
-  nameGetter: () => string = () => '文件名',
+  nameGetter: () => string = () => '文件名', /* 函数类型 = 默认函数 */
   charset: string = 'utf-8'
 ) => {
   const blob = new Blob([content], {type: `${mimeType};${charset}`});
@@ -81,6 +81,11 @@ export function openUrl(url: string, target: string = '_blank') {
   window.open(url, target);
 }
 
+/**
+ * 从侧边栏对象里面提取侧边栏对象
+ * @param sidebar 侧边栏对象（Map类型，key为父路径）
+ * @param parentPath 父路径
+ */
 export function getCardEntries(sidebar: DefaultTheme.Sidebar, parentPath: string): DefaultTheme.SidebarItem[] {
   if (!sidebar) return [];
   const entries = Object.entries(sidebar);

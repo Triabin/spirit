@@ -67,9 +67,13 @@ description: Java学习笔记与文档
 >
 > <img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/16/b5691fe174876b368e8fa7d336a75f64-image-20251216235058273.png" alt="image-20251216235058273" align="left"/>
 >
+> <div style="clear: both;"></div>
+>
 > JRE（Java Runtime Environment）：JRE是Java运行环境，包含了Java虚拟机、Java类库和其他运行Java程序所需的软件。
 >
 > <img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/16/17334f99c463bdc11b47e8eda30c4626-image-20251216235148566.png" alt="image-20251216235148566" align="left"/>
+>
+> <div style="clear: both;"></div>
 >
 > 一般来说，JDK包含JRE，所以如果是开发Java程序的话安装JDK即可，如果是作为运行编译完成的Java程序的服务器，则可以只安装JRE。
 
@@ -247,6 +251,7 @@ java HelloWorld # .class可以省略
 ## 跨平台原理
 
 <img src="https://gitee.com/triabin/img_bed/raw/master/2025/12/16/89722d31a1bf2125316ca2c7e3ca27ac-image-20251216234656216.png" alt="image-20251216234656216" align="left" />
+<div style="clear: both;"></div>
 
 ## Java几个基础命令使用与讲解（重要）
 

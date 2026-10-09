@@ -1,9 +1,6 @@
 <!-- 通用技术重要技术栈页面组件 -->
 <template>
-  <CustomCards
-      ref="cardsRef"
-      title="重要技术栈"
-      :cards="cards"/>
+  <CustomCards title="重要技术栈" :cards="cards"/>
 </template>
 <script lang="ts" setup>
 import sidebar from '@/config/sidebar';
