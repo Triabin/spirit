@@ -22,7 +22,7 @@ const bgImageUrl = computed(() => props.bgImage ? `url(${props.bgImage})` : '');
 * {
   box-sizing: border-box;
   width: 100vw;
-  height: 94vh;
+  height: 95.1vh;
 }
 
 .main-layout {

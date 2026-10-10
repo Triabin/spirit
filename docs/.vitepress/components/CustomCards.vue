@@ -1,6 +1,6 @@
 <!-- 卡片展示页面组件 -->
 <template>
-  <MainLayout>
+  <MainLayout :bg-image="bgImage">
     <h1>{{ props.title }}</h1>
     <div v-if="slots['info']" class="custom-block info">
       <slot name="info"/>
@@ -27,17 +27,28 @@
     </div>
   </MainLayout>
 </template>
+
 <script lang="ts" setup>
 import MainLayout from '@/layout/MainLayout.vue';
 import { openUrl } from '@/common/utils';
-import { useSlots } from 'vue';
+import { ref, useSlots, toRef, watchEffect } from 'vue';
+import { useData } from 'vitepress';
 
 const props = defineProps<{
   title: string,
   cards: { text?: string, link?: string }[]
 }>();
 const slots = useSlots();
+console.log('slots', slots);
+const isDark = toRef(useData(), 'isDark');
+const bgImage = ref<string>('');
+watchEffect(() => bgImage.value = isDark.value ?
+    'https://gitee.com/triabin/img_bed/raw/master/2026/10/10/e7556307b33a2c15d6ed3a3f08d183eb-sunlight-shining-single-mountain-top-sunset-with-dark-cloudy-sky.webp'
+    : 'https://image.slidesdocs.com/responsive-images/background/line-art-congenital-malformation-abstract-clinical-case-simple-powerpoint-background_64f966f905__960_540.jpg'
+    // : 'https://img.shetu66.com/2025/04/09/174412833539813346.png'
+);
 </script>
+
 <style lang="css" scoped>
 h1 {
   font-size: 32px;

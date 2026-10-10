@@ -27,10 +27,10 @@ items:
     url: https://github.com/krahets/hello-algo
     description: GitHub仓库，一本对新手学习数据结构与算法非常友好的书籍。
 
-  - title: deprecated-version
+  - title: DeveloperRoadmaps
     icon: https://roadmap.sh/manifest/favicon.ico
-    url: https://github.com/roadmapsh/deprecated-version
-    description: GitHub仓库，编程语言学习路线图，每个阶段的学习内容，以及对应的学习资源（不过指向的学习视频都是国外视频平台的）。
+    url: https://roadmap.sh/
+    description: 编程语言学习路线图，每个阶段的学习内容，以及对应的学习资源（不过指向的学习视频都是国外视频平台的）。
     
   - title: 力扣LeetCode
     icon: https://leetcode.cn/favicon.ico

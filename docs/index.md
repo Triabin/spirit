@@ -1,6 +1,6 @@
 ---
 layout: home
-
+footer: false
 hero:
   name: "灵犀Spirit"
   text: "一个人的心有灵犀"
@@ -15,7 +15,6 @@ hero:
     - theme: alt
       text: 编程笔记
       link: /coding/
-
 features:
   - icon:
       src: /icons/笔记.svg
