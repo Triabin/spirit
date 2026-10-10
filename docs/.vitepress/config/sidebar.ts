@@ -71,6 +71,7 @@ const sidebar: DefaultTheme.Sidebar = {
   ],
   '/essays/': [
     {text: '识文僻义', link: '/essays/识文僻义'},
+    {text: '快捷键', link: '/essays/快捷键'},
   ]
 };
 
