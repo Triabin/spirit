@@ -34,7 +34,7 @@ import Java from '@/views/coding/java/index.vue';
 
 #### 安装包下载
 
-~~[官网地址，点击跳转](https://www.oracle.com/java/technologies/downloads/archive/)，或者到[Java版本变更表](#java版本变更表)中点击对应版本直接跳转（jdk1的找不到）~~（于2025年11月发现已经不可用，详情见Oracle账号问题，当然，入如果是OracleJDK17及以后的版本，则还是可以到官网直接下载）。可以使用国内的jdk镜像下载：
+~~[官网地址，点击跳转](https://www.oracle.com/java/technologies/downloads/archive/)，或者到[Java版本变更表](./random-notes/Java版本变更)中点击对应版本直接跳转（jdk1的找不到）~~（于2025年11月发现已经不可用，详情见Oracle账号问题，当然，入如果是OracleJDK17及以后的版本，则还是可以到官网直接下载）。可以使用国内的jdk镜像下载：
 
 * 华为OracleJDK镜像：[https://repo.huaweicloud.com/java/jdk/](https://repo.huaweicloud.com/java/jdk/)
 * injdk：[https://d10.injdk.cn/openjdk/oraclejdk/](https://d10.injdk.cn/openjdk/oraclejdk/)
