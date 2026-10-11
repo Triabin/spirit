@@ -39,7 +39,6 @@ const props = defineProps<{
   cards: { text?: string, link?: string }[]
 }>();
 const slots = useSlots();
-console.log('slots', slots);
 const isDark = toRef(useData(), 'isDark');
 const bgImage = ref<string>('');
 watchEffect(() => bgImage.value = isDark.value ?
