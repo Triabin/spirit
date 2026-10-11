@@ -33,24 +33,26 @@ const sidebar: DefaultTheme.Sidebar = {
     },
   ],
   '/coding/java/': [
-    {
-      text: '随记',
-      link: '/coding/java/random-notes/',
-      items: [
-        {text: 'Java代理模式', link: '/coding/java/random-notes/Java代理模式'},
-        {text: 'Java四大函数式编程接口', link: '/coding/java/random-notes/Java四大函数式编程接口'},
-        {text: 'Java四大引用-强软弱虚', link: '/coding/java/random-notes/Java四大引用-强软弱虚'},
-        {text: 'Springboot接入Log4j2', link: '/coding/java/random-notes/Springboot接入Log4j2'},
-        {text: 'Springboot配置使用Redis', link: '/coding/java/random-notes/Springboot配置使用Redis'},
-        {text: 'SpringBoot使用RabbitMQ', link: '/coding/java/random-notes/Springboot使用RabbitMQ'}
-      ]
-    },
-    {text: 'Java基础', link: '/coding/java/Java基础'},
+    {text: 'Java基础（上）', link: '/coding/java/Java基础（上）'},
+    {text: 'Java基础（下）', link: '/coding/java/Java基础（下）'},
     {text: 'Java进阶', link: '/coding/java/Java进阶'},
     {text: 'Spring', link: '/coding/java/Spring'},
     {text: 'SpringMVC', link: '/coding/java/SpringMVC'},
     {text: 'SpringBoot', link: '/coding/java/SpringBoot'},
     {text: 'SpringAI', link: '/coding/java/SpringAI'},
+    {
+      text: '随记',
+      link: '/coding/java/random-notes/',
+      items: [
+        {text: 'Java版本变更', link: '/coding/java/random-notes/Java版本变更'},
+        {text: 'Java代理模式', link: '/coding/java/random-notes/Java代理模式'},
+        {text: 'Java四大函数式编程接口', link: '/coding/java/random-notes/Java四大函数式编程接口'},
+        {text: 'Java四大引用-强软弱虚', link: '/coding/java/random-notes/Java四大引用-强软弱虚'},
+        {text: 'Springboot接入Log4j2', link: '/coding/java/random-notes/Springboot接入Log4j2'},
+        {text: 'Springboot配置使用Redis', link: '/coding/java/random-notes/Springboot配置使用Redis'},
+        {text: 'SpringBoot使用RabbitMQ', link: '/coding/java/random-notes/Springboot使用RabbitMQ'},
+      ]
+    },
   ],
   '/coding/python/': [
     {text: 'Python基础语法', link: '/coding/python/Python基础语法'},

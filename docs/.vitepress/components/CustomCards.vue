@@ -1,7 +1,7 @@
 <!-- 卡片展示页面组件 -->
 <template>
-  <MainLayout :bg-image="bgImage">
-    <h1>{{ props.title }}</h1>
+  <MainLayout>
+    <h1 v-if="props.title">{{ props.title }}</h1>
     <div v-if="slots['info']" class="custom-block info">
       <slot name="info"/>
       <!-- 样例 -->
@@ -35,7 +35,7 @@ import { ref, useSlots, toRef, watchEffect } from 'vue';
 import { useData } from 'vitepress';
 
 const props = defineProps<{
-  title: string,
+  title?: string,
   cards: { text?: string, link?: string }[]
 }>();
 const slots = useSlots();

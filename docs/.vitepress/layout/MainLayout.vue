@@ -19,12 +19,6 @@ const bgImageUrl = computed(() => props.bgImage ? `url(${props.bgImage})` : '');
 </script>
 
 <style lang="css" scoped>
-* {
-  box-sizing: border-box;
-  width: 100vw;
-  height: 95.1vh;
-}
-
 .main-layout {
   display: flex;
   justify-content: center;

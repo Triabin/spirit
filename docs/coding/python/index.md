@@ -1,10 +1,18 @@
 ---
 title: Python
+layout: doc
+author: Triabin
 description: Python学习笔记与文档
 date: 2025-11-07 19:25:50
 ---
 
 # Python学习笔记与文档
+
+<script lang="ts" setup>
+import Python from '@/views/coding/Python.vue';
+</script>
+
+<Python/>
 
 ## 1、安装
 
