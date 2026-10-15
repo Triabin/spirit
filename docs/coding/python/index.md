@@ -24,7 +24,7 @@ Python包管理工具为pip，所以除了配置python环境变量外，还需�
 
 一般Linux、macOS都会自带python，如果python命令不生效，可以尝试python3命令，都无效或者对版本有特殊要求再去安装配置指定版本。
 
-::: info Tips
+::: tip Tips
 如果在macOS/Linux中，默认命令为python3，可以考虑在shell配置文件中配置别名以便使用python命令，pip3同理。
 ```shell
 alias python=python3

@@ -167,7 +167,7 @@ INSERT INTO 表名(字段1, 字段2, ...) VALUES(值11, 值12, ...), (值21, 值
 INSERT INTO 表名 VALUES(值11, 值12, ...), (值21, 值22, ...), ...;
 ```
 
-:::warning 注意
+::: warning 注意
 
 * 插入数据时，指定的字段顺序需要与值的顺序是一一对应的；
 * 字符串和日期型数据应该包含在引号中；
@@ -191,7 +191,7 @@ UPDATE 表名 SET 字段1=值1, 字段2=值2, ...[ WHERE 条件];
 DELETE FROM 表名[ WHERE 条件];
 ```
 
-:::warning 注意
+::: warning 注意
 
 * DELETE语句的条件可选，如果没有则删除整张表数据（注意与TRUNCATE区别）；
 * DELETE语句不能删除某一个字段的值（可以使用UPDATE）。
@@ -254,7 +254,7 @@ SELECT 字段列表 FROM 表名 WHERE 条件列表;
 |      `OR`或`||`       |         或者（多个条件任意一个成立）         |
 |      `NOT`或`!`       |                   非，不是                   |
 
-:::warning 注意
+::: warning 注意
 
 * `BETWEEN min AND max`语句中，BETWEEN后为较小值，AND后为较大值；
 * 匹配字段column为两个字符的数据：`SELECT * FROM 表 WHERE column LIKE '__'`。
@@ -278,7 +278,7 @@ SELECT 字段列表 FROM 表名 WHERE 条件列表;
 SELECT 聚合函数(字段列表) FROM 表名;
 ```
 
-:::danger 注意
+::: danger 注意
 
 NULL值不参与所有聚合函数运算。
 
@@ -295,7 +295,7 @@ SELECT 字段列表 FROM 表名 [WHERE 分组前的条件] GROUP BY 分组字段
 * 执行时机不同：`WHERE`是分组之前进行过滤，不满足`WHERE`条件的不参与分组；`HAVING`是分组之后对结果进行过滤。
 * 判断条件不同：`WHERE`不能对聚合函数进行判断，而`HAVING`可以。
 
-:::warning 注意
+::: warning 注意
 
 * 执行顺序：`WHERE > 聚合函数 > HAVING`。
 * 分组之后，查询的字段一般为聚合函数和分组字段，查询其他字段无任何意义。
@@ -374,7 +374,7 @@ CREATE TABLE `user`(
 ) COMMENT '用户表';
 ```
 
-:::warning 注意
+::: warning 注意
 
 * 注意区分两张表的逻辑关联和外键关联。
 

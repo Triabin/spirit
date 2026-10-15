@@ -874,7 +874,7 @@ public class MapDemo {
 
 `HashMap`底层与`HashSet`一样，也是首先创建长度为16的数组，负载因子也是0.75（`HashSet`底层其实是创建一个`HashMap`，只不过所有键都指向同一个值）。但是在`HashMap`中，存入数组中的是`java.util.Map.Entry`对象，并且计算哈希值的时候只用键来计算，跟值无关。另外，关于哈希冲突时的处理（包括调用键的`equals`方法结果也是`true`的情况），如果键相同，则覆盖值，而不是像`HashSet`一样不添加。
 
-:::warning 注意
+::: warning 注意
 
 基于哈希表在Java中的底层这种运用原理，如果要使用引用类型作为`HashMap`的键（虽然实际项目中我从来没见过这么干，但是我见过这样的面试题），那么一定一定要重写定好对应类型的`equals`和`hashCode`方法。
 
@@ -3125,6 +3125,10 @@ public class MyFileUtils {
 
 ① 继承`java.lang.Thread`类的方式实现
 
+* 定义一个类继承`Thread`类
+* 重写`run()`方法，确定线程要做的事情并在方法体中实现代码
+* 创建该类对象，调用`start()`方法调用线程
+
 ```java
 // 1、自己定义一个类实现Thread
 public class ThreadDemo extends Thread {
@@ -3161,6 +3165,12 @@ public class Demo {
 
 ② 实现`java.lang.Runnable`接口的方式实现
 
+* 定义一个类实现`Runnable`接口
+* 重写里面的`run`方法
+* 创建该实现类对象
+* 利用该实现类对象作为构造函数的参数传入创建一个`Thread`类对象
+* 调用`start()`方法启动线程
+
 ```java
 // 创建一个类实现Runnalbe接口
 public class ThreadDemo implements Runnable {
@@ -3191,6 +3201,8 @@ public class Demo {
     }
 }
 ```
+
+> 上述样例中的`td`其实就可以理解为线程中要执行的**任务**（任务这个概念很重要，尤其是对后续`Future`和`Callable`两个接口以及线程池相关的理解）
 
 ③ 利用`java.util.concurrent.Callable`接口和`java.util.concurrent.Future`接口实现
 

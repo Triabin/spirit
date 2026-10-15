@@ -199,7 +199,7 @@ public class ValueDemo {
 * 类名使用大驼峰命名法，即每个单词首字母大写；
 * 尽可能的见名知意
 
-:::warning 注意
+::: warning 注意
 
 ① 下划线开头的标识符：在早期代码中，有时用 `_`开头表示“私有”或“内部”成员（如 `_count`），但这不是强制规范，Oracle 官方编码规范不鼓励使用下划线开头，并且Java 9+ 中，单独的下划线 `_`是关键字（受限标识符），不能作为变量名；
 
@@ -359,7 +359,7 @@ public class Demo {
 
 **补码**：正数的补码是其本身，负数的补码是在其取反的基础上+1。由于反码转为原码过程中，“-0”`1000 000`一直没有被使用，所以就规定，`1000 0000`为数字-128的补码（-128没有原码和反码），所以一个字节能表示的整数数值范围为`-128~127`，并且基于这个原因（方便CPU运算），CPU寄存器和内存中（甚至硬盘中）的整数的存储方式都是补码，所以原码和反码对于计算机来说都是概念上的东西，它不需要原码和反码，只需要补码进行数据流转运算即可，所以即使-128在计算机中没有原码和补码也不影响。
 
-:::info Tips
+::: tip Tips
 
 有了原码、反码和补码的前置知识，就可以解释前面的Java基本数据类型取值范围的缘故了：
 
@@ -525,7 +525,7 @@ switch (表达式) {
 * default：所有情况都不匹配的时候就执行该语句体（类似if中的else），非必填项，也不一定是写在最下面，可以写在case之间的任意位置。当然还是比较建议必须写在最后面。
 * case的值只能是字面量，不能是变量，且case后面的值不允许重复。
 
-:::info Tips
+::: tip Tips
 
 ① 如果有多个case后面的值都是相同的处理逻辑，可以直接将这些值（case 值:）写在一起，一行一条语句（必须逐行挨在一起），然后在最后一条语句后面只写一遍处理逻辑，这样任意一个case匹配成功都可迅速往后执行。（利用case穿透）
 
@@ -588,7 +588,7 @@ public class Demo {
 
 <div style="clear: both;"></div>
 
-:::info Tips
+::: tip Tips
 
 ① 初始化语句、条件语句和条件控制语句甚至循环结构语句都是非必填项，当然不建议这么做，如果省略条件语句，代表循环将会是一个死循环，容易造成OOM（内存溢出异常），不过有时候会用`for (::) + break;`类代替`while`循环。（`break`关键字在这里为跳出循环语句）。
 
@@ -1105,7 +1105,7 @@ public class MethodDemo {
 }
 ```
 
-:::info Tips
+::: tip Tips
 
 方法定义技巧：
 
@@ -1404,7 +1404,7 @@ public class Person {
 }
 ```
 
-:::info Tips
+::: tip Tips
 
 ① 一些序列化框架是通过`gettter/setter`方法来获取属性的（例如Alibaba Fastjson）。
 
@@ -1596,7 +1596,7 @@ public class Person {
 * 构造方法的重载：带参构造方法，和无参构造方法，两者方法名相同，但是参数不同，这叫做构造方法的重载。
 * 推荐的使用方式：无论是否使用，都手动书写无参和全参的构造方法。
 
-:::info Tips
+::: tip Tips
 
 与之前所述的利用IDEA生成`getter/setter`方法的相同，也可以通过`Alt + Insert`（macOS为`Command + N`），进入`Generate`选项菜单，选择生成构造方法，并且具体要初始化哪些参数也直接可选，亦或者使用`lombok`组件的`@AllArgsConstructor`与`@NoArgsConstructor`注解生成全参构造与无参构造方法。
 
@@ -2221,7 +2221,7 @@ class Cat extends Animal {
 * 其他情况都需要导包
 * 如果同事使用两个包中的同名类，需要用全类名（很少碰到）
 
-:::info Tips
+::: tip Tips
 
 在编写Java程序的时候，如果使用JetBrains IDEA，默认情况下，导入同一个包中的类如果超过5个，它就会自动改成`import com.identifier.*`，这个星号就表示导入这个包下的所有类。这种导入方式虽然省事儿，但是在项目中是及其不推荐的，首先代码编写需要的是确保使用明确声明的东西，其次这回很容易造成命名空间污染以及出现不必要的导入，因此需要避免使用`*`号导入。IDEA设置自动导包自动使用`*`同包数量：`File -> New Projects Setup -> Settings for New Projects... -> Editor -> Code Style -> Java -> Imports`，进入界面后将`Class count to use import whith '*'`和`Names count to use static import whith '*'`改为一个几乎不可能达到的数字（一般直接改为9999😅），然后保存即可。
 
@@ -2244,7 +2244,7 @@ final，翻译成中文就是`最终的`，即不可变，在Java中，`final`�
 * `final`修饰的变量是基本类型，那么变量存储的数据值不能发生改变；
 * `final`修饰的变量是引用类型，那么变量存储的地址值不能发生改变，对象内部的可以改变。 
 
-:::info 说明
+::: info 说明
 **① 字符串不可变的原因：`java.lang.String`类使用了字节数组存储字符串内容，该字节数组使用了`final`关键字进行修饰：`private final byte[] value;`；**
 
 **② 在项目中，一般会用`Constants.java`这个类定义全局常量，定义格式：`public static final 数据类型 常量名 = 常量值;`，使用：`Constants.常量名`；**
@@ -2279,7 +2279,7 @@ final，翻译成中文就是`最终的`，即不可变，在Java中，`final`�
   
   例如在类的方法中，如果有多个需要暴露到外界使用的方法都有相同的代码逻辑，那么这部分代码就称之为共性代码。共性代码一般会被抽取出来，封装成一个私有方法，供类中的其他方法调用。（因为这相当于类中方法的一部分，不希望暴露到外界被其他地方调用）
 
-:::info Tips
+::: tip Tips
 在实际开发中，其实并没有那么统一的标准，大多根据项目功能开发需求和语言特性，自由发挥使用，尽量避免屎山代码的形成即可。
 :::
 
@@ -2638,7 +2638,7 @@ public class Car {
 * 在外部类编写方法，对外提供内部类的对象：在外部类创建对外暴露的成员方法，方法返回该内部类对象实例即可。
 * 直接创建格式：`外部类名.内部类名 对象名 = 外部类对象.内部类对象;`，示例：`Outer.Inner inner = new Outer().new Inner();`
 
-:::info Tips
+::: tip Tips
 
 ① Java打印地址值的时候，如果是内部类，地址值为以下格式：`外部类名$内部类名@地址值`，这也是之前命名规范中不建议使用美元符号命名的原因之一。
 
@@ -2982,7 +2982,7 @@ public class LambdaDemo {
 }
 ```
 
-:::info Tips
+::: tip Tips
 
 函数式编程思想是JDK8才引入的的，为此，JDK8还提供了一些函数式接口来供方便我们更好地在Java开发中使用函数式编程，详见[Java四大函数式编程接口](./random-notes/Java四大函数式编程接口)。在实际开发中，熟悉了函数式编程后，就会觉得Lambda表达式非常好用，但是在刚开始接触开发的时候，往往意识不到哪些地方该使用函数式编程。以我的经验来看，**只要觉得某个地方传递的参数实际上是函数**，就立马考虑是否使用函数式编程，一使用函数式编程，就先看看在Java提供的四大函数式编程接口中，是否有现成可用的接口，避免自己重复创建函数式接口。四大函数式编程接口基本涵盖了80%以上的使用场景了，极少需要自己手动创建这样的接口。
 
@@ -3316,7 +3316,7 @@ public class StringDemo {
 
 * `public boolean equalsIgnoreCase("要比较的字符串")`：功能与`equals`相同，只是忽略大小写（见名知意）。
 
-:::info Tips
+::: tip Tips
 
 在编程过程中难免会遇到未知字符串变量与已知字符串进行比较的情况，例如方法传入的字符串参数`value`与已知字符串`"targetValue"`进行比较，此时应该写成`"targetValue".equals(value)`，因为如果反过来写成`value.equals("targetValue")`，虽然代码能编译通过，但是如果调用方法的时候传入的字符串为`null`，那么这种写法将导致空指针异常（`NullPointerException`，算是Java程序员最常见的异常之一了😅）。
 
@@ -3630,7 +3630,7 @@ Java帮助文档使用：在Oracle官网，有完整的接口文档，将这些�
 
 <div style="clear: both;"></div>
 
-:::warning 注意
+::: warning 注意
 
 ① `.CHM`文件在Windows系统中可以直接打开，并正常显示；
 
@@ -3838,7 +3838,7 @@ public class CloneDemo {
 
 
 
-:::warning 注意
+::: warning 注意
 
 ① 如果在Java接口中，里面没有任何抽象方法以及其他内容，那么这个接口就是一个标记接口。
 
@@ -4003,17 +4003,19 @@ public class BigDecimalDemo {
 
 ### 9.7 时间日期类
 
-> 关于时间的一些地理知识
->
-> 以前，以地球0度经线位的时间为标准时间（本初子午线），英国伦敦的格林威（尼）治天文台就在这条线上，因此以前的世界时间也叫格林威治时间（Greenwich Mean Time，即**GMT**）。
->
-> 对于地球上的每一个地方来说，太阳直射时为正午12点，地球上的时间需要一个统一的计算标准，而计算的核心就是地球的自转，地球自转一周是24小时，于是将地球从经度方向分为24个不同的时区，本初子午线所在时区为零时区，往西为西时区共12个，与本初子午线每差一个时区时间就早一个小时；往东为东时区也是12个，东西十二区重叠在一起（注意，重叠在一起，不代表时间相同，因为时间实际上是人为规定的），时区与本初子午线每差一个时区时间就往后晚一个小时。中国所使用的时间北京时间就是东八区时间，而东八区的标准时间实际上在上海，因此Linux系统或者一些地方表示中国时间的时候只能选`Asia/Shanghai`。
->
-> 由于东西十二区重叠，为了避免该时区内的人日期混乱，于是规定了一条国际日期变更线（日界线），变更线东侧日期减一天，西侧日期加一天。为了避免同一个国家/地区两个时间的尴尬情况，该变更线从180度经线附近延伸出来后多处采用曲折走向避开陆地，并且也经过多次变更。
->
-> 然而，实际上地球的自转并不是均匀的，这就会导致出现记录的实际时间与自转时间出现误差的情况，据统计，最大误差长达16分钟。
->
-> 2012年1月，取消用了将近130年的格林威治标准时间，标准时间改为使用原子钟提供。原子钟是利用铯原子的震动频率计算出来的时间，作为世界标准时间（**UTC**），铯原子每震动9192631770次等于1秒。
+::: info 关于时间的一些地理知识
+
+以前，以地球0度经线位的时间为标准时间（本初子午线），英国伦敦的格林威（尼）治天文台就在这条线上，因此以前的世界时间也叫格林威治时间（Greenwich Mean Time，即**GMT**）。
+
+对于地球上的每一个地方来说，太阳直射时为正午12点，地球上的时间需要一个统一的计算标准，而计算的核心就是地球的自转，地球自转一周是24小时，于是将地球从经度方向分为24个不同的时区，本初子午线所在时区为零时区，往西为西时区共12个，与本初子午线每差一个时区时间就早一个小时；往东为东时区也是12个，东西十二区重叠在一起（注意，重叠在一起，不代表时间相同，因为时间实际上是人为规定的），时区与本初子午线每差一个时区时间就往后晚一个小时。中国所使用的时间北京时间就是东八区时间，而东八区的标准时间实际上在上海，因此Linux系统或者一些地方表示中国时间的时候只能选`Asia/Shanghai`。
+
+由于东西十二区重叠，为了避免该时区内的人日期混乱，于是规定了一条国际日期变更线（日界线），变更线东侧日期减一天，西侧日期加一天。为了避免同一个国家/地区两个时间的尴尬情况，该变更线从180度经线附近延伸出来后多处采用曲折走向避开陆地，并且也经过多次变更。
+
+然而，实际上地球的自转并不是均匀的，这就会导致出现记录的实际时间与自转时间出现误差的情况，据统计，最大误差长达16分钟。
+
+2012年1月，取消用了将近130年的格林威治标准时间，标准时间改为使用原子钟提供。原子钟是利用铯原子的震动频率计算出来的时间，作为世界标准时间（**UTC**），铯原子每震动9192631770次等于1秒。
+
+:::
 
 需要了解的前置知识：
 
@@ -4032,50 +4034,52 @@ public class BigDecimalDemo {
 
 <div style="clear: both;"></div>
 
-> 通过练习题熟悉这些方法特性的使用：
->
-> 需求1：打印时间原点开始一年之后的时间。
->
-> 需求2：定义任意两个`Date`对象，比较一下哪个时间在前，哪个时间在后。
->
-> ```java
-> import java.util.Date;
-> import java.util.Random;
-> 
-> public class DateDemo {
->     public static void main(String[] args) {
->         solution1(); // 时间原点一年以后的时间为：Fri Jan 01 08:00:00 CST 1971
->         solution2();
->     }
-> 
->     /**
->      * 题解1
->      */
->     public static void solution1() {
->         Date date = new Date(0L);
-> 
->         long time = date.getTime() + 365 * 24 * 60 * 60 * 1000L;
->         date.setTime(time);
->         System.out.println("时间原点一年以后的时间为：" + date);
->     }
-> 
->     public static void solution2() {
->         Random random = new Random();
->         long currentTime = System.currentTimeMillis();
->         Date date1 = new Date(random.nextLong(currentTime));
->         Date date2 = new Date(random.nextLong(currentTime));
->         if (date1.getTime() >  date2.getTime()) {
->             System.out.println("在前面的时间为：" + date2);
->             System.out.println("在后面的时间为：" + date1);
->         } else if (date2.getTime() >  date1.getTime()) {
->             System.out.println("在前面的时间为：" + date1);
->             System.out.println("在后面的时间为：" + date2);
->         } else {
->             System.out.println("时间相同：" + date1);
->         }
->     }
-> }
-> ```
+::: info 通过练习题熟悉这些方法特性的使用：
+
+需求1：打印时间原点开始一年之后的时间。
+
+需求2：定义任意两个`Date`对象，比较一下哪个时间在前，哪个时间在后。
+
+```java
+import java.util.Date;
+import java.util.Random;
+
+public class DateDemo {
+    public static void main(String[] args) {
+        solution1(); // 时间原点一年以后的时间为：Fri Jan 01 08:00:00 CST 1971
+        solution2();
+    }
+
+    /**
+     * 题解1
+     */
+    public static void solution1() {
+        Date date = new Date(0L);
+
+        long time = date.getTime() + 365 * 24 * 60 * 60 * 1000L;
+        date.setTime(time);
+        System.out.println("时间原点一年以后的时间为：" + date);
+    }
+
+    public static void solution2() {
+        Random random = new Random();
+        long currentTime = System.currentTimeMillis();
+        Date date1 = new Date(random.nextLong(currentTime));
+        Date date2 = new Date(random.nextLong(currentTime));
+        if (date1.getTime() >  date2.getTime()) {
+            System.out.println("在前面的时间为：" + date2);
+            System.out.println("在后面的时间为：" + date1);
+        } else if (date2.getTime() >  date1.getTime()) {
+            System.out.println("在前面的时间为：" + date1);
+            System.out.println("在后面的时间为：" + date2);
+        } else {
+            System.out.println("时间相同：" + date1);
+        }
+    }
+}
+```
+
+:::
 
 关于`Date`类中的其他方法，不管是静态方法还是成员方法，都比较见名知意，属于一看就知道怎么用的那种，就不详细介绍了。
 
@@ -4129,9 +4133,9 @@ public class SDFDemo {
 }
 ```
 
-说明：上述时间戳前后不一致的原因是因为格式`yyyy-MM-dd HH:mm:ss`中不包含对毫秒数的格式化，导致了字符串转回日期对象的时候丢失了毫秒数，所以转换回来的时间戳最后三位全部归零。另外，在调用`parse`方法的时候，如果要解析的时间字符串与格式字符串格式不匹配，可能会抛出`ParseException`异常。
+说明：上述时间戳前后不一致是因为格式`yyyy-MM-dd HH:mm:ss`中不包含对毫秒数的格式化，导致了字符串转回日期对象的时候丢失了毫秒数，所以转换回来的时间戳最后三位全部归零。另外，在调用`parse`方法的时候，如果要解析的时间字符串与格式字符串格式不匹配，可能会抛出`ParseException`异常。
 
-:::info Tips
+::: tip Tips
 
 ① `SimpleDateFormat`中文系统语言下，默认的匹配模式为Windows系统：`yyyy/M/d aH:mm`，Unix系统：`yyyy/M/d HH:mm`，不过最好不要用这个，不确定性太强；
 
@@ -4634,7 +4638,7 @@ O(1) < O(logn) < O(n) < O(n \cdot logn) < O(n^2) < O(2^n) < O(n!) \\
 \end{aligned}
 $$
 
-:::warning 说明
+::: warning 说明
 
 ① 由于对数可以在不影响复杂度的前提下换底（数学关系：$O(log_mn) = O(\frac{log_kn}{log_km}) = O(log_kn)$），所以通常会直接省略底数，直接将对数阶记为 $O(logn)$。 
 
@@ -4716,7 +4720,7 @@ int iterSum(int n) {
 * 解决问题的思路上，迭代是”自下而上“地解决问题，从最基础的步骤开始，然后不断重复累加这些步骤，直到任务完成，例如上述求和方法，不断地从0累加到n，得到求和结果；递归则是“自上而下”地解决问题，将原问题分解为更小的子问题，这些子问题和原问题具有相同的形式，接下来将子问题分解为更小的子问题，直到基本情况时停止（基本情况的解是已知的），例如上述的递归求和，求`0~n`的和可以分解为求`n + (0 ~ n-1)`的和，`0~n-1`的和又可以分解为求`(n-1) + (0 ~ n-2)`的和，如此不断重复，直到求`0~1`的和为1，开始逐层返回计算结果。
 * 内存上，递归通常比迭代更加耗费内存空间，因为递归会不断调用自身，在触及终止条件之前，所有的方法都在栈空间中不断堆积，而跌的所占用的内存通常在第一次循环结束时就已经确定并且不会再在迭代体内增加，因此在使用递归时明确终止条件非常非常重要，否则容易栈溢出。因为递归调用方法的额开销也导致了递归通常比迭代的时间效率更低，所以一般能用迭代就尽量用迭代，递归多用于一些注重子问题分析的情景，例如树、图、分治、回溯等，代码结构简洁清晰。
 
-::: info Tips
+::: tip Tips
 
 关于递归的使用，目前主要用在遍历一些不确定深度的数据结构上，例如给定一个JSON对象，你不确定它有哪些属性，属性是JSONObject还是JSONArray还是别的数据类型，但是对于JSONObject和JSONArray又需要同样的处理方式，这时候既不知道这个对象“有多深”，又需要确保整个对象的每个字段都需要遍历到，就很适合使用递归而不是迭代了。
 
@@ -5613,7 +5617,7 @@ public static void radixSort(int[] arr) {
 
   **简单记忆:** `o1-o2`为升序，`o2-o1`为降序。
 
-:::warning 注意
+::: warning 注意
 
 `Arrays`中有一个方法使用非常广泛——`public static <T> List<T> asList(T... a)`，作用是将数组转为`List`，但是一定一定要注意，该方法方法体虽然是`return new ArrayList<>(a);`，但是这里的`ArrayList`不是`java.util.ArrayList`，而是`Arrays`内部自己定义的一个私有静态类，这个类的集合对象不能被修改，因此如果有类似的需求，请务必写成`List<Xxx> list = new ArrayList<>(Arrays.asList(...));`这样的形式（使用还挺广泛的）。
 

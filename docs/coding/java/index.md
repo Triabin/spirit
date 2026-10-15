@@ -398,7 +398,7 @@ javac @xxx.txt # 编译xxx.txt文件中列出的.java文件所有，每行一个
 
 <div style="clear: both;"></div>
 
-:::warning 注意
+::: warning 注意
 
 ① 远程调试版本是按照行号来与本地代码匹配，如果本地代码与远程调试代码版本不同，它将会按照行号显示Debug结果；
 
